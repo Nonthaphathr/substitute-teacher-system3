@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบจัดสอนแทน V.6.7 (PDF Fixed)</title>
+    <title>ระบบจัดสอนแทน V.6.8 (Auto-Fit & PDF Fix)</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -14,6 +14,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
     <style>
+        /* ใช้ Font Sarabun จาก Google Fonts แทน TH Sarabun New ชั่วคราวเพื่อให้แสดงผลได้ทุกเครื่อง */
         @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Kanit:wght@300;400;500;600;700&display=swap');
 
         :root { --primary: #15803d; --bg: #f0fdf4; }
@@ -83,32 +84,20 @@
         .modal-tools { background: #333; padding: 10px; display: flex; justify-content: flex-end; gap: 10px; color: white; flex-wrap: wrap; }
         .modal-view { flex-grow: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 20px; background: #525659; }
 
-        /* ========== A4 PAPER STYLES (TH Sarabun New) ========== */
+        /* ========== A4 PAPER STYLES (Adjusted) ========== */
         .a4-paper {
             width: 210mm;
-            min-height: 297mm;
-            max-height: 297mm;
+            height: 297mm; /* Fix height for single page logic */
             background: white;
-            padding: 15mm 20mm 20mm 25mm;
+            padding: 15mm 20mm 15mm 25mm; /* Margins */
             position: relative;
-            font-family: 'Sarabun', 'TH Sarabun New', serif;
-            font-size: 16pt;
+            font-family: 'Sarabun', sans-serif; /* ใช้ Sarabun แทน TH Sarabun New เพื่อความชัวร์ */
             color: black;
             box-sizing: border-box;
-            overflow: hidden;
             box-shadow: 0 0 10px rgba(0,0,0,0.3);
             margin-bottom: 20px;
-        }
-
-        /* Page Number Header */
-        .page-number {
-            position: absolute;
-            top: 8mm;
-            left: 0;
-            right: 0;
-            text-align: center;
-            font-size: 16pt;
-            font-family: 'Sarabun', 'TH Sarabun New', serif;
+            overflow: hidden; /* Prevent spillover */
+            transform-origin: top center; /* For scaling */
         }
 
         /* Document Header */
@@ -119,35 +108,31 @@
             padding-top: 0;
         }
         .garuda {
-            width: 55px;
+            width: 60px; /* ปรับขนาดครุฑให้สมดุล */
             height: auto;
         }
         .head-text {
             flex-grow: 1;
             text-align: center;
-            padding-right: 55px;
+            padding-right: 60px; /* Balance with garuda */
         }
         .head-text h2 {
-            font-size: 20pt;
+            font-size: 16pt; /* USER REQ: 16pt */
             font-weight: bold;
-            margin: 10px 0 0 0;
+            margin: 15px 0 0 0;
             line-height: 1;
         }
 
         /* Document Meta */
         .doc-meta {
-            font-size: 16pt;
+            font-size: 14pt; /* USER REQ: 14pt */
             line-height: 1.3;
             margin-top: 5px;
-        }
-        .doc-meta-row {
-            display: flex;
-            flex-wrap: wrap;
         }
 
         /* Document Content */
         .doc-content {
-            font-size: 16pt;
+            font-size: 14pt; /* USER REQ: 14pt */
             text-indent: 2.5cm;
             text-align: justify;
             line-height: 1.3;
@@ -159,11 +144,11 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 10px;
-            font-size: 15pt;
+            font-size: 14pt; /* USER REQ: 14pt */
         }
         .doc-table th, .doc-table td {
             border: 1px solid black;
-            padding: 4px 6px;
+            padding: 3px 5px; /* Compact padding */
             text-align: center;
             vertical-align: middle;
             line-height: 1.2;
@@ -179,10 +164,10 @@
 
         /* Signatures */
         .doc-sign {
-            margin-top: 30px;
+            margin-top: 20px;
             display: flex;
             justify-content: space-between;
-            font-size: 16pt;
+            font-size: 14pt; /* Adjusted to match body */
         }
         .doc-sign.single {
             justify-content: flex-start;
@@ -191,9 +176,6 @@
             text-align: center;
             width: 45%;
             line-height: 1.4;
-        }
-        .sign-box.left {
-            text-align: center;
         }
 
         /* Horizontal Line */
@@ -205,53 +187,30 @@
 
         /* Print Styles */
         @media print {
-            body { 
-                background: white; 
-                padding: 0; 
-                margin: 0;
-            }
-            .app-container, .modal-tools { 
-                display: none !important; 
-            }
-            .modal { 
-                position: static; 
-                background: white; 
-                width: 100%; 
-                height: auto; 
-                display: block !important; 
-            }
-            .modal-content { 
-                margin: 0; 
-                width: 100%; 
-                height: auto; 
-                background: white; 
-                box-shadow: none; 
-                overflow: visible; 
-            }
-            .modal-view { 
-                padding: 0; 
-                display: block;
-                background: white;
-            }
+            body { background: white; padding: 0; margin: 0; }
+            .app-container, .modal-tools { display: none !important; }
+            .modal { position: static; background: white; display: block !important; height: auto; }
+            .modal-content { width: 100%; box-shadow: none; margin: 0; height: auto; }
+            .modal-view { padding: 0; background: white; }
             .a4-paper { 
+                box-shadow: none; 
                 margin: 0; 
-                padding: 15mm 20mm 20mm 25mm;
-                page-break-after: always;
-                page-break-inside: avoid;
-                width: 100%; 
-                min-height: auto;
-                max-height: none;
-                box-shadow: none;
-            }
-            .a4-paper:last-child {
-                page-break-after: auto;
+                page-break-after: avoid; 
+                height: auto; /* Allow auto height on print */
+                transform: none !important; /* Reset scale for real print */
             }
         }
-
-        @media (max-width: 768px) {
-            .period-title { flex-direction: column; align-items: flex-start; }
-            .period-title input, .period-title select { width: 100%; }
-            .a4-paper { width: 100%; min-height: auto; max-height: none; padding: 10mm; }
+        
+        /* Utility for cloning */
+        #temp-print-area {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%;
+            z-index: 9999;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            justify-content: center;
+            padding: 20px;
         }
     </style>
 </head>
@@ -259,8 +218,8 @@
 
     <div class="app-container">
         <div class="header">
-            <h1>ระบบจัดสอนแทน V.6.7</h1>
-            <p>แก้ไข PDF Layout, เลขหน้า, TH Sarabun 16pt</p>
+            <h1>ระบบจัดสอนแทน V.6.8</h1>
+            <p>Auto-Fit to One Page & PDF Fix</p>
         </div>
 
         <div class="nav-bar">
@@ -343,12 +302,14 @@
     <div id="previewModal" class="modal">
         <div class="modal-content">
             <div class="modal-tools">
-                <span>ตัวอย่างรายงาน (A4 - TH Sarabun)</span>
-                <button onclick="window.print()" class="nav-btn" style="background:#2563eb; color:white; border:none;">🖨️ พิมพ์ / บันทึก PDF</button>
-                <button onclick="downloadPDF_Library()" class="nav-btn" style="background:#be123c; color:white; border:none;">📥 ดาวน์โหลด PDF</button>
+                <span>ตัวอย่างรายงาน (A4 - Fit to Page)</span>
+                <button onclick="window.print()" class="nav-btn" style="background:#2563eb; color:white; border:none;">🖨️ พิมพ์</button>
+                <button onclick="downloadPDF_AutoFit()" class="nav-btn" style="background:#be123c; color:white; border:none;">📥 ดาวน์โหลด PDF (Fixed)</button>
                 <button onclick="document.getElementById('previewModal').style.display='none'" class="nav-btn" style="background:#64748b; color:white; border:none;">ปิด</button>
             </div>
-            <div class="modal-view" id="paperContainer"></div>
+            <div class="modal-view">
+                <div id="paperContainer"></div>
+            </div>
         </div>
     </div>
 
@@ -528,15 +489,12 @@
             const inputName = `rad_${absentName}_${period}`;
             const key = `${absentName}_${period}`;
             
-            // Get previous selection
             const previousTeacher = window.selectionTracker[key];
             
-            // Deselect all
             container.querySelectorAll('.candidate-opt').forEach(x => x.classList.remove('selected'));
             el.classList.add('selected');
             el.querySelector('input').checked = true;
 
-            // Update workload
             if(previousTeacher && previousTeacher !== teacherName) {
                 realtimeWorkload[previousTeacher] = Math.max(0, (realtimeWorkload[previousTeacher] || 0) - 1);
             }
@@ -642,6 +600,9 @@
 
             renderPaper(data, scheduler, director);
             document.getElementById('previewModal').style.display = 'block';
+            
+            // Auto Fit Trigger
+            setTimeout(autoFitContent, 500);
         }
 
         function renderPaper(data, scheduler, director) {
@@ -655,48 +616,32 @@
             const yearBE = parseInt(dateParts[0]) + 543;
             const thaiDateStr = `${dayNum} ${monthName} พ.ศ. ${yearBE}`;
 
-            // Group by substitute teacher
-            const grouped = {};
-            data.forEach(x => {
-                if(!grouped[x.sub]) grouped[x.sub] = [];
-                grouped[x.sub].push(x);
+            // Combine all data into one table for single page logic
+            data.sort((a,b) => {
+                 if(a.sub === b.sub) return a.period - b.period;
+                 return a.sub.localeCompare(b.sub);
             });
 
-            let totalPages = Object.keys(grouped).length;
-            let currentPage = 0;
+            let rows = data.map((it, idx) => `
+                <tr>
+                    <td>${idx+1}</td>
+                    <td class="text-left">${it.sub} แทน<br>${it.absent}</td>
+                    <td>${it.reason}</td>
+                    <td>${it.period}</td>
+                    <td>${it.subject}</td>
+                    <td>${it.grade}</td>
+                    <td>-</td>
+                </tr>
+            `).join('');
 
-            for(const [subName, items] of Object.entries(grouped)) {
-                currentPage++;
-                const subObj = teachersData.find(t => t.name === subName);
-                const subDept = subObj ? subObj.department : "";
+            // Minimum rows to look good
+            const minRows = 8;
+            for(let k = data.length; k < minRows; k++) {
+                rows += `<tr><td style="height:25px;">&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
+            }
 
-                items.sort((a,b) => a.period - b.period);
-                
-                // สร้างแถวในตาราง (สูงสุด 6 แถว เพื่อให้พอดีหน้า)
-                let rows = items.map((it, idx) => `
-                    <tr>
-                        <td>${idx+1}</td>
-                        <td class="text-left">${it.absent}</td>
-                        <td>${it.reason}</td>
-                        <td>${it.period}</td>
-                        <td>${it.subject}</td>
-                        <td>${it.grade}</td>
-                        <td>-</td>
-                    </tr>
-                `).join('');
-
-                // เติมแถวว่างให้ครบ 5 แถว (ถ้าน้อยกว่า)
-                const minRows = 5;
-                for(let k = items.length; k < minRows; k++) {
-                    rows += `<tr><td style="height:25px;">&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
-                }
-
-                // Page number (หน้าแรกไม่มีเลข)
-                const pageNumberHtml = currentPage > 1 ? `<div class="page-number">-${currentPage}-</div>` : '';
-
-                container.innerHTML += `
-                <div class="a4-paper">
-                    ${pageNumberHtml}
+            container.innerHTML = `
+                <div class="a4-paper" id="paperContent">
                     <div class="doc-head">
                         <img src="https://nonthaphathr.github.io/uploadimg/kruda.png" class="garuda" crossorigin="anonymous">
                         <div class="head-text">
@@ -719,37 +664,25 @@
                     <div class="doc-meta"><b>เรียน</b> ผู้อำนวยการโรงเรียนกระดุมทองวิทยา</div>
                     
                     <div class="doc-content">
-                        ตามที่ข้าพเจ้า ${subName} ตำแหน่ง ครู กลุ่มสาระการเรียนรู้${subDept} ได้รับมอบหมายให้ปฏิบัติราชการแทน เมื่อวันที่ ${thaiDateStr} ตามความทราบแล้วนั้น
-                    </div>
-                    <div class="doc-content" style="margin-top:0;">
-                        บัดนี้ ข้าพเจ้าได้ดำเนินการสอนแทนดังกล่าวเสร็จสิ้นเรียบร้อยแล้ว จึงขอรายงานผลการสอนแทน ดังต่อไปนี้
+                        ตามที่ข้าพเจ้าและคณะครู ได้รับมอบหมายให้ปฏิบัติราชการสอนแทน เมื่อวันที่ ${thaiDateStr} ตามความทราบแล้วนั้น บัดนี้ การปฏิบัติหน้าที่ดังกล่าวเสร็จสิ้นเรียบร้อยแล้ว จึงขอรายงานผลดังนี้
                     </div>
                     
                     <table class="doc-table">
                         <thead>
                             <tr>
                                 <th style="width:6%;">ที่</th>
-                                <th style="width:26%;">ปฏิบัติราชการแทน</th>
-                                <th style="width:14%;">สาเหตุ</th>
-                                <th style="width:10%;">คาบที่</th>
-                                <th style="width:16%;">รหัสวิชา</th>
+                                <th style="width:28%;">ผู้สอน / ผู้ลา</th>
+                                <th style="width:12%;">สาเหตุ</th>
+                                <th style="width:10%;">คาบ</th>
+                                <th style="width:15%;">วิชา</th>
                                 <th style="width:10%;">ชั้น</th>
-                                <th style="width:14%;">หมายเหตุ</th>
+                                <th style="width:10%;">หมายเหตุ</th>
                             </tr>
                         </thead>
                         <tbody>${rows}</tbody>
                     </table>
                     
-                    <div class="doc-sign single">
-                        <div class="sign-box left">
-                            <br>
-                            ลงชื่อ..............................................<br>
-                            (${subName})<br>
-                            ผู้รายงาน
-                        </div>
-                    </div>
-                    
-                    <div class="doc-sign" style="margin-top:25px;">
+                    <div class="doc-sign" style="margin-top:30px;">
                         <div class="sign-box">
                             ลงชื่อ..............................................<br>
                             (${scheduler})<br>
@@ -759,16 +692,40 @@
                             <div style="text-align:right; margin-bottom:5px;">ทราบ</div>
                             ลงชื่อ..............................................<br>
                             (${director})<br>
-                            ผู้อำนวยการโรงเรียนกระดุมทองวิทยา
+                            ผู้อำนวยการโรงเรียน
                         </div>
                     </div>
                 </div>`;
+        }
+
+        // --- AUTO FIT LOGIC ---
+        function autoFitContent() {
+            const paper = document.getElementById('paperContent');
+            if(!paper) return;
+            
+            // Reset scale
+            paper.style.transform = 'scale(1)';
+            
+            // Check overflow (297mm approx 1123px, minus margin roughly 1050px safe area)
+            // But we use scrollHeight vs clientHeight logic
+            let scale = 1;
+            const maxHeight = paper.clientHeight; // 297mm height
+            
+            // Loop verify
+            if (paper.scrollHeight > maxHeight) {
+                // Calculate ratio roughly
+                scale = maxHeight / paper.scrollHeight;
+                // Cap minimum scale to readable level
+                if(scale < 0.6) scale = 0.6; 
+                
+                paper.style.transform = `scale(${scale})`;
+                // Center vertically if needed, but top center is usually best for papers
             }
         }
 
-        // --- DOWNLOAD PDF ---
-        async function downloadPDF_Library() {
-            const element = document.getElementById('paperContainer');
+        // --- DOWNLOAD PDF (Fix Blank Page) ---
+        async function downloadPDF_AutoFit() {
+            const originalElement = document.getElementById('paperContent');
             
             Swal.fire({
                 title: 'กำลังสร้าง PDF...',
@@ -777,22 +734,38 @@
                 didOpen: () => { Swal.showLoading(); }
             });
 
+            // 1. CLONE Element to Body (Outside Modal) to prevent blank page issues
+            const clone = originalElement.cloneNode(true);
+            const wrapper = document.createElement('div');
+            wrapper.id = 'temp-print-wrapper';
+            wrapper.style.position = 'fixed';
+            wrapper.style.top = '-9999px'; // Hide off screen
+            wrapper.style.left = '0';
+            wrapper.style.zIndex = '99999';
+            // Copy calculated transform
+            clone.style.transform = originalElement.style.transform;
+            
+            wrapper.appendChild(clone);
+            document.body.appendChild(wrapper);
+
+            // Wait for images to load in clone
+            await new Promise(r => setTimeout(r, 800));
+
             try {
                 const opt = {
                     margin: 0,
                     filename: `รายงานสอนแทน_${docDate}.pdf`,
                     image: { type: 'jpeg', quality: 0.98 },
                     html2canvas: { 
-                        scale: 2,
-                        useCORS: true,
-                        allowTaint: true,
-                        logging: false
+                        scale: 2, 
+                        useCORS: true, 
+                        logging: false,
+                        windowWidth: 1200 // Force width to prevent mobile layout capture
                     },
-                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                    pagebreak: { mode: 'css', before: '.a4-paper', avoid: '.doc-table' }
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
                 };
 
-                await html2pdf().set(opt).from(element).save();
+                await html2pdf().set(opt).from(clone).save();
                 
                 Swal.fire({
                     icon: 'success',
@@ -803,11 +776,10 @@
                 });
             } catch(error) {
                 console.error('PDF Error:', error);
-                Swal.fire({
-                    icon: 'info',
-                    title: 'แนะนำ',
-                    html: 'หากดาวน์โหลดไม่สำเร็จ<br>กรุณาใช้ปุ่ม <b>"พิมพ์ / บันทึก PDF"</b> แทน',
-                });
+                Swal.fire('Error', 'เกิดข้อผิดพลาดในการสร้าง PDF', 'error');
+            } finally {
+                // Remove temp element
+                document.body.removeChild(wrapper);
             }
         }
 
