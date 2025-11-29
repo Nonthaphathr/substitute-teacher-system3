@@ -3,21 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบจัดสอนแทน V.7.0 (Local Print Only)</title>
+    <title>ระบบจัดสอนแทน V.7.1</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
     <style>
-        /* Import ฟอนต์สำหรับหน้าเว็บทั่วไป */
-        @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap');
-        /* Import ฟอนต์สำหรับเอกสารราชการ (Sarabun ใกล้เคียง TH Sarabun New) */
-        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Kanit:wght@300;400;500;600;700&display=swap');
 
         :root { --primary: #15803d; --bg: #f0fdf4; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -80,150 +76,203 @@
         .modal-tools { background: #333; padding: 10px; display: flex; justify-content: flex-end; gap: 10px; color: white; flex-wrap: wrap; }
         .modal-view { flex-grow: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 20px; background: #525659; }
 
-        /* ========================================= */
-        /* CSS สำหรับกระดาษ A4 และรูปแบบบันทึกข้อความ */
-        /* ========================================= */
+        /* ===== A4 Paper Styles - แก้ไขใหม่ ===== */
         .a4-paper {
             width: 210mm;
-            height: 297mm; /* Fix ความสูงให้เป๊ะ */
+            min-height: 297mm;
             background: white;
-            /* ระยะขอบมาตรฐาน: ซ้าย 3cm (25mm เผื่อเย็บ), ขวา 2cm, บน 2.5cm, ล่าง 2cm */
-            padding: 25mm 20mm 20mm 25mm; 
+            padding: 20mm 20mm 20mm 25mm;
             position: relative;
             font-family: 'Sarabun', sans-serif;
+            font-size: 14pt;
+            line-height: 1.15;
             color: black;
             box-sizing: border-box;
             box-shadow: 0 0 10px rgba(0,0,0,0.3);
             margin-bottom: 20px;
-            overflow: hidden; /* ห้ามล้น */
+            page-break-after: always;
+            page-break-inside: avoid;
         }
 
-        /* จัดการ Font Size ให้แม่นยำ */
-        .doc-content, .doc-meta, .doc-sign, .doc-table td, .doc-table th {
-            font-size: 16pt !important;
-            line-height: 1.25; /* ระยะบรรทัดกระชับแบบราชการ */
-        }
-
-        .garuda-container {
-            display: flex;
-            align-items: flex-end; /* ให้ครุฑอยู่ระดับเดียวกับข้อความล่าง */
-            margin-bottom: 10px;
-            height: 35mm; /* จองพื้นที่ส่วนหัว */
-            position: relative;
-        }
-
-        .garuda {
-            width: 30mm; /* ขนาดครุฑมาตรฐานประมาณ 3 ซม. */
-            height: auto;
-            position: absolute;
-            left: 0;
-            top: 0;
-        }
-
-        .head-text {
-            width: 100%;
-            text-align: center;
-            padding-top: 15mm; /* ดันคำว่าบันทึกข้อความลงมา */
-        }
-
-        .head-text h2 {
-            font-size: 29pt !important; /* ขนาดหัวข้อบันทึกข้อความ ใหญ่พิเศษ */
+        .doc-code {
+            text-align: right;
+            font-size: 12pt;
             font-weight: bold;
-            line-height: 1;
-            margin: 0;
+            margin-bottom: 5px;
+        }
+
+        .doc-title {
+            text-align: center;
+            font-size: 20pt;
+            font-weight: bold;
+            margin-bottom: 10px;
         }
 
         .doc-meta {
-            margin-bottom: 4px;
-            text-align: justify;
+            font-size: 14pt;
+            line-height: 1.5;
+            margin-bottom: 2px;
         }
-        
-        /* เส้นประ หรือ เส้นทึบ แล้วแต่แบบ */
-        .doc-hr {
+
+        .doc-meta-inline {
+            display: flex;
+            gap: 20px;
+        }
+
+        .doc-line {
             border: none;
             border-bottom: 1px solid black;
-            margin: 5px 0 15px 0;
+            margin: 8px 0;
+        }
+
+        .doc-to {
+            font-size: 14pt;
+            font-weight: bold;
+            font-style: italic;
+            margin-bottom: 8px;
         }
 
         .doc-content {
+            font-size: 14pt;
+            text-indent: 2cm;
             text-align: justify;
-            text-indent: 2.5cm;
-            margin-bottom: 6px;
+            line-height: 1.3;
+            margin-bottom: 5px;
         }
 
         .doc-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
-            margin-bottom: 15px;
+            margin: 10px 0;
+            font-size: 12pt;
         }
-        
-        .doc-table th {
-            background: white; /* ราชการไม่นิยมถมสีเทา */
-            font-weight: bold;
-            text-align: center;
-            vertical-align: middle;
-            border: 1px solid black;
-            padding: 5px;
-        }
-        
+
+        .doc-table th, 
         .doc-table td {
             border: 1px solid black;
-            padding: 4px 6px;
+            padding: 3px 5px;
             text-align: center;
             vertical-align: middle;
+            line-height: 1.2;
         }
-        
-        .doc-table td.text-left { text-align: left; }
 
-        .doc-sign {
-            margin-top: 25px;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
+        .doc-table th {
+            background: #f5f5f5;
+            font-weight: bold;
         }
-        
-        .sign-box {
+
+        .doc-table td.text-left {
+            text-align: left;
+            padding-left: 6px;
+        }
+
+        .doc-closing {
+            font-size: 14pt;
+            text-indent: 2cm;
+            margin-top: 10px;
+        }
+
+        .sign-section {
+            font-size: 14pt;
+            margin-top: 15px;
+        }
+
+        .sign-reporter {
             text-align: center;
-            width: 45%;
+            margin-left: 55%;
+        }
+
+        .sign-row {
+            display: flex;
+            margin-top: 20px;
+        }
+
+        .sign-box {
+            width: 50%;
+            font-size: 14pt;
             line-height: 1.4;
         }
 
-        .page-number {
-            position: absolute;
-            top: 10mm;
-            width: 100%;
-            text-align: center;
-            font-size: 16pt;
-            left: 0;
+        .sign-box.left {
+            padding-left: 20px;
         }
 
-        /* สำหรับหน้าจอพิมพ์ (Print/PDF) */
+        .sign-box.right {
+            text-align: center;
+        }
+
+        .checkbox-item {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 1px solid black;
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+
+        /* ===== Print Styles ===== */
         @media print {
-            body { background: white; padding: 0; margin: 0; }
-            .app-container, .modal-tools { display: none !important; }
-            .modal { position: static; background: white; width: 100%; height: auto; display: block !important; }
-            .modal-content { margin: 0; width: 100%; height: auto; background: white; box-shadow: none; border: none; }
-            .modal-view { padding: 0; display: block; background: white; overflow: visible; }
-            
-            .a4-paper {
+            @page {
+                size: A4;
                 margin: 0;
-                padding: 25mm 20mm 20mm 25mm; 
-                width: 100%;
-                height: 297mm; /* บังคับความสูงตอน Print */
+            }
+            
+            body { 
+                background: white; 
+                padding: 0; 
+                margin: 0;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            
+            .app-container, 
+            .modal-tools { 
+                display: none !important; 
+            }
+            
+            .modal { 
+                position: static; 
+                background: white; 
+                width: 100%; 
+                height: auto; 
+                display: block !important; 
+            }
+            
+            .modal-content { 
+                margin: 0; 
+                width: 100%; 
+                height: auto; 
+                background: white; 
+                box-shadow: none; 
+                overflow: visible; 
+            }
+            
+            .modal-view { 
+                padding: 0; 
+                display: block;
+                background: white;
+            }
+            
+            .a4-paper { 
+                margin: 0; 
+                padding: 20mm 20mm 20mm 25mm;
                 page-break-after: always;
+                page-break-inside: avoid;
+                width: 100%; 
+                min-height: auto;
                 box-shadow: none;
                 border: none;
             }
-            .a4-paper:last-child { page-break-after: auto; }
             
-            /* ซ่อนพื้นหลังสีเวลาพิมพ์ */
-            * { -webkit-print-color-adjust: exact; }
+            .a4-paper:last-child {
+                page-break-after: auto;
+            }
         }
 
         @media (max-width: 768px) {
             .period-title { flex-direction: column; align-items: flex-start; }
             .period-title input, .period-title select { width: 100%; }
+            .a4-paper { width: 100%; min-height: auto; padding: 10mm; font-size: 11pt; }
         }
     </style>
 </head>
@@ -231,8 +280,8 @@
 
     <div class="app-container">
         <div class="header">
-            <h1>ระบบจัดสอนแทน V.7.0</h1>
-            <p>✨ สร้างเอกสาร PDF (Local)</p>
+            <h1>ระบบจัดสอนแทน V.7.1</h1>
+            <p>✨ สร้างรายงาน PDF สำหรับโรงเรียนกระดุมทองวิทยา</p>
         </div>
 
         <div class="nav-bar">
@@ -292,7 +341,7 @@
                 <div id="matchCards"></div>
                 <div style="overflow: hidden; margin-top:20px;">
                     <button class="btn-print" onclick="preparePreview()" style="float:right;">
-                        <i class="fas fa-eye"></i> ดูตัวอย่าง / พิมพ์เอกสาร
+                        <i class="fas fa-eye"></i> ดูตัวอย่างและพิมพ์ PDF
                     </button>
                 </div>
             </div>
@@ -315,9 +364,10 @@
     <div id="previewModal" class="modal">
         <div class="modal-content">
             <div class="modal-tools">
-                <span>ตัวอย่างรายงาน (A4 - TH Sarabun Layout)</span>
-                <button onclick="window.print()" class="nav-btn" style="background:#2563eb; color:white; border:none;">🖨️ สั่งพิมพ์ (แนะนำ)</button>
-                <button onclick="downloadPDF_Library()" class="nav-btn" style="background:#be123c; color:white; border:none;">📥 ดาวน์โหลด PDF</button>
+                <span>ตัวอย่างรายงาน (A4 - TH Sarabun)</span>
+                <button onclick="window.print()" class="nav-btn" style="background:#2563eb; color:white; border:none;">
+                    🖨️ พิมพ์ / บันทึก PDF
+                </button>
                 <button onclick="document.getElementById('previewModal').style.display='none'" class="nav-btn" style="background:#64748b; color:white; border:none;">ปิด</button>
             </div>
             <div class="modal-view" id="paperContainer"></div>
@@ -326,10 +376,10 @@
 
     <script>
         // ============================================
-        // CONFIG & INITIALIZATION
+        // CONFIG
         // ============================================
         
-        // Firebase Config
+        // Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyCF7qDDxp6NXk3y7wLiySasqoviGyCKNNw",
             authDomain: "sornthan-fc0f1.firebaseapp.com",
@@ -370,7 +420,6 @@
         // ============================================
         // UTILITY FUNCTIONS
         // ============================================
-        
         function formatThaiDate(dateStr) {
             const dateParts = dateStr.split('-');
             const thaiMonths = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
@@ -378,7 +427,7 @@
             const dayNum = parseInt(dateParts[2]);
             const monthName = thaiMonths[parseInt(dateParts[1]) - 1];
             const yearBE = parseInt(dateParts[0]) + 543;
-            return `${dayNum} ${monthName} ${yearBE}`; // ตัด พ.ศ. ออกเพื่อให้กระชับตามตัวอย่าง
+            return `${dayNum} ${monthName} พ.ศ. ${yearBE}`;
         }
 
         // ============================================
@@ -578,7 +627,7 @@
         }
 
         // ============================================
-        // PREVIEW & SAVE FUNCTIONS (UPDATED FOR A4)
+        // Preview & PDF Functions
         // ============================================
         async function preparePreview() {
             const data = [];
@@ -619,7 +668,6 @@
 
             if(!isValid) return Swal.fire('เตือน', 'กรุณาเลือกผู้สอนแทนอย่างน้อย 1 รายการ', 'warning');
 
-            // บันทึก Firebase
             try {
                 await db.collection("substitutions").add({
                     created_at: firebase.firestore.FieldValue.serverTimestamp(),
@@ -640,23 +688,21 @@
             container.innerHTML = '';
 
             const thaiDateStr = formatThaiDate(docDate);
-            const fullThaiDateStr = `${thaiDateStr.replace(/(\d{4})/, "พ.ศ. $1")}`;
 
+            // Group by substitute teacher
             const grouped = {};
             data.forEach(x => {
                 if(!grouped[x.sub]) grouped[x.sub] = [];
                 grouped[x.sub].push(x);
             });
 
-            let currentPage = 0;
-
             for(const [subName, items] of Object.entries(grouped)) {
-                currentPage++;
                 const subObj = teachersData.find(t => t.name === subName);
                 const subDept = subObj ? subObj.department : "";
 
                 items.sort((a,b) => a.period - b.period);
                 
+                // Build table rows
                 let rows = items.map((it, idx) => `
                     <tr>
                         <td>${idx+1}</td>
@@ -665,134 +711,103 @@
                         <td>${it.period}</td>
                         <td>${it.subject}</td>
                         <td>${it.grade}</td>
-                        <td>-</td>
+                        <td></td>
+                        <td></td>
                     </tr>
                 `).join('');
 
-                // เติมแถวว่างให้เต็มตาราง (เพื่อให้ดูเป็นเอกสารราชการ)
-                const minRows = 8;
+                // Add empty rows to fill table (minimum 10 rows)
+                const minRows = 10;
                 for(let k = items.length; k < minRows; k++) {
-                    rows += `<tr><td style="height:25px;">&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
+                    rows += `<tr>
+                        <td style="height:18px;">&nbsp;</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>`;
                 }
 
                 container.innerHTML += `
                 <div class="a4-paper">
-                    <div class="garuda-container">
-                        <img src="https://nonthaphathr.github.io/uploadimg/kruda.png" class="garuda" crossorigin="anonymous">
-                        <div class="head-text">
-                            <h2>บันทึกข้อความ</h2>
-                        </div>
-                    </div>
+                    <div class="doc-code">วก.กทว.303</div>
+                    <div class="doc-title">บันทึกข้อความ</div>
                     
                     <div class="doc-meta">
-                        <b>ส่วนราชการ</b> โรงเรียนกระดุมทองวิทยา ตำบลหนองหัวช้าง อำเภอกันทรารมย์ จังหวัดศรีสะเกษ
+                        <b>ส่วนราชการ</b>&nbsp;&nbsp;&nbsp;โรงเรียนกระดุมทองวิทยา&nbsp;&nbsp;&nbsp;ตำบลหนองหัวช้าง&nbsp;&nbsp;&nbsp;อำเภอกันทรารมย์&nbsp;&nbsp;&nbsp;จังหวัดศรีสะเกษ
+                    </div>
+                    <div class="doc-meta doc-meta-inline">
+                        <span><b>ที่</b>&nbsp;&nbsp;ศก 51008.08/.................</span>
+                        <span><b>วันที่</b>&nbsp;&nbsp;${thaiDateStr}</span>
                     </div>
                     <div class="doc-meta">
-                        <div style="display:flex;">
-                            <div style="width:50%;"><b>ที่</b> ศก 51008.08/.........</div>
-                            <div style="width:50%;"><b>วันที่</b> ${fullThaiDateStr}</div>
-                        </div>
-                    </div>
-                    <div class="doc-meta">
-                        <b>เรื่อง</b> รายงานผลการสอนแทน
+                        <b>เรื่อง</b>&nbsp;&nbsp;&nbsp;รายงานผลการสอนแทน
                     </div>
                     
-                    <hr class="doc-hr">
+                    <hr class="doc-line">
                     
-                    <div class="doc-meta"><b>เรียน</b> ผู้อำนวยการโรงเรียนกระดุมทองวิทยา</div>
+                    <div class="doc-to">เรียน&nbsp;&nbsp;&nbsp;ผู้อำนวยการโรงเรียนกระดุมทองวิทยา</div>
                     
                     <div class="doc-content">
-                        ตามที่ข้าพเจ้า ${subName} ตำแหน่ง ครู กลุ่มสาระการเรียนรู้${subDept} ได้รับมอบหมายให้ปฏิบัติราชการแทน เมื่อวันที่ ${fullThaiDateStr} ตามความทราบแล้วนั้น
+                        ตามที่ข้าพเจ้า ${subName} ตำแหน่ง ครู กลุ่มสาระฯ${subDept} ได้รับมอบหมายให้ปฏิบัติราชการแทน เมื่อวันที่ ${thaiDateStr} ตามความทราบแล้วนั้น
                     </div>
-                    <div class="doc-content" style="margin-top:0;">
+                    <div class="doc-content" style="text-indent:2cm;">
                         บัดนี้ ข้าพเจ้าได้ดำเนินการสอนแทนดังกล่าวเสร็จสิ้นเรียบร้อยแล้ว จึงขอรายงานผลการสอนแทน ดังต่อไปนี้
                     </div>
                     
                     <table class="doc-table">
                         <thead>
                             <tr>
-                                <th style="width:6%;">ที่</th>
-                                <th style="width:26%;">ปฏิบัติราชการแทน</th>
-                                <th style="width:14%;">สาเหตุ</th>
-                                <th style="width:10%;">คาบที่</th>
-                                <th style="width:16%;">รหัสวิชา</th>
-                                <th style="width:10%;">ชั้น</th>
-                                <th style="width:14%;">หมายเหตุ</th>
+                                <th rowspan="2" style="width:5%;">ที่</th>
+                                <th rowspan="2" style="width:22%;">ปฏิบัติราชการแทน<br>คุณครู</th>
+                                <th rowspan="2" style="width:12%;">สาเหตุที่<br>ปฏิบัติราชการแทน</th>
+                                <th colspan="4" style="width:40%;">การสอนแทน</th>
+                                <th rowspan="2" style="width:10%;">หมายเหตุ</th>
+                            </tr>
+                            <tr>
+                                <th style="width:8%;">คาบที่</th>
+                                <th style="width:12%;">รหัสวิชา</th>
+                                <th style="width:8%;">ชั้น</th>
+                                <th style="width:12%;">จัดกิจกรรม</th>
                             </tr>
                         </thead>
                         <tbody>${rows}</tbody>
                     </table>
                     
-                    <div class="doc-sign single">
-                        <div class="sign-box"></div>
-                        <div class="sign-box">
-                            <br>
-                            ลงชื่อ..............................................<br>
+                    <div class="doc-closing">จึงเรียนมาเพื่อโปรดทราบ</div>
+                    
+                    <div class="sign-section">
+                        <div class="sign-reporter">
+                            ลงชื่อ............................................<br>
                             (${subName})<br>
-                            ผู้รายงาน
+                            ตำแหน่ง ..............ครู............................
                         </div>
                     </div>
                     
-                    <div class="doc-sign" style="margin-top:20px;">
-                        <div class="sign-box">
-                            ลงชื่อ..............................................<br>
-                            (${scheduler})<br>
-                            หัวหน้าฝ่ายวิชาการ/ผู้จัด
+                    <div class="sign-row">
+                        <div class="sign-box left">
+                            <span class="checkbox-item"></span> รับทราบ<br><br>
+                            ลงชื่อ............................................<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;หัวหน้าฝ่ายวิชาการ<br>
+                            (${scheduler})
                         </div>
-                        <div class="sign-box">
-                            <div style="text-align:center; margin-bottom:5px;">ทราบ</div>
-                            ลงชื่อ..............................................<br>
-                            (${director})<br>
-                            ผู้อำนวยการโรงเรียนกระดุมทองวิทยา
+                        <div class="sign-box right">
+                            <span class="checkbox-item"></span> รับทราบ ............................................<br><br>
+                            ลงชื่อ............................................<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ผู้อำนวยการโรงเรียนกระดุมทองวิทยา<br>
+                            (${director})
                         </div>
                     </div>
                 </div>`;
             }
         }
 
-        async function downloadPDF_Library() {
-            const element = document.getElementById('paperContainer');
-            
-            Swal.fire({
-                title: 'กำลังสร้าง PDF...',
-                text: 'กรุณารอสักครู่',
-                allowOutsideClick: false,
-                didOpen: () => { Swal.showLoading(); }
-            });
-
-            try {
-                // Config นี้สำคัญมาก เพื่อให้ PDF ไม่เพี้ยน
-                const opt = {
-                    margin: 0, // ตั้งเป็น 0 เพราะเรามี padding ใน css แล้ว
-                    filename: `รายงานสอนแทน_${docDate}.pdf`,
-                    image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { 
-                        scale: 2, // เพิ่มความชัด
-                        useCORS: true,
-                        scrollY: 0
-                    },
-                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-                };
-
-                await html2pdf().set(opt).from(element).save();
-                
-                Swal.fire({
-                    icon: 'success',
-                    title: 'สำเร็จ!',
-                    text: 'ดาวน์โหลด PDF เรียบร้อย',
-                    timer: 2000,
-                    showConfirmButton: false
-                });
-            } catch(error) {
-                console.error('PDF Error:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'เกิดข้อผิดพลาด',
-                    text: 'กรุณาลองใหม่อีกครั้ง หรือใช้ปุ่ม "สั่งพิมพ์"'
-                });
-            }
-        }
-
+        // ============================================
+        // History Functions
+        // ============================================
         function loadHistory() {
             const list = document.getElementById('historyList');
             list.innerHTML = '<div style="text-align:center; padding:20px;">🔄 กำลังโหลด...</div>';
@@ -846,6 +861,9 @@
             });
         }
 
+        // ============================================
+        // Dashboard Charts
+        // ============================================
         let deptChartInstance = null;
         let teacherChartInstance = null;
 
