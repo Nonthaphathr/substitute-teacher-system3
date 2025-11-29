@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบจัดสอนแทน V.7.1</title>
+    <title>ระบบจัดสอนแทน V.7.2 (Final)</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -76,12 +76,12 @@
         .modal-tools { background: #333; padding: 10px; display: flex; justify-content: flex-end; gap: 10px; color: white; flex-wrap: wrap; }
         .modal-view { flex-grow: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 20px; background: #525659; }
 
-        /* ===== A4 Paper Styles - แก้ไขใหม่ ===== */
+        /* ===== A4 Paper Styles ===== */
         .a4-paper {
             width: 210mm;
             min-height: 297mm;
             background: white;
-            padding: 20mm 20mm 20mm 25mm;
+            padding: 20mm 20mm 15mm 25mm;
             position: relative;
             font-family: 'Sarabun', sans-serif;
             font-size: 14pt;
@@ -185,16 +185,17 @@
         .sign-row {
             display: flex;
             margin-top: 20px;
+            justify-content: space-between;
         }
 
         .sign-box {
-            width: 50%;
+            width: 48%;
             font-size: 14pt;
             line-height: 1.4;
         }
 
         .sign-box.left {
-            padding-left: 20px;
+            padding-left: 10px;
         }
 
         .sign-box.right {
@@ -208,6 +209,15 @@
             border: 1px solid black;
             margin-right: 5px;
             vertical-align: middle;
+        }
+        
+        .footer-system {
+            position: absolute;
+            bottom: 10mm;
+            right: 20mm;
+            font-size: 10pt;
+            color: #9ca3af;
+            font-style: italic;
         }
 
         /* ===== Print Styles ===== */
@@ -255,7 +265,7 @@
             
             .a4-paper { 
                 margin: 0; 
-                padding: 20mm 20mm 20mm 25mm;
+                padding: 20mm 20mm 15mm 25mm;
                 page-break-after: always;
                 page-break-inside: avoid;
                 width: 100%; 
@@ -280,7 +290,7 @@
 
     <div class="app-container">
         <div class="header">
-            <h1>ระบบจัดสอนแทน V.7.1</h1>
+            <h1>ระบบจัดสอนแทน V.7.2</h1>
             <p>✨ สร้างรายงาน PDF สำหรับโรงเรียนกระดุมทองวิทยา</p>
         </div>
 
@@ -309,13 +319,24 @@
                         <input type="date" id="docDate">
                     </div>
                 </div>
+                
                 <div class="input-row">
                     <div>
                         <label>ผู้จัดตาราง (แสดงในรายงาน)</label>
-                        <input type="text" id="schedulerName" value="ครูนนทพัทธ์ หิรัญเรือง">
+                        <input type="text" id="schedulerName" value="นายนนทพัทธ์ หิรัญเรือง">
                     </div>
                     <div>
-                        <label>ผู้อำนวยการ (แสดงในรายงาน)</label>
+                        <label>หัวหน้ากลุ่มบริหารงานวิชาการ</label>
+                        <input type="text" id="academicHeadName" value="นางสุพัฒตา ศรีเมือง">
+                    </div>
+                </div>
+                <div class="input-row">
+                    <div>
+                        <label>รองผู้อำนวยการโรงเรียน</label>
+                        <input type="text" id="deputyDirectorName" value="นางสุคันทร บาอินทร์">
+                    </div>
+                    <div>
+                        <label>ผู้อำนวยการโรงเรียน</label>
                         <input type="text" id="directorName" value="นางสุนิสา ใจใหญ่">
                     </div>
                 </div>
@@ -627,11 +648,13 @@
         }
 
         // ============================================
-        // Preview & PDF Functions
+        // Preview & PDF Functions (Updated Logic)
         // ============================================
         async function preparePreview() {
             const data = [];
             const scheduler = document.getElementById('schedulerName').value;
+            const academicHead = document.getElementById('academicHeadName').value;
+            const deputyDirector = document.getElementById('deputyDirectorName').value;
             const director = document.getElementById('directorName').value;
 
             const cards = document.querySelectorAll('.card');
@@ -675,15 +698,17 @@
                     daySchedule: daySchedule,
                     records: data,
                     scheduler: scheduler,
-                    director: director
+                    director: director,
+                    academicHead: academicHead,
+                    deputyDirector: deputyDirector
                 });
             } catch(e) { console.error("Firebase save error:", e); }
 
-            renderPaper(data, scheduler, director);
+            renderPaper(data, scheduler, academicHead, deputyDirector, director);
             document.getElementById('previewModal').style.display = 'block';
         }
 
-        function renderPaper(data, scheduler, director) {
+        function renderPaper(data, scheduler, academicHead, deputyDirector, director) {
             const container = document.getElementById('paperContainer');
             container.innerHTML = '';
 
@@ -791,15 +816,28 @@
                         <div class="sign-box left">
                             <span class="checkbox-item"></span> รับทราบ<br><br>
                             ลงชื่อ............................................<br>
-                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;หัวหน้าฝ่ายวิชาการ<br>
-                            (${scheduler})
+                            (${academicHead})<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;หัวหน้ากลุ่มบริหารงานวิชาการ<br>
                         </div>
                         <div class="sign-box right">
                             <span class="checkbox-item"></span> รับทราบ ............................................<br><br>
                             ลงชื่อ............................................<br>
-                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ผู้อำนวยการโรงเรียนกระดุมทองวิทยา<br>
-                            (${director})
+                            (${deputyDirector})<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;รองผู้อำนวยการโรงเรียน<br>
                         </div>
+                    </div>
+
+                    <div class="sign-row">
+                        <div class="sign-box left"></div> <div class="sign-box right">
+                            <span class="checkbox-item"></span> รับทราบ ............................................<br><br>
+                            ลงชื่อ............................................<br>
+                            (${director})<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ผู้อำนวยการโรงเรียนกระดุมทองวิทยา
+                        </div>
+                    </div>
+
+                    <div class="footer-system">
+                        พิมพ์จากระบบจัดสอนแทนออนไลน์ โดย ครูนนทพัทธ์ หิรัญเรือง
                     </div>
                 </div>`;
             }
