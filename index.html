@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบจัดสอนแทน V.Final (Dual Reports)</title>
+    <title>ระบบจัดสอนแทน V.Restore (Full Features)</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -57,73 +57,71 @@
 
         .btn-primary { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-family: 'Kanit'; font-size: 1rem; margin-top: 15px; }
         
-        .report-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; flex-wrap: wrap; }
-        .btn-action { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-family: 'Kanit'; display: flex; align-items: center; gap: 5px; color: white; }
-        .btn-summary { background: #f59e0b; }
-        .btn-individual { background: #2563eb; }
-
-        /* Reason Select */
-        .reason-select { padding: 5px 10px; border-radius: 6px; border: 1px solid #f59e0b; background: #fffbeb; font-family: 'Kanit'; font-size: 0.9rem; min-width: 120px; }
-
-        /* ========== A4 PAPER STYLES ========== */
-        /* Hidden container for PDF generation */
-        #print-staging-area {
-            position: fixed;
-            top: -9999px;
-            left: 0;
-            width: 210mm; /* Force A4 width */
-            z-index: 99999;
+        .btn-print { 
+            background: #2563eb; color: white; padding: 10px 25px; border: none; border-radius: 6px; cursor: pointer; font-family: 'Kanit'; 
+            display: inline-flex; align-items: center; gap: 5px; margin-top: 20px;
         }
 
+        /* Modal */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(3px); }
+        .modal-content { background: #525659; width: 95%; height: 98%; margin: 10px auto; border-radius: 8px; display: flex; flex-direction: column; }
+        .modal-tools { background: #333; padding: 10px; display: flex; justify-content: space-between; align-items: center; color: white; flex-wrap: wrap; }
+        .modal-view { flex-grow: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 20px; background: #525659; }
+
+        .preview-tabs { display: flex; gap: 5px; }
+        .tab-btn { background: #475569; color: #cbd5e1; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-family: 'Kanit'; }
+        .tab-btn.active { background: #2563eb; color: white; font-weight: bold; }
+
+        /* A4 Paper */
         .a4-paper {
             width: 210mm;
             min-height: 297mm;
             background: white;
-            padding: 15mm 20mm 20mm 25mm; /* Top Right Bottom Left */
+            padding: 15mm 20mm 20mm 25mm;
             position: relative;
             font-family: 'Sarabun', sans-serif;
             color: black;
             box-sizing: border-box;
-            page-break-after: always; /* Ensure new page for each report */
+            box-shadow: 0 0 15px rgba(0,0,0,0.5);
+            margin-bottom: 20px;
         }
-        .a4-paper:last-child { page-break-after: auto; }
 
-        /* Fonts as requested */
-        .th-sarabun { font-family: 'Sarabun', sans-serif; }
-        .font-16 { font-size: 16pt; font-weight: bold; }
-        .font-14 { font-size: 14pt; }
-        .font-12 { font-size: 12pt; }
-
-        /* Headers */
+        /* Report Styles */
+        .doc-code { position: absolute; right: 20mm; top: 15mm; font-size: 12pt; }
         .doc-head { display: flex; align-items: flex-start; margin-bottom: 10px; }
         .garuda { width: 60px; height: auto; }
         .head-text { flex-grow: 1; text-align: center; padding-right: 60px; }
-        .head-text h2 { margin: 15px 0 0 0; line-height: 1; }
-        .doc-code { position: absolute; right: 20mm; top: 15mm; font-size: 12pt; }
-
-        /* Content */
-        .doc-content { text-indent: 2.5cm; text-align: justify; line-height: 1.3; margin-top: 8px; }
-        .doc-meta { line-height: 1.3; margin-top: 4px; }
-
-        /* Table */
-        .doc-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        .doc-table th, .doc-table td { border: 1px solid black; padding: 4px; text-align: center; vertical-align: middle; line-height: 1.1; }
+        .head-text h2 { margin: 15px 0 0 0; line-height: 1; font-size: 16pt; font-weight: bold; }
+        .doc-meta { font-size: 16pt; line-height: 1.4; margin-top: 5px; }
+        .doc-content { font-size: 16pt; text-indent: 2.5cm; text-align: justify; line-height: 1.4; margin-top: 10px; }
+        
+        .doc-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14pt; }
+        .doc-table th, .doc-table td { border: 1px solid black; padding: 5px; text-align: center; vertical-align: middle; }
         .doc-table th { background: #f0f0f0; font-weight: bold; }
         .text-left { text-align: left !important; padding-left: 5px !important; }
 
-        /* Signatures */
-        .signature-section { margin-top: 25px; display: flex; flex-wrap: wrap; justify-content: space-between; row-gap: 20px; }
+        .signature-section { margin-top: 30px; display: flex; flex-wrap: wrap; justify-content: space-between; row-gap: 20px; font-size: 16pt; }
         .sign-box { text-align: center; min-width: 45%; flex: 1; }
         .sign-line { display: inline-block; border-bottom: 1px dotted black; width: 140px; margin: 0 5px; }
-
+        
+        /* Print Fix */
+        @media print {
+            body * { visibility: hidden; }
+            #paperContainer, #paperContainer * { visibility: visible; }
+            #paperContainer { position: absolute; left: 0; top: 0; width: 100%; }
+            .modal { position: static; background: white; }
+            .modal-content { background: white; width: 100%; height: auto; box-shadow: none; margin: 0; }
+            .modal-view { padding: 0; background: white; }
+            .a4-paper { box-shadow: none; margin: 0; page-break-after: always; }
+        }
     </style>
 </head>
 <body>
 
     <div class="app-container">
         <div class="header">
-            <h1>ระบบจัดสอนแทน V.Final</h1>
-            <p>ใบสรุปสอนแทน (รวม) & บันทึกข้อความ (รายบุคคล)</p>
+            <h1>ระบบจัดสอนแทน V.Restore</h1>
+            <p>กู้คืนฟังก์ชัน Dashboard / History / รายชื่อครู / แก้ไข PDF หน้าขาว</p>
         </div>
 
         <div class="nav-bar">
@@ -156,12 +154,9 @@
                 <h3 style="margin-bottom:15px; color:#166534;">ผลการจับคู่สอนแทน</h3>
                 <div id="matchCards"></div>
                 
-                <div class="report-actions">
-                    <button class="btn-action btn-summary" onclick="saveAndPrint('summary')">
-                        <i class="fas fa-file-alt"></i> บันทึก & พิมพ์ใบสรุป (รวม)
-                    </button>
-                    <button class="btn-action btn-individual" onclick="saveAndPrint('individual')">
-                        <i class="fas fa-file-signature"></i> บันทึก & พิมพ์บันทึกข้อความ (รายบุคคล)
+                <div style="text-align:right;">
+                    <button class="btn-print" onclick="openPreviewModal()">
+                        <i class="fas fa-eye"></i> ดูตัวอย่างรายงาน & ดาวน์โหลด (Preview & Print)
                     </button>
                 </div>
             </div>
@@ -173,10 +168,36 @@
             <div id="historyList"></div>
         </div>
         
-        <div id="dashboard" class="page-section"></div>
+        <div id="dashboard" class="page-section">
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:20px;">
+                <div class="card" style="padding:15px;">
+                    <h4>สัดส่วนกลุ่มสาระฯ</h4>
+                    <canvas id="deptChart"></canvas>
+                </div>
+                <div class="card" style="padding:15px;">
+                    <h4>5 อันดับครูสอนแทนสูงสุด</h4>
+                    <canvas id="teacherChart"></canvas>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div id="print-staging-area"></div>
+    <div id="previewModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-tools">
+                <div class="preview-tabs">
+                    <button class="tab-btn active" onclick="switchPreview('summary')">📄 ใบสรุป (รวม)</button>
+                    <button class="tab-btn" onclick="switchPreview('individual')">📑 บันทึกข้อความ (รายบุคคล)</button>
+                </div>
+                <div>
+                    <button onclick="downloadCurrentView()" class="nav-btn" style="background:#be123c; color:white; border:none;">📥 ดาวน์โหลด PDF (หน้านี้)</button>
+                    <button onclick="closePreview()" class="nav-btn" style="background:#64748b; color:white; border:none;">ปิด</button>
+                </div>
+            </div>
+            <div class="modal-view" id="paperContainer">
+                </div>
+        </div>
+    </div>
 
     <script>
         // --- CONFIG ---
@@ -191,7 +212,7 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // --- DATA ---
+        // --- DATA (กู้คืนรายชื่อครูครบ 14 ท่าน) ---
         const teachersData = [
             { name: "นายวิทยา ใหม่คามิ", department: "สังคมศึกษาฯ", schedule: { "จันทร์": [1, 5, 6, 7], "อังคาร": [3, 5, 6], "พุธ": [1, 2, 3, 5, 6], "พฤหัสบดี": [1, 3, 4, 5, 6], "ศุกร์": [2, 4, 7] } },
             { name: "นางสาวณิชารีย์ คำศรีทา", department: "วิทยาศาสตร์ฯ", schedule: { "จันทร์": [2, 4], "อังคาร": [3, 4, 6], "พุธ": [3, 4, 5, 6], "พฤหัสบดี": [5, 6], "ศุกร์": [4, 5, 6] } },
@@ -214,6 +235,7 @@
         let docDate = "";
         let workloadMap = {};
         let realtimeWorkload = {};
+        let currentData = null; // Store current generated data
 
         // --- INIT ---
         window.onload = () => {
@@ -233,6 +255,7 @@
             document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
             event.currentTarget.classList.add('active');
             if(id === 'history') loadHistory();
+            if(id === 'dashboard') renderCharts();
         }
 
         function toggleSelect(name, cb) {
@@ -255,7 +278,6 @@
             realtimeWorkload = {};
             window.selectionTracker = {};
             
-            // Get current workload from DB
             try {
                 const snap = await db.collection("substitutions").where("docDate", "==", docDate).get();
                 snap.forEach(doc => {
@@ -341,15 +363,10 @@
             });
         }
 
-        // --- SAVE AND PRINT DISPATCHER ---
-        async function saveAndPrint(mode) {
-            // 1. Gather Data
+        // --- PREVIEW & REPORT LOGIC ---
+        async function openPreviewModal() {
+            // Collect Data
             const data = [];
-            const scheduler = document.getElementById('schedulerName').value;
-            const headAcademic = document.getElementById('headAcademic').value;
-            const deputy = document.getElementById('deputyName').value;
-            const director = document.getElementById('directorName').value;
-
             document.querySelectorAll('.card').forEach(card => {
                 const absent = card.querySelector('.card-header span').innerText.replace(' (ลา)', '');
                 const reason = card.querySelector('select').value;
@@ -368,32 +385,48 @@
             });
 
             if(data.length === 0) return Swal.fire('เตือน', 'กรุณาเลือกผู้สอนแทน', 'warning');
+            
+            // Save to Global for switching tabs
+            currentData = {
+                records: data,
+                scheduler: document.getElementById('schedulerName').value,
+                head: document.getElementById('headAcademic').value,
+                deputy: document.getElementById('deputyName').value,
+                director: document.getElementById('directorName').value
+            };
 
-            // 2. Save to Firebase (Optional: Only once if not saved)
+            // Save to Firebase
             try {
-                // Check if exists for update logic or just add new log
-                // For simplicity, we add new log. You might want to update existing.
                 await db.collection("substitutions").add({
                     created_at: firebase.firestore.FieldValue.serverTimestamp(),
-                    docDate, daySchedule, records: data, scheduler, director
+                    docDate, daySchedule, records: data, 
+                    scheduler: currentData.scheduler, director: currentData.director
                 });
             } catch(e) { console.error("Save error", e); }
 
-            // 3. Generate HTML based on mode
+            // Open Modal and render Summary by default
+            document.getElementById('previewModal').style.display = 'block';
+            switchPreview('summary');
+        }
+
+        function switchPreview(mode) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            const container = document.getElementById('paperContainer');
+            container.innerHTML = ''; // Clear previous
+
             if(mode === 'summary') {
-                generateSummaryReport(data, scheduler, headAcademic, deputy, director);
+                renderSummary(container);
             } else {
-                generateIndividualReport(data, scheduler, headAcademic, director);
+                renderIndividual(container);
             }
         }
 
-        // --- REPORT 1: SUMMARY (วก.กทว.302) ---
-        function generateSummaryReport(data, scheduler, head, deputy, director) {
+        function renderSummary(container) {
             const dateStr = getThaiDate(docDate);
-            
-            // Group by Absent Teacher
             const grouped = {};
-            data.forEach(d => {
+            currentData.records.forEach(d => {
                 if(!grouped[d.absent]) grouped[d.absent] = [];
                 grouped[d.absent].push(d);
             });
@@ -402,44 +435,28 @@
             let counter = 1;
             for(const [absent, items] of Object.entries(grouped)) {
                 items.sort((a,b) => a.period - b.period);
-                
-                // First row contains the Absent Teacher name
-                rows += `
-                    <tr>
-                        <td rowspan="${items.length}">${counter++}</td>
-                        <td rowspan="${items.length}" class="text-left">${absent}</td>
-                        <td rowspan="${items.length}">${items[0].reason}</td>
-                        <td>${items[0].period}</td>
-                        <td>${items[0].subject}</td>
-                        <td>${items[0].grade}</td>
-                        <td class="text-left">${items[0].sub}</td>
-                        <td></td>
-                    </tr>
-                `;
-                // Subsequent rows
+                rows += `<tr>
+                    <td rowspan="${items.length}">${counter++}</td>
+                    <td rowspan="${items.length}" class="text-left">${absent}</td>
+                    <td rowspan="${items.length}">${items[0].reason}</td>
+                    <td>${items[0].period}</td>
+                    <td>${items[0].subject}</td>
+                    <td>${items[0].grade}</td>
+                    <td class="text-left">${items[0].sub}</td>
+                    <td></td>
+                </tr>`;
                 for(let i=1; i<items.length; i++) {
-                    rows += `
-                        <tr>
-                            <td>${items[i].period}</td>
-                            <td>${items[i].subject}</td>
-                            <td>${items[i].grade}</td>
-                            <td class="text-left">${items[i].sub}</td>
-                            <td></td>
-                        </tr>
-                    `;
+                    rows += `<tr><td>${items[i].period}</td><td>${items[i].subject}</td><td>${items[i].grade}</td><td class="text-left">${items[i].sub}</td><td></td></tr>`;
                 }
             }
 
-            // Fill empty rows to make it look full A4 if needed, or leave as is
-            
-            const html = `
-                <div class="a4-paper th-sarabun font-14">
+            container.innerHTML = `
+                <div class="a4-paper">
                     <div class="doc-code">วก.กทว.302</div>
-                    <center class="font-16">แบบบันทึกการจัดสอนแทน</center>
-                    <center class="font-16">โรงเรียนกระดุมทองวิทยา ต.หนองหัวช้าง อ.กันทรารมย์ จ.ศรีสะเกษ</center>
-                    <center class="font-14">วันที่ ${dateStr} ภาคเรียนที่ 2 ปีการศึกษา 2568</center>
-                    
-                    <table class="doc-table font-14">
+                    <center style="font-size:16pt; font-weight:bold;">แบบบันทึกการจัดสอนแทน</center>
+                    <center style="font-size:16pt; font-weight:bold;">โรงเรียนกระดุมทองวิทยา ต.หนองหัวช้าง อ.กันทรารมย์ จ.ศรีสะเกษ</center>
+                    <center style="font-size:14pt;">วันที่ ${dateStr} ภาคเรียนที่ 2 ปีการศึกษา 2568</center>
+                    <table class="doc-table">
                         <thead>
                             <tr>
                                 <th style="width:5%">ที่</th>
@@ -449,165 +466,98 @@
                                 <th style="width:10%">รหัสวิชา</th>
                                 <th style="width:8%">ชั้น</th>
                                 <th style="width:22%">ครูสอนแทน</th>
-                                <th style="width:15%">หมายเหตุ/ลงนาม</th>
+                                <th style="width:15%">ลงนาม</th>
                             </tr>
                         </thead>
                         <tbody>${rows}</tbody>
                     </table>
-
-                    <div class="signature-section font-14">
-                        <div class="sign-box">
-                            <br>ลงชื่อ<span class="sign-line"></span>ผู้จัดสอนแทน<br>(${scheduler})
-                        </div>
-                        <div class="sign-box">
-                            <br>ลงชื่อ<span class="sign-line"></span>หน.ฝ่ายวิชาการ<br>(${head})
-                        </div>
-                        <div class="sign-box">
-                            <br>ลงชื่อ<span class="sign-line"></span>รองผู้อำนวยการ<br>(${deputy})
-                        </div>
-                        <div class="sign-box">
-                            <br>ลงชื่อ<span class="sign-line"></span>ผู้อำนวยการ<br>(${director})
-                        </div>
+                    <div class="signature-section">
+                        <div class="sign-box"><br>ลงชื่อ<span class="sign-line"></span>ผู้จัด<br>(${currentData.scheduler})</div>
+                        <div class="sign-box"><br>ลงชื่อ<span class="sign-line"></span>หน.วิชาการ<br>(${currentData.head})</div>
+                        <div class="sign-box"><br>ลงชื่อ<span class="sign-line"></span>รอง ผอ.<br>(${currentData.deputy})</div>
+                        <div class="sign-box"><br>ลงชื่อ<span class="sign-line"></span>ผอ.<br>(${currentData.director})</div>
                     </div>
-                </div>
-            `;
-            
-            triggerDownload(html, `ใบสรุปสอนแทน_${docDate}.pdf`);
+                </div>`;
         }
 
-        // --- REPORT 2: INDIVIDUAL (วก.กทว.303) ---
-        function generateIndividualReport(data, scheduler, head, director) {
+        function renderIndividual(container) {
             const dateStr = getThaiDate(docDate);
-            
-            // Group by SUBSTITUTE Teacher
             const grouped = {};
-            data.forEach(d => {
+            currentData.records.forEach(d => {
                 if(!grouped[d.sub]) grouped[d.sub] = [];
                 grouped[d.sub].push(d);
             });
 
-            let fullHtml = "";
-
             for(const [subName, items] of Object.entries(grouped)) {
                 items.sort((a,b) => a.period - b.period);
-                const dept = items[0].dept || "วิทยาศาสตร์ฯ"; // Fallback or get from data
+                const dept = items[0].dept || "";
+                
+                let rows = items.map((it, idx) => `<tr>
+                    <td>${idx+1}</td><td class="text-left">${it.absent}</td><td>${it.reason}</td><td>${it.period}</td><td>${it.subject}</td><td>${it.grade}</td><td>-</td>
+                </tr>`).join('');
 
-                let rows = items.map((it, idx) => `
-                    <tr>
-                        <td>${idx+1}</td>
-                        <td class="text-left">${it.absent}</td>
-                        <td>${it.reason}</td>
-                        <td>${it.period}</td>
-                        <td>${it.subject}</td>
-                        <td>${it.grade}</td>
-                        <td>-</td>
-                    </tr>
-                `).join('');
+                for(let i=items.length; i<8; i++) rows += `<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
 
-                // Fill rows to 8
-                for(let i=items.length; i<8; i++) {
-                    rows += `<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
-                }
-
-                fullHtml += `
-                    <div class="a4-paper th-sarabun font-14">
+                container.innerHTML += `
+                    <div class="a4-paper">
                         <div class="doc-code">วก.กทว.303</div>
                         <div class="doc-head">
                             <img src="https://nonthaphathr.github.io/uploadimg/kruda.png" class="garuda" crossorigin="anonymous">
-                            <div class="head-text">
-                                <h2 class="font-16">บันทึกข้อความ</h2>
-                            </div>
+                            <div class="head-text"><h2>บันทึกข้อความ</h2></div>
                         </div>
-                        <div class="doc-meta font-14">
-                            <b>ส่วนราชการ</b> โรงเรียนกระดุมทองวิทยา ตำบลหนองหัวช้าง อำเภอกันทรารมย์ จังหวัดศรีสะเกษ<br>
-                            <b>ที่</b> ศก 51008.08/......... &nbsp;&nbsp;&nbsp; <b>วันที่</b> ${dateStr}<br>
-                            <b>เรื่อง</b> รายงานผลการสอนแทน
+                        <div class="doc-meta">
+                            <b>ส่วนราชการ</b> โรงเรียนกระดุมทองวิทยา<br><b>ที่</b> ศก 51008.08/......... <b>วันที่</b> ${dateStr}<br><b>เรื่อง</b> รายงานผลการสอนแทน
                         </div>
-                        <hr style="border:none; border-bottom:1px solid black; margin:5px 0;">
-                        <div class="doc-meta font-14"><b>เรียน</b> ผู้อำนวยการโรงเรียนกระดุมทองวิทยา</div>
-                        
-                        <div class="doc-content font-14">
-                            ตามที่ข้าพเจ้า ${subName} ตำแหน่ง ครู กลุ่มสาระการเรียนรู้${dept} ได้รับมอบหมายให้ปฏิบัติราชการแทน เมื่อวันที่ ${dateStr} ตามความทราบแล้วนั้น
-                        </div>
-                        <div class="doc-content font-14" style="margin-top:0;">
-                            บัดนี้ ข้าพเจ้าได้ดำเนินการสอนแทนดังกล่าวเสร็จสิ้นเรียบร้อยแล้ว จึงขอรายงานผลการสอนแทน ดังต่อไปนี้
-                        </div>
-
-                        <table class="doc-table font-14">
-                            <thead>
-                                <tr>
-                                    <th style="width:6%">ที่</th>
-                                    <th style="width:25%">ปฏิบัติราชการแทน</th>
-                                    <th style="width:14%">สาเหตุ</th>
-                                    <th style="width:10%">คาบที่</th>
-                                    <th style="width:15%">รหัสวิชา</th>
-                                    <th style="width:10%">ชั้น</th>
-                                    <th style="width:15%">หมายเหตุ</th>
-                                </tr>
-                            </thead>
+                        <hr style="border:none; border-bottom:1px solid black; margin:10px 0;">
+                        <div class="doc-meta"><b>เรียน</b> ผู้อำนวยการโรงเรียนกระดุมทองวิทยา</div>
+                        <div class="doc-content">ตามที่ข้าพเจ้า ${subName} ตำแหน่ง ครู กลุ่มสาระฯ${dept} ได้รับมอบหมายให้ปฏิบัติราชการแทน เมื่อวันที่ ${dateStr} นั้น บัดนี้การสอนแทนเสร็จสิ้นแล้ว จึงขอรายงานผลดังนี้</div>
+                        <table class="doc-table">
+                            <thead><tr><th style="width:6%">ที่</th><th>ปฏิบัติราชการแทน</th><th>สาเหตุ</th><th>คาบ</th><th>รหัสวิชา</th><th>ชั้น</th><th>หมายเหตุ</th></tr></thead>
                             <tbody>${rows}</tbody>
                         </table>
-
-                        <div class="doc-content font-14">จึงเรียนมาเพื่อโปรดทราบ</div>
-
-                        <div class="signature-section font-14">
-                            <div class="sign-box">
-                                <br>ลงชื่อ<span class="sign-line"></span><br>(${subName})<br>ตำแหน่ง ครู
-                            </div>
-                            <div class="sign-box">
-                                <br>ลงชื่อ<span class="sign-line"></span>หัวหน้าฝ่ายวิชาการ<br>(${head})
-                            </div>
+                        <div class="doc-content">จึงเรียนมาเพื่อโปรดทราบ</div>
+                        <div class="signature-section">
+                            <div class="sign-box"><br>ลงชื่อ<span class="sign-line"></span><br>(${subName})<br>ผู้รายงาน</div>
+                            <div class="sign-box"><br>ลงชื่อ<span class="sign-line"></span><br>(${currentData.head})<br>หัวหน้าฝ่ายวิชาการ</div>
                         </div>
-                        <div class="signature-section font-14" style="justify-content:center;">
-                            <div class="sign-box">
-                                <br>ลงชื่อ<span class="sign-line"></span>ผู้อำนวยการ<br>(${director})
-                            </div>
+                        <div class="signature-section" style="justify-content:center;">
+                            <div class="sign-box"><br>ลงชื่อ<span class="sign-line"></span><br>(${currentData.director})<br>ผู้อำนวยการโรงเรียน</div>
                         </div>
-                    </div>
-                `;
+                    </div>`;
             }
-            
-            triggerDownload(fullHtml, `บันทึกข้อความรายบุคคล_${docDate}.pdf`);
         }
 
-        // --- UTILS & PDF GENERATOR ---
+        // --- DOWNLOAD PDF (WYSIWYG Mode) ---
+        function downloadCurrentView() {
+            const element = document.getElementById('paperContainer');
+            Swal.fire({ title: 'กำลังสร้าง PDF...', didOpen: () => Swal.showLoading() });
+            
+            // ใช้ค่า config ที่ชัดเจน
+            const opt = {
+                margin: 0,
+                filename: `รายงานสอนแทน_${docDate}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, logging: false },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            // เรียก html2pdf จาก Element ที่มองเห็นอยู่ (แก้ปัญหาหน้าขาว)
+            html2pdf().set(opt).from(element).save().then(() => {
+                Swal.close();
+            });
+        }
+
+        function closePreview() {
+            document.getElementById('previewModal').style.display = 'none';
+        }
+
         function getThaiDate(inp) {
             const d = new Date(inp);
             const m = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
             return `${d.getDate()} ${m[d.getMonth()]} ${d.getFullYear()+543}`;
         }
 
-        function triggerDownload(htmlContent, filename) {
-            // 1. Inject HTML into Hidden Staging Area
-            const staging = document.getElementById('print-staging-area');
-            staging.innerHTML = htmlContent;
-
-            Swal.fire({ title: 'กำลังสร้าง PDF...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-
-            // 2. Wait for images to load (Important!)
-            const images = staging.getElementsByTagName('img');
-            const promises = Array.from(images).map(img => {
-                if(img.complete) return Promise.resolve();
-                return new Promise(resolve => { img.onload = resolve; img.onerror = resolve; });
-            });
-
-            Promise.all(promises).then(() => {
-                // 3. Generate PDF from Staging Area
-                const opt = {
-                    margin: 0,
-                    filename: filename,
-                    image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { scale: 2, useCORS: true, logging: false },
-                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-                };
-
-                html2pdf().set(opt).from(staging).save().then(() => {
-                    Swal.fire({ icon: 'success', title: 'ดาวน์โหลดสำเร็จ', timer: 1500, showConfirmButton: false });
-                    staging.innerHTML = ''; // Clean up
-                });
-            });
-        }
-        
+        // --- RESTORED: HISTORY & DELETE ---
         function loadHistory() {
              const list = document.getElementById('historyList');
             list.innerHTML = '<div style="text-align:center; padding:20px;">🔄 กำลังโหลด...</div>';
@@ -626,11 +576,52 @@
                     item.className = 'card';
                     item.style = 'padding:15px; margin-bottom:10px;';
                     item.innerHTML = `
-                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
-                            <div><strong>📅 ${d.docDate}</strong> <span style="font-size:0.8rem; color:#64748b;">(${d.records.length} รายการ)</span></div>
-                        </div>
-                    `;
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <div><strong>📅 ${d.docDate}</strong> <span style="font-size:0.8rem;">(${d.records.length} รายการ)</span></div>
+                            <button onclick="deleteLog('${doc.id}')" style="background:#fee2e2; color:red; border:none; padding:5px 15px; cursor:pointer; border-radius:4px;">🗑️ ลบ</button>
+                        </div>`;
                     list.appendChild(item);
+                });
+            });
+        }
+
+        function deleteLog(id) {
+            Swal.fire({ 
+                title: 'ยืนยันลบ?', showCancelButton: true, confirmButtonColor: '#ef4444' 
+            }).then(r => {
+                if(r.isConfirmed) {
+                    db.collection("substitutions").doc(id).delete().then(() => {
+                        loadHistory();
+                        renderCharts();
+                    });
+                }
+            });
+        }
+
+        // --- RESTORED: CHARTS ---
+        let chart1 = null, chart2 = null;
+        function renderCharts() {
+            db.collection("substitutions").get().then(snap => {
+                let dMap = {}, tMap = {};
+                snap.forEach(doc => {
+                    doc.data().records.forEach(r => {
+                        dMap[r.dept||'อื่นๆ'] = (dMap[r.dept||'อื่นๆ']||0)+1;
+                        tMap[r.sub] = (tMap[r.sub]||0)+1;
+                    });
+                });
+                
+                if(chart1) chart1.destroy();
+                if(chart2) chart2.destroy();
+                
+                chart1 = new Chart(document.getElementById('deptChart'), {
+                    type: 'doughnut',
+                    data: { labels: Object.keys(dMap), datasets: [{data: Object.values(dMap), backgroundColor: ['#3b82f6','#ef4444','#eab308','#22c55e','#8b5cf6']}] }
+                });
+
+                const top5 = Object.entries(tMap).sort((a,b)=>b[1]-a[1]).slice(0,5);
+                chart2 = new Chart(document.getElementById('teacherChart'), {
+                    type: 'bar',
+                    data: { labels: top5.map(x=>x[0]), datasets: [{label:'คาบ', data: top5.map(x=>x[1]), backgroundColor:'#166534'}] }
                 });
             });
         }
