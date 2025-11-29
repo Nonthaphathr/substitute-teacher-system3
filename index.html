@@ -3,112 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบจัดสอนแทน V.5.0 (Ultimate)</title>
+    <title>ระบบจัดสอนแทน V.6.0 (PDF & Full Option)</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
     <style>
+        /* Import TH Sarabun New for PDF */
         @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Kanit:wght@300;400;500;600;700&display=swap');
 
-        /* --- Global & Theme --- */
-        :root { --primary: #4338ca; --secondary: #3b82f6; --bg: #f3f4f6; }
+        /* --- Global --- */
+        :root { --primary: #4f46e5; --bg: #f8fafc; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Kanit', sans-serif; background: var(--bg); min-height: 100vh; padding: 20px; color: #1e293b; }
+        body { font-family: 'Kanit', sans-serif; background: var(--bg); color: #1e293b; padding: 20px; }
 
-        .app-container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); overflow: hidden; min-height: 85vh; display: flex; flex-direction: column; }
+        .app-container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); overflow: hidden; min-height: 90vh; display: flex; flex-direction: column; }
         
-        /* Header */
-        .header { background: linear-gradient(135deg, #4338ca, #6366f1); padding: 30px; color: white; text-align: center; position: relative; }
-        .header h1 { font-size: 2rem; margin-bottom: 5px; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-        .header p { opacity: 0.9; }
+        /* Header & Nav */
+        .header { background: linear-gradient(135deg, #1e40af, #3b82f6); padding: 20px; color: white; text-align: center; }
+        .nav-bar { display: flex; justify-content: center; gap: 10px; padding: 15px; background: white; border-bottom: 1px solid #e2e8f0; flex-wrap: wrap; }
+        .nav-btn { padding: 8px 20px; border-radius: 20px; border: 1px solid #e2e8f0; background: white; color: #64748b; cursor: pointer; transition: 0.2s; font-family: 'Kanit'; }
+        .nav-btn.active, .nav-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
 
-        /* Nav */
-        .nav-bar { display: flex; justify-content: center; gap: 15px; padding: 15px; background: white; border-bottom: 1px solid #e5e7eb; }
-        .nav-btn { padding: 10px 25px; border-radius: 50px; border: 1px solid #e5e7eb; background: white; color: #64748b; cursor: pointer; transition: 0.3s; font-family: 'Kanit'; font-size: 1rem; }
-        .nav-btn:hover, .nav-btn.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 10px rgba(67, 56, 202, 0.3); }
-
-        /* Sections */
-        .page-section { display: none; padding: 30px; flex-grow: 1; animation: fadeIn 0.4s; }
+        /* Content */
+        .page-section { display: none; padding: 25px; flex-grow: 1; animation: fadeIn 0.3s; }
         .page-section.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
         /* Controls */
-        .control-panel { background: #f8fafc; padding: 25px; border-radius: 15px; border: 1px solid #e2e8f0; margin-bottom: 30px; }
-        select { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #cbd5e1; font-family: 'Kanit'; font-size: 1rem; margin-top: 8px; }
+        .control-group { background: #f1f5f9; padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #e2e8f0; }
+        .input-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: 500; font-size: 0.9rem; }
+        select, input[type="text"] { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-family: 'Kanit'; }
         
-        .teacher-checkboxes { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; max-height: 250px; overflow-y: auto; background: white; padding: 15px; border: 1px solid #e2e8f0; border-radius: 10px; margin-top: 10px; }
-        .checkbox-item { display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
-        
-        .tag-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; min-height: 30px; }
-        .tag { background: #e0e7ff; color: #3730a3; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; }
+        /* Teacher Selection */
+        .teacher-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; max-height: 200px; overflow-y: auto; background: white; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; }
+        .teacher-item { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; }
+        .tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; min-height: 25px; }
+        .tag { background: #dbeafe; color: #1e40af; padding: 2px 10px; border-radius: 15px; font-size: 0.8rem; }
 
-        /* Cards */
-        .match-card { background: white; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
-        .match-header { background: #fee2e2; color: #991b1b; padding: 15px 20px; font-weight: 600; display: flex; justify-content: space-between; border-left: 5px solid #ef4444; }
+        /* Match Cards */
+        .card { background: white; border: 1px solid #e2e8f0; border-radius: 10px; margin-bottom: 15px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .card-header { background: #fee2e2; padding: 10px 20px; color: #991b1b; font-weight: 600; border-left: 4px solid #ef4444; display: flex; justify-content: space-between; }
+        .card-body { padding: 15px; }
         
-        .period-row { display: flex; padding: 15px 20px; border-bottom: 1px solid #f1f5f9; gap: 15px; align-items: flex-start; }
-        .period-badge { background: var(--secondary); color: white; padding: 5px 12px; border-radius: 6px; font-weight: bold; min-width: 70px; text-align: center; height: fit-content; }
+        .period-block { margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px dashed #e2e8f0; }
+        .period-block:last-child { margin-bottom: 0; border-bottom: none; }
+        .period-title { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
+        .badge-p { background: #3b82f6; color: white; padding: 4px 10px; border-radius: 5px; font-weight: bold; font-size: 0.9rem; }
         
-        /* Radio Options */
-        .teacher-option { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 12px; position: relative; }
-        .teacher-option:hover { background: #f8fafc; border-color: #94a3b8; }
-        .teacher-option.selected { background: #eff6ff; border-color: var(--secondary); outline: 2px solid var(--secondary); }
-        .load-badge { position: absolute; right: 10px; top: 10px; font-size: 0.75rem; padding: 2px 8px; border-radius: 10px; font-weight: bold; }
-        .load-low { background: #dcfce7; color: #166534; }
-        .load-med { background: #fef9c3; color: #854d0e; }
-        .load-high { background: #fee2e2; color: #991b1b; }
+        /* Inputs in Card */
+        .detail-inputs { display: flex; gap: 10px; margin-bottom: 10px; }
+        .detail-inputs input, .detail-inputs select { padding: 6px; font-size: 0.9rem; }
 
-        /* Buttons */
-        .btn-process { width: 100%; padding: 15px; background: linear-gradient(135deg, #059669, #047857); color: white; border: none; border-radius: 12px; font-size: 1.1rem; cursor: pointer; font-family: 'Kanit'; font-weight: 500; margin-top: 20px; transition: 0.3s; }
-        .btn-process:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(5, 150, 105, 0.3); }
-        .btn-save { background: var(--primary); color: white; padding: 12px 30px; border: none; border-radius: 8px; cursor: pointer; font-family: 'Kanit'; display: flex; align-items: center; gap: 8px; float: right; }
+        /* Radio Candidates */
+        .candidate-opt { display: flex; align-items: center; gap: 10px; padding: 8px; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 5px; cursor: pointer; transition: 0.2s; position: relative; }
+        .candidate-opt:hover { background: #f8fafc; }
+        .candidate-opt.selected { background: #eff6ff; border-color: #3b82f6; outline: 1px solid #3b82f6; }
+        .workload-badge { margin-left: auto; font-size: 0.75rem; padding: 2px 8px; border-radius: 10px; background: #e2e8f0; color: #475569; }
+        .load-high { background: #fecaca; color: #991b1b; }
 
-        /* Dashboard */
-        .dash-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; }
-        .dash-card { background: white; padding: 20px; border-radius: 15px; border: 1px solid #e2e8f0; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        /* Action Buttons */
+        .btn-primary { width: 100%; padding: 12px; background: linear-gradient(to right, #059669, #047857); color: white; border: none; border-radius: 8px; cursor: pointer; font-family: 'Kanit'; font-size: 1rem; transition: 0.3s; }
+        .btn-primary:hover { transform: translateY(-2px); shadow: 0 4px 12px rgba(5, 150, 105, 0.2); }
+        .btn-print { background: #2563eb; color: white; padding: 10px 25px; border: none; border-radius: 6px; cursor: pointer; float: right; font-family: 'Kanit'; display: flex; align-items: center; gap: 5px; }
 
-        /* Modal Preview */
-        .modal { display: none; position: fixed; z-index: 999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); }
-        .modal-content { background: #525659; width: 85%; height: 95%; margin: 20px auto; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; }
-        .modal-toolbar { background: #333; padding: 15px; display: flex; justify-content: flex-end; gap: 10px; color: white; align-items: center; }
-        .modal-body { flex-grow: 1; overflow-y: auto; padding: 40px; display: flex; flex-direction: column; align-items: center; gap: 20px; }
+        /* Modal */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(3px); }
+        .modal-content { background: #525659; width: 90%; height: 95%; margin: 20px auto; border-radius: 8px; display: flex; flex-direction: column; }
+        .modal-tools { background: #333; padding: 10px 20px; display: flex; justify-content: flex-end; gap: 10px; align-items: center; color: white; }
+        .modal-view { flex-grow: 1; overflow-y: auto; padding: 40px; display: flex; flex-direction: column; align-items: center; gap: 20px; }
+
+        /* A4 Paper */
+        .a4-paper { width: 210mm; min-height: 297mm; background: white; padding: 20mm 20mm; position: relative; font-family: 'Sarabun', sans-serif; color: black; box-shadow: 0 0 15px rgba(0,0,0,0.5); box-sizing: border-box; }
         
-        /* A4 Paper Style (Exact PDF Replica) */
-        .a4-page { width: 210mm; min-height: 297mm; background: white; padding: 25mm 20mm; box-shadow: 0 0 15px rgba(0,0,0,0.5); position: relative; font-family: 'Sarabun', sans-serif; color: black; box-sizing: border-box; }
+        /* PDF Specifics */
+        .doc-head { display: flex; align-items: flex-start; margin-bottom: 0px; }
+        .garuda { width: 60px; height: auto; }
+        .head-text { flex-grow: 1; text-align: center; padding-right: 60px; }
+        .head-text h2 { font-size: 20pt; font-weight: bold; margin: 10px 0 0 0; line-height: 1; }
         
-        .doc-header { display: flex; align-items: flex-start; margin-bottom: 0px; }
-        .garuda { width: 60px; height: auto; margin-right: 20px; } /* ปรับขนาดครุฑ */
-        .doc-title { flex-grow: 1; text-align: center; padding-top: 15px; padding-right: 80px; } /* ดันข้อความให้กึ่งกลางหน้ากระดาษเทียบกับครุฑ */
-        .doc-title h2 { font-size: 29pt; font-weight: bold; margin: 0; line-height: 1; }
-        
-        .doc-info { margin-top: 5px; font-size: 16pt; line-height: 1.5; }
-        .doc-info b { font-weight: bold; }
-        
-        .doc-body { margin-top: 10px; font-size: 16pt; text-indent: 2.5cm; line-height: 1.5; text-align: justify; }
+        .doc-meta { margin-top: 10px; font-size: 16pt; line-height: 1.4; }
+        .doc-content { margin-top: 10px; font-size: 16pt; text-indent: 2.5cm; text-align: justify; line-height: 1.4; }
         
         .doc-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 15pt; }
-        .doc-table th, .doc-table td { border: 1px solid black; padding: 6px; text-align: left; vertical-align: top; }
-        .doc-table th { text-align: center; font-weight: bold; }
+        .doc-table th, .doc-table td { border: 1px solid black; padding: 5px; text-align: center; vertical-align: middle; line-height: 1.2; }
+        .doc-table td.left { text-align: left; }
         
-        .doc-footer { margin-top: 40px; font-size: 16pt; }
-        .sign-col { width: 45%; text-align: center; float: left; }
-        .sign-col.right { float: right; }
-        .clearfix::after { content: ""; clear: both; display: table; }
+        .doc-sign { margin-top: 40px; display: flex; justify-content: space-between; font-size: 16pt; }
+        .sign-box { text-align: center; width: 45%; }
 
         @media print {
             body { background: white; padding: 0; }
             .app-container, .modal { display: none; }
-            .modal { display: block !important; position: static; background: white; width: 100%; height: auto; }
-            .modal-content { margin: 0; width: 100%; height: auto; background: white; box-shadow: none; overflow: visible; }
-            .modal-toolbar { display: none; }
-            .modal-body { padding: 0; display: block; }
-            .a4-page { box-shadow: none; margin: 0; page-break-after: always; width: 100%; }
-            .a4-page:last-child { page-break-after: auto; }
+            .modal { display: block !important; position: static; background: white; }
+            .modal-content { width: 100%; height: auto; background: white; margin: 0; }
+            .modal-tools { display: none; }
+            .modal-view { padding: 0; display: block; }
+            .a4-paper { box-shadow: none; margin: 0; page-break-after: always; width: 100%; }
         }
     </style>
 </head>
@@ -116,84 +113,96 @@
 
     <div class="app-container">
         <div class="header">
-            <h1>ระบบจัดสอนแทน V.5.0</h1>
-            <p>Workload Monitor & Official Report Gen.</p>
+            <h1>ระบบจัดสอนแทน V.6.0</h1>
+            <p>Complete Edition (PDF & Workload)</p>
         </div>
 
         <div class="nav-bar">
             <button class="nav-btn active" onclick="switchTab('allocation')">📝 จัดสอนแทน</button>
+            <button class="nav-btn" onclick="switchTab('history')">📂 ประวัติ/แก้ไข</button>
             <button class="nav-btn" onclick="switchTab('dashboard')">📊 แดชบอร์ด</button>
-            <button class="nav-btn" onclick="switchTab('history')">🕒 ประวัติ</button>
         </div>
 
         <div id="allocation" class="page-section active">
-            <div class="control-panel">
-                <div style="margin-bottom: 15px;">
-                    <label>📅 เลือกวัน</label>
-                    <select id="daySelect">
-                        <option value="">-- เลือกวัน --</option>
-                        <option value="จันทร์">จันทร์</option>
-                        <option value="อังคาร">อังคาร</option>
-                        <option value="พุธ">พุธ</option>
-                        <option value="พฤหัสบดี">พฤหัสบดี</option>
-                        <option value="ศุกร์">ศุกร์</option>
-                    </select>
+            <div class="control-group">
+                <div class="input-row">
+                    <div>
+                        <label>วันที่สอนแทน</label>
+                        <select id="daySelect">
+                            <option value="">-- เลือกวัน --</option>
+                            <option value="จันทร์">จันทร์</option>
+                            <option value="อังคาร">อังคาร</option>
+                            <option value="พุธ">พุธ</option>
+                            <option value="พฤหัสบดี">พฤหัสบดี</option>
+                            <option value="ศุกร์">ศุกร์</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>ลงชื่อผู้จัดตาราง (แสดงในรายงาน)</label>
+                        <select id="schedulerName">
+                            <option value="ครูนนทพัทธ์ หิรัญเรือง">ครูนนทพัทธ์ หิรัญเรือง</option>
+                            <option value="นางสาวสุพัฒตา ศรีเมือง">นางสาวสุพัฒตา ศรีเมือง</option>
+                            <option value="เจ้าหน้าที่วิชาการ">เจ้าหน้าที่วิชาการ</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>ลงชื่อผู้อำนวยการ (แสดงในรายงาน)</label>
+                        <select id="directorName">
+                            <option value="นางสุนิสา ใจใหญ่">นางสุนิสา ใจใหญ่</option>
+                            <option value="รองผู้อำนวยการฝ่ายวิชาการ">รองผู้อำนวยการฝ่ายวิชาการ</option>
+                        </select>
+                    </div>
                 </div>
-                <div>
-                    <label>🤕 ครูที่ลา/ไปราชการ</label>
-                    <div class="tag-container" id="selectedTags"></div>
-                    <div class="teacher-checkboxes" id="teacherList"></div>
-                </div>
-                <button class="btn-process" onclick="processData()">🔍 ประมวลผลและตรวจสอบภาระงาน</button>
+
+                <label>เลือกครูที่ลา/ไปราชการ</label>
+                <div class="tags" id="selectedTags"></div>
+                <div class="teacher-grid" id="teacherCheckboxes"></div>
+
+                <button class="btn-primary" onclick="processAllocation()" style="margin-top:20px;">
+                    🔍 ประมวลผลและตรวจสอบภาระงาน
+                </button>
             </div>
 
-            <div id="resultSection" style="display: none;">
-                <h3 style="margin-bottom: 20px; color: #334155;">📋 เลือกครูสอนแทน (แสดงภาระงานวันนี้)</h3>
-                <div id="matchContainer"></div>
-                <div style="margin-top: 30px; overflow: hidden;">
-                    <button class="btn-save" onclick="openPreviewModal()">
-                        <i class="fas fa-print"></i> บันทึกและพิมพ์รายงาน
+            <div id="resultArea" style="display: none;">
+                <h3 style="margin-bottom:15px;">ระบุรายละเอียดและเลือกผู้สอนแทน</h3>
+                <div id="matchCards"></div>
+                <div style="overflow: hidden; margin-top:20px;">
+                    <button class="btn-print" onclick="preparePreview()">
+                        <i class="fas fa-file-pdf"></i> สร้างรายงาน PDF
                     </button>
                 </div>
             </div>
         </div>
 
-        <div id="dashboard" class="page-section">
-            <h3 style="margin-bottom: 20px;">สถิติการจัดสอนแทน (Cloud Data)</h3>
-            <button class="nav-btn" onclick="renderDashboard()" style="margin-bottom:20px; font-size:0.9rem;">🔄 รีเฟรชข้อมูล</button>
-            <div class="dash-grid">
-                <div class="dash-card">
-                    <h4>สัดส่วนตามกลุ่มสาระฯ</h4>
-                    <canvas id="deptChart"></canvas>
-                </div>
-                <div class="dash-card">
-                    <h4>Top 5 ครูสอนแทนสูงสุด</h4>
-                    <canvas id="topTeacherChart"></canvas>
-                </div>
-            </div>
+        <div id="history" class="page-section">
+            <h3>ประวัติการจัดสอนแทน</h3>
+            <button onclick="loadHistory()" class="nav-btn" style="margin:10px 0;">🔄 รีเฟรช</button>
+            <div id="historyList"></div>
         </div>
 
-        <div id="history" class="page-section">
-            <h3 style="margin-bottom: 20px;">ประวัติการดำเนินการ</h3>
-            <button class="nav-btn" onclick="loadHistory()" style="margin-bottom:20px; font-size:0.9rem;">🔄 รีเฟรช</button>
-            <div id="historyList"></div>
+        <div id="dashboard" class="page-section">
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:20px;">
+                <div class="card"><div class="card-body"><canvas id="deptChart"></canvas></div></div>
+                <div class="card"><div class="card-body"><canvas id="teacherChart"></canvas></div></div>
+            </div>
         </div>
     </div>
 
     <div id="previewModal" class="modal">
         <div class="modal-content">
-            <div class="modal-toolbar">
-                <span>ตัวอย่างเอกสาร (แยกหน้าตามผู้สอนแทน)</span>
+            <div class="modal-tools">
+                <span>ตัวอย่างรายงาน (A4)</span>
+                <button onclick="downloadPDF()" class="nav-btn" style="background:#e11d48; color:white; border:none;">📥 โหลด PDF</button>
                 <button onclick="window.print()" class="nav-btn" style="background:#22c55e; color:white; border:none;">🖨️ พิมพ์</button>
-                <button onclick="document.getElementById('previewModal').style.display='none'" class="nav-btn" style="background:#ef4444; color:white; border:none;">ปิด</button>
+                <button onclick="closeModal()" class="nav-btn" style="background:#64748b; color:white; border:none;">ปิด</button>
             </div>
-            <div class="modal-body" id="previewBody">
+            <div class="modal-view" id="paperContainer">
                 </div>
         </div>
     </div>
 
     <script>
-        // --- 1. FIREBASE CONFIG ---
+        // --- FIREBASE SETUP ---
         const firebaseConfig = {
             apiKey: "AIzaSyCF7qDDxp6NXk3y7wLiySasqoviGyCKNNw",
             authDomain: "sornthan-fc0f1.firebaseapp.com",
@@ -205,7 +214,7 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // --- 2. TEACHER DATA ---
+        // --- DATA ---
         const teachersData = [
             { name: "นายวิทยา ใหม่คามิ", department: "สังคมศึกษาฯ", schedule: { "จันทร์": [1, 5, 6, 7], "อังคาร": [3, 5, 6], "พุธ": [1, 2, 3, 5, 6], "พฤหัสบดี": [1, 3, 4, 5, 6], "ศุกร์": [2, 4, 7] } },
             { name: "นางสาวณิชารีย์ คำศรีทา", department: "วิทยาศาสตร์ฯ", schedule: { "จันทร์": [2, 4], "อังคาร": [3, 4, 6], "พุธ": [3, 4, 5, 6], "พฤหัสบดี": [5, 6], "ศุกร์": [4, 5, 6] } },
@@ -223,41 +232,36 @@
             { name: "นายนนทพัทธ์ หิรัญเรือง", department: "ภาษาไทย", schedule: { "จันทร์": [2, 4, 5, 6], "อังคาร": [2, 3], "พุธ": [2, 3, 5, 6], "พฤหัสบดี": [2, 6], "ศุกร์": [1, 3, 4] } }
         ];
 
-        // --- 3. STATE & UTILS ---
+        // --- STATE ---
         let selectedTeachers = [];
         let currentDay = "";
-        let teacherLoadMap = {}; // เก็บข้อมูลว่าวันนี้ใครสอนไปกี่คาบแล้ว
-        let chartDept = null;
-        let chartTeacher = null;
+        let workloadMap = {}; // Real-time load
 
-        window.onload = () => renderTeacherList();
+        // --- INIT ---
+        window.onload = () => {
+            const container = document.getElementById('teacherCheckboxes');
+            container.innerHTML = teachersData.map((t, i) => `
+                <div class="teacher-item">
+                    <input type="checkbox" id="t${i}" value="${t.name}" onchange="toggleSelect('${t.name}', this)">
+                    <label for="t${i}" style="cursor:pointer">${t.name}</label>
+                </div>
+            `).join('');
+        };
 
         function switchTab(id) {
             document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
             event.currentTarget.classList.add('active');
-            
-            if (id === 'dashboard') renderDashboard();
-            if (id === 'history') loadHistory();
+            if(id === 'history') loadHistory();
+            if(id === 'dashboard') renderCharts();
         }
 
-        // --- 4. ALLOCATION LOGIC ---
-        function renderTeacherList() {
-            const container = document.getElementById('teacherList');
-            container.innerHTML = teachersData.map((t, i) => `
-                <div class="checkbox-item">
-                    <input type="checkbox" id="t${i}" value="${t.name}" onchange="toggleTeacher('${t.name}', this)">
-                    <label for="t${i}" style="cursor:pointer">${t.name}</label>
-                </div>
-            `).join('');
-        }
-
-        function toggleTeacher(name, cb) {
-            if (cb.checked) {
-                if (selectedTeachers.length >= 6) {
-                    cb.checked = false;
-                    return Swal.fire('แจ้งเตือน', 'เลือกได้สูงสุด 6 ท่าน', 'warning');
+        // --- LOGIC: ALLOCATION ---
+        function toggleSelect(name, cb) {
+            if(cb.checked) {
+                if(selectedTeachers.length >= 6) {
+                    cb.checked = false; return Swal.fire('เตือน', 'เลือกได้สูงสุด 6 ท่าน', 'warning');
                 }
                 selectedTeachers.push(name);
             } else {
@@ -266,269 +270,287 @@
             document.getElementById('selectedTags').innerHTML = selectedTeachers.map(t => `<div class="tag">${t}</div>`).join('');
         }
 
-        async function processData() {
+        async function processAllocation() {
             currentDay = document.getElementById('daySelect').value;
-            if (!currentDay || selectedTeachers.length === 0) return Swal.fire('ข้อมูลไม่ครบ', 'เลือกวันและครูที่ลา', 'warning');
+            if(!currentDay || selectedTeachers.length === 0) return Swal.fire('ข้อมูลไม่ครบ', 'กรุณาเลือกวันและครูที่ลา', 'warning');
 
-            // 1. Fetch Today's Load from Firebase
-            await fetchTeacherLoad();
+            // 1. Get Workload from DB
+            workloadMap = {};
+            const snap = await db.collection("substitutions").where("day", "==", currentDay).get();
+            snap.forEach(doc => {
+                const recs = doc.data().records || [];
+                recs.forEach(r => workloadMap[r.sub] = (workloadMap[r.sub] || 0) + 1);
+            });
 
-            // 2. Render Cards
-            const container = document.getElementById('matchContainer');
+            // 2. Render UI
+            const container = document.getElementById('matchCards');
             container.innerHTML = '';
 
             selectedTeachers.forEach(absentName => {
-                const absentObj = teachersData.find(t => t.name === absentName);
-                const periods = absentObj.schedule[currentDay] || [];
-                if (periods.length === 0) return;
+                const teacherObj = teachersData.find(t => t.name === absentName);
+                const periods = teacherObj.schedule[currentDay] || [];
+                if(periods.length === 0) return;
 
-                let html = `<div class="match-card">
-                    <div class="match-header">
-                        <span><i class="fas fa-user-slash"></i> ${absentName}</span>
-                    </div>`;
+                let html = `<div class="card">
+                    <div class="card-header">
+                        <span>${absentName} (ลา)</span>
+                    </div>
+                    <div class="card-body">`;
 
                 periods.sort((a,b)=>a-b).forEach(period => {
-                    const candidates = getCandidates(currentDay, period, selectedTeachers);
-                    html += `<div class="period-row">
-                        <div class="period-badge">คาบ ${period}</div>
-                        <div style="flex:1;">`;
+                    const candidates = findCandidates(currentDay, period, selectedTeachers);
+                    html += `<div class="period-block">
+                        <div class="period-title">
+                            <span class="badge-p">คาบ ${period}</span>
+                            <div class="detail-inputs">
+                                <input type="text" id="subj_${absentName}_${period}" placeholder="รหัสวิชา (เช่น ค21101)">
+                                <select id="grade_${absentName}_${period}">
+                                    <option value="">ชั้น</option>
+                                    <option value="ม.1">ม.1</option>
+                                    <option value="ม.2">ม.2</option>
+                                    <option value="ม.3">ม.3</option>
+                                    <option value="ม.4">ม.4</option>
+                                    <option value="ม.5">ม.5</option>
+                                    <option value="ม.6">ม.6</option>
+                                    <option value="ม.1-6">ม.1-6</option>
+                                </select>
+                            </div>
+                        </div>`;
                     
-                    if(candidates.length === 0) html += `<div style="color:red">ไม่มีครูว่าง</div>`;
+                    if(candidates.length === 0) html += `<div style="color:red">ไม่มีครูว่างช่วงนี้</div>`;
                     else {
                         candidates.forEach(t => {
-                            const inputName = `sub_${absentName.replace(/\s/g,'')}_${period}`;
-                            const load = teacherLoadMap[t.name] || 0;
-                            const loadClass = load === 0 ? 'load-low' : (load < 2 ? 'load-med' : 'load-high');
+                            const load = workloadMap[t.name] || 0;
+                            const loadColor = load > 1 ? 'load-high' : '';
+                            const inputName = `rad_${absentName}_${period}`;
                             
                             html += `
-                                <label class="teacher-option" onclick="selectRadio(this)">
+                                <div class="candidate-opt" onclick="selectRadio(this)">
                                     <input type="radio" name="${inputName}" value="${t.name}" data-dept="${t.department}">
-                                    <div>
-                                        <strong>${t.name}</strong> 
-                                        <div style="font-size:0.8rem; color:#666;">${t.department}</div>
-                                    </div>
-                                    <div class="load-badge ${loadClass}">วันนี้สอนแล้ว: ${load} คาบ</div>
-                                </label>
+                                    <div>${t.name} <small style="color:#666">(${t.department})</small></div>
+                                    <div class="workload-badge ${loadColor}">วันนี้สอนแล้ว: ${load} คาบ</div>
+                                </div>
                             `;
                         });
                     }
-                    html += `</div></div>`;
+                    html += `</div>`;
                 });
-                html += `</div>`;
+                html += `</div></div>`;
                 container.innerHTML += html;
             });
 
-            document.getElementById('resultSection').style.display = 'block';
-            setTimeout(() => document.getElementById('resultSection').scrollIntoView({behavior:'smooth'}), 100);
+            document.getElementById('resultArea').style.display = 'block';
+            setTimeout(() => document.getElementById('resultArea').scrollIntoView({behavior:'smooth'}), 100);
         }
 
-        async function fetchTeacherLoad() {
-            teacherLoadMap = {};
-            // Query Firebase where day == currentDay
-            const snapshot = await db.collection('substitutions').where('day', '==', currentDay).get();
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                (data.records || []).forEach(r => {
-                    teacherLoadMap[r.sub_teacher] = (teacherLoadMap[r.sub_teacher] || 0) + 1;
-                });
-            });
-        }
-
-        function getCandidates(day, period, exclude) {
+        function findCandidates(day, period, exclude) {
             return teachersData
-                .filter(t => !exclude.includes(t.name) && !(t.schedule[day] || []).includes(period))
-                .sort((a,b) => (teacherLoadMap[a.name]||0) - (teacherLoadMap[b.name]||0)) // Sort by load
+                .filter(t => !exclude.includes(t.name) && !(t.schedule[day]||[]).includes(period))
+                .sort((a,b) => (workloadMap[a.name]||0) - (workloadMap[b.name]||0))
                 .slice(0, 5);
         }
 
         function selectRadio(el) {
-            el.parentElement.querySelectorAll('.teacher-option').forEach(e => e.classList.remove('selected'));
+            el.parentElement.querySelectorAll('.candidate-opt').forEach(x => x.classList.remove('selected'));
             el.classList.add('selected');
             el.querySelector('input').checked = true;
         }
 
-        // --- 5. REPORT GENERATION (PDF STYLE) ---
-        function openPreviewModal() {
-            const dataToPrint = [];
-            document.querySelectorAll('.match-card').forEach(card => {
-                const absent = card.querySelector('.match-header span').innerText.trim();
-                card.querySelectorAll('.period-row').forEach(row => {
-                    const period = row.querySelector('.period-badge').innerText.replace('คาบ ','');
-                    const checked = row.querySelector('input:checked');
-                    if(checked) {
-                        dataToPrint.push({
+        // --- REPORT & PDF ---
+        async function preparePreview() {
+            const data = [];
+            const scheduler = document.getElementById('schedulerName').value;
+            const director = document.getElementById('directorName').value;
+
+            // Collect Data
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                const absent = card.querySelector('.card-header span').innerText.replace(' (ลา)', '');
+                card.querySelectorAll('.period-block').forEach(block => {
+                    const period = block.querySelector('.badge-p').innerText.replace('คาบ ', '');
+                    const radio = block.querySelector('input[type="radio"]:checked');
+                    
+                    if(radio) {
+                        const subj = document.getElementById(`subj_${absent}_${period}`).value || "-";
+                        const grade = document.getElementById(`grade_${absent}_${period}`).value || "-";
+                        data.push({
                             absent: absent,
                             period: period,
-                            sub: checked.value,
-                            dept: checked.dataset.dept
+                            sub: radio.value,
+                            dept: radio.dataset.dept,
+                            subject: subj,
+                            grade: grade
                         });
                     }
                 });
             });
 
-            if(dataToPrint.length === 0) return Swal.fire('เตือน', 'กรุณาเลือกผู้สอนแทน', 'warning');
+            if(data.length === 0) return Swal.fire('เตือน', 'กรุณาเลือกผู้สอนแทน', 'warning');
 
-            // Group by Substitute Teacher
-            const groupBySub = {};
-            dataToPrint.forEach(item => {
-                if(!groupBySub[item.sub]) groupBySub[item.sub] = [];
-                groupBySub[item.sub].push(item);
-            });
+            // Save to DB
+            try {
+                await db.collection("substitutions").add({
+                    created_at: firebase.firestore.FieldValue.serverTimestamp(),
+                    day: currentDay,
+                    records: data,
+                    scheduler: scheduler,
+                    director: director
+                });
+            } catch(e) { console.error(e); }
 
+            // Generate HTML
             const dateObj = new Date();
             const thaiDate = `${dateObj.getDate()} เดือน ${['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'][dateObj.getMonth()]} พ.ศ. ${dateObj.getFullYear()+543}`;
-            
-            let allPagesHtml = '';
+            const container = document.getElementById('paperContainer');
+            container.innerHTML = '';
 
-            // Generate One Page Per Substitute
-            for (const [subName, items] of Object.entries(groupBySub)) {
-                // Find Dept of sub
+            // Group by Substitute
+            const grouped = {};
+            data.forEach(x => {
+                if(!grouped[x.sub]) grouped[x.sub] = [];
+                grouped[x.sub].push(x);
+            });
+
+            for(const [subName, items] of Object.entries(grouped)) {
+                // Find sub dept
                 const subObj = teachersData.find(t => t.name === subName);
-                const subDept = subObj ? subObj.department : "กลุ่มสาระฯ...................";
+                const subDept = subObj ? subObj.department : "";
 
-                // Table Rows
-                items.sort((a,b) => a.period - b.period);
-                let rows = '';
-                items.forEach((it, idx) => {
-                    rows += `
-                        <tr>
-                            <td style="text-align:center;">${idx+1}</td>
-                            <td>${it.absent}</td>
-                            <td>ไปราชการ</td>
-                            <td style="text-align:center;">${it.period}</td>
-                            <td>-</td>
-                            <td>-</td>
-                            <td></td>
-                        </tr>
-                    `;
-                });
+                // Rows
+                items.sort((a,b)=>a.period - b.period);
+                let rows = items.map((it, idx) => `
+                    <tr>
+                        <td>${idx+1}</td>
+                        <td class="left">${it.absent}</td>
+                        <td>ไปราชการ</td>
+                        <td>${it.period}</td>
+                        <td>${it.subject}</td>
+                        <td>${it.grade}</td>
+                        <td>-</td>
+                    </tr>
+                `).join('');
 
-                // Page Template (Exact PDF Replica)
-                allPagesHtml += `
-                <div class="a4-page">
-                    <div class="doc-header">
+                // Fill empty rows
+                for(let k=items.length; k<5; k++) {
+                    rows += `<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
+                }
+
+                container.innerHTML += `
+                <div class="a4-paper">
+                    <div class="doc-head">
                         <img src="https://nonthaphathr.github.io/uploadimg/kruda.png" class="garuda">
-                        <div class="doc-title">
+                        <div class="head-text">
                             <h2>บันทึกข้อความ</h2>
                         </div>
                     </div>
-                    
-                    <div class="doc-info">
+                    <div class="doc-meta">
                         <b>ส่วนราชการ</b> โรงเรียนกระดุมทองวิทยา ตำบลหนองหัวช้าง อำเภอกันทรารมย์ จังหวัดศรีสะเกษ<br>
                         <b>ที่</b> ศก 51008.08/......... <b>วันที่</b> ${thaiDate}<br>
                         <b>เรื่อง</b> รายงานผลการสอนแทน
                     </div>
-                    
-                    <div style="border-bottom: 1px solid black; margin: 10px 0;"></div>
-                    
-                    <div class="doc-info">
-                        <b>เรียน</b> ผู้อำนวยการโรงเรียนกระดุมทองวิทยา
-                    </div>
-
-                    <div class="doc-body">
-                        ตามที่ข้าพเจ้า ${subName} ตำแหน่ง ครู ${subDept} ได้รับมอบหมายให้ปฏิบัติราชการแทน เมื่อวันที่ ${thaiDate} ตามความทราบแล้วนั้น
-                        <br>
+                    <div style="border-bottom:1px solid black; margin:10px 0;"></div>
+                    <div class="doc-meta"><b>เรียน</b> ผู้อำนวยการโรงเรียนกระดุมทองวิทยา</div>
+                    <div class="doc-content">
+                        ตามที่ข้าพเจ้า ${subName} ตำแหน่ง ครู ${subDept} ได้รับมอบหมายให้ปฏิบัติราชการแทน เมื่อวันที่ ${thaiDate} ตามความทราบแล้วนั้น<br>
                         บัดนี้ ข้าพเจ้าได้ดำเนินการสอนแทนดังกล่าวเสร็จสิ้นเรียบร้อยแล้ว จึงขอรายงานผลการสอนแทน ดังต่อไปนี้
                     </div>
-
                     <table class="doc-table">
                         <thead>
                             <tr>
                                 <th style="width:5%">ที่</th>
                                 <th style="width:25%">ปฏิบัติราชการแทน</th>
-                                <th style="width:20%">สาเหตุ</th>
+                                <th style="width:15%">สาเหตุ</th>
                                 <th style="width:10%">คาบที่</th>
-                                <th style="width:10%">รหัสวิชา</th>
+                                <th style="width:15%">รหัสวิชา</th>
                                 <th style="width:10%">ชั้น</th>
-                                <th style="width:20%">หมายเหตุ</th>
+                                <th style="width:15%">หมายเหตุ</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            ${rows}
-                            <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-                            <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-                        </tbody>
+                        <tbody>${rows}</tbody>
                     </table>
-
-                    <div class="doc-footer">
-                        จึงเรียนมาเพื่อโปรดทราบ
-                        <br><br>
-                        <div class="clearfix">
-                            <div class="sign-col">
-                                ลงชื่อ................................................<br>
-                                (${subName})<br>
-                                ผู้รายงาน
-                            </div>
-                        </div>
-                        <br><br>
-                        <div class="clearfix">
-                             <div class="sign-col">
-                                ลงชื่อ................................................<br>
-                                (นางสาวสุพัฒตา ศรีเมือง)<br>
-                                หัวหน้าฝ่ายวิชาการ
-                            </div>
-                            <div class="sign-col right">
-                                ทราบ<br><br>
-                                ลงชื่อ................................................<br>
-                                (นางสุนิสา ใจใหญ่)<br>
-                                ผู้อำนวยการโรงเรียนกระดุมทองวิทยา
-                            </div>
+                    <div class="doc-sign">
+                        <div class="sign-box">
+                            <br>ลงชื่อ................................................<br>(${subName})<br>ผู้รายงาน
                         </div>
                     </div>
-                </div>
-                `;
+                    <div class="doc-sign" style="margin-top:20px;">
+                        <div class="sign-box">
+                            ลงชื่อ................................................<br>(${scheduler})<br>หัวหน้าฝ่ายวิชาการ/ผู้จัด
+                        </div>
+                        <div class="sign-box">
+                            ทราบ<br><br>ลงชื่อ................................................<br>(${director})<br>ผู้อำนวยการโรงเรียนกระดุมทองวิทยา
+                        </div>
+                    </div>
+                </div>`;
             }
 
-            document.getElementById('previewBody').innerHTML = allPagesHtml;
             document.getElementById('previewModal').style.display = 'block';
+        }
 
-            // Auto Save
-            db.collection("substitutions").add({
-                created_at: firebase.firestore.FieldValue.serverTimestamp(),
-                day: currentDay,
-                records: dataToPrint
+        function downloadPDF() {
+            const element = document.getElementById('paperContainer');
+            const opt = {
+                margin: 0,
+                filename: `รายงานสอนแทน_${currentDay}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(element).save();
+        }
+
+        function closeModal() { document.getElementById('previewModal').style.display = 'none'; }
+
+        // --- HISTORY & DASHBOARD ---
+        function loadHistory() {
+            const div = document.getElementById('historyList');
+            div.innerHTML = 'Loading...';
+            db.collection("substitutions").orderBy("created_at", "desc").limit(10).get().then(snap => {
+                div.innerHTML = '';
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    const item = document.createElement('div');
+                    item.className = 'card';
+                    item.style.padding = '15px';
+                    item.innerHTML = `
+                        <strong>วันที่ ${d.day}</strong> <span style="color:#666; font-size:0.9rem">(${new Date(d.created_at.seconds*1000).toLocaleString('th-TH')})</span>
+                        <button onclick="deleteLog('${doc.id}')" style="float:right; background:#fee2e2; color:red; border:none; padding:5px 10px; cursor:pointer; border-radius:5px;">ลบ</button>
+                        <ul style="margin-top:10px; padding-left:20px; font-size:0.9rem;">
+                            ${d.records.map(r => `<li>คาบ ${r.period}: ${r.sub} แทน ${r.absent} (${r.subject}/${r.grade})</li>`).join('')}
+                        </ul>
+                    `;
+                    div.appendChild(item);
+                });
             });
         }
 
-        // --- 6. DASHBOARD & HISTORY ---
-        function renderDashboard() {
+        function deleteLog(id) {
+            Swal.fire({ title:'ยืนยันลบ?', icon:'warning', showCancelButton:true }).then(r => {
+                if(r.isConfirmed) db.collection("substitutions").doc(id).delete().then(() => loadHistory());
+            });
+        }
+
+        function renderCharts() {
             db.collection("substitutions").get().then(snap => {
-                let deptStats = {}, teacherStats = {};
+                let dMap = {}, tMap = {};
                 snap.forEach(doc => {
-                    (doc.data().records||[]).forEach(r => {
-                        const d = r.dept || 'อื่นๆ';
-                        deptStats[d] = (deptStats[d]||0)+1;
-                        teacherStats[r.sub] = (teacherStats[r.sub]||0)+1;
+                    doc.data().records.forEach(r => {
+                        dMap[r.dept||'อื่นๆ'] = (dMap[r.dept||'อื่นๆ']||0)+1;
+                        tMap[r.sub] = (tMap[r.sub]||0)+1;
                     });
                 });
-
-                if(chartDept) chartDept.destroy();
-                chartDept = new Chart(document.getElementById('deptChart'), {
+                
+                new Chart(document.getElementById('deptChart'), {
                     type: 'doughnut',
-                    data: { labels: Object.keys(deptStats), datasets:[{data: Object.values(deptStats), backgroundColor:['#f87171','#60a5fa','#fbbf24','#34d399','#a78bfa']}] }
+                    data: { labels:Object.keys(dMap), datasets:[{data:Object.values(dMap), backgroundColor:['#3b82f6','#ef4444','#eab308','#22c55e']}] },
+                    options: { plugins: { title: { display: true, text: 'สัดส่วนตามกลุ่มสาระฯ' } } }
                 });
 
-                if(chartTeacher) chartTeacher.destroy();
-                const sorted = Object.entries(teacherStats).sort((a,b)=>b[1]-a[1]).slice(0,5);
-                chartTeacher = new Chart(document.getElementById('topTeacherChart'), {
+                const top5 = Object.entries(tMap).sort((a,b)=>b[1]-a[1]).slice(0,5);
+                new Chart(document.getElementById('teacherChart'), {
                     type: 'bar',
-                    data: { labels: sorted.map(i=>i[0]), datasets:[{label:'คาบ', data:sorted.map(i=>i[1]), backgroundColor:'#6366f1'}] }
-                });
-            });
-        }
-
-        function loadHistory() {
-            const list = document.getElementById('historyList');
-            list.innerHTML = 'Loading...';
-            db.collection("substitutions").orderBy("created_at", "desc").limit(10).get().then(snap => {
-                list.innerHTML = '';
-                snap.forEach(doc => {
-                    const data = doc.data();
-                    const div = document.createElement('div');
-                    div.style = "background:white; padding:15px; border:1px solid #e2e8f0; border-radius:10px; margin-bottom:10px;";
-                    div.innerHTML = `<strong>${data.day}</strong> <span style="color:#64748b">(${new Date(data.created_at.seconds*1000).toLocaleString('th-TH')})</span><br>
-                    ${data.records.map(r => `<span style="font-size:0.9rem">• ${r.sub} แทน ${r.absent} (คาบ ${r.period})</span>`).join('<br>')}`;
-                    list.appendChild(div);
+                    data: { labels:top5.map(x=>x[0]), datasets:[{label:'คาบ', data:top5.map(x=>x[1]), backgroundColor:'#6366f1'}] },
+                    options: { plugins: { title: { display: true, text: 'Top 5 ครูสอนแทน' } } }
                 });
             });
         }
