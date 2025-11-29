@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบจัดสอนแทน V.7.2 (Final)</title>
+    <title>ระบบจัดสอนแทน V.7.3 (Signature Fixed)</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -172,45 +172,23 @@
             margin-top: 10px;
         }
 
-        .sign-section {
-            font-size: 14pt;
-            margin-top: 15px;
-        }
-
-        .sign-reporter {
-            text-align: center;
-            margin-left: 55%;
-        }
-
-        .sign-row {
-            display: flex;
+        /* Styles สำหรับส่วนลายเซ็นแบบตาราง */
+        .sign-table {
+            width: 100%;
+            border-collapse: collapse;
+            border: none;
             margin-top: 20px;
-            justify-content: space-between;
         }
-
-        .sign-box {
-            width: 48%;
+        .sign-table td {
+            border: none;
+            vertical-align: top;
+            text-align: center;
+            padding: 10px;
+            width: 50%;
             font-size: 14pt;
             line-height: 1.4;
         }
 
-        .sign-box.left {
-            padding-left: 10px;
-        }
-
-        .sign-box.right {
-            text-align: center;
-        }
-
-        .checkbox-item {
-            display: inline-block;
-            width: 14px;
-            height: 14px;
-            border: 1px solid black;
-            margin-right: 5px;
-            vertical-align: middle;
-        }
-        
         .footer-system {
             position: absolute;
             bottom: 10mm;
@@ -226,7 +204,6 @@
                 size: A4;
                 margin: 0;
             }
-            
             body { 
                 background: white; 
                 padding: 0; 
@@ -234,35 +211,10 @@
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
-            
-            .app-container, 
-            .modal-tools { 
-                display: none !important; 
-            }
-            
-            .modal { 
-                position: static; 
-                background: white; 
-                width: 100%; 
-                height: auto; 
-                display: block !important; 
-            }
-            
-            .modal-content { 
-                margin: 0; 
-                width: 100%; 
-                height: auto; 
-                background: white; 
-                box-shadow: none; 
-                overflow: visible; 
-            }
-            
-            .modal-view { 
-                padding: 0; 
-                display: block;
-                background: white;
-            }
-            
+            .app-container, .modal-tools { display: none !important; }
+            .modal { position: static; background: white; width: 100%; height: auto; display: block !important; }
+            .modal-content { margin: 0; width: 100%; height: auto; background: white; box-shadow: none; overflow: visible; }
+            .modal-view { padding: 0; display: block; background: white; }
             .a4-paper { 
                 margin: 0; 
                 padding: 20mm 20mm 15mm 25mm;
@@ -273,10 +225,7 @@
                 box-shadow: none;
                 border: none;
             }
-            
-            .a4-paper:last-child {
-                page-break-after: auto;
-            }
+            .a4-paper:last-child { page-break-after: auto; }
         }
 
         @media (max-width: 768px) {
@@ -290,8 +239,8 @@
 
     <div class="app-container">
         <div class="header">
-            <h1>ระบบจัดสอนแทน V.7.2</h1>
-            <p>✨ สร้างรายงาน PDF สำหรับโรงเรียนกระดุมทองวิทยา</p>
+            <h1>ระบบจัดสอนแทน V.7.3</h1>
+            <p>✨ แก้ไขการจัดวางลายเซ็น (Fixed Layout)</p>
         </div>
 
         <div class="nav-bar">
@@ -399,8 +348,6 @@
         // ============================================
         // CONFIG
         // ============================================
-        
-        // Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyCF7qDDxp6NXk3y7wLiySasqoviGyCKNNw",
             authDomain: "sornthan-fc0f1.firebaseapp.com",
@@ -439,7 +386,7 @@
         let realtimeWorkload = {};
 
         // ============================================
-        // UTILITY FUNCTIONS
+        // UTILITY & MAIN FUNCTIONS
         // ============================================
         function formatThaiDate(dateStr) {
             const dateParts = dateStr.split('-');
@@ -451,9 +398,6 @@
             return `${dayNum} ${monthName} พ.ศ. ${yearBE}`;
         }
 
-        // ============================================
-        // MAIN APP FUNCTIONS
-        // ============================================
         window.onload = () => {
             const container = document.getElementById('teacherCheckboxes');
             container.innerHTML = teachersData.map((t, i) => `
@@ -489,14 +433,12 @@
         async function processAllocation() {
             daySchedule = document.getElementById('daySchedule').value;
             docDate = document.getElementById('docDate').value;
-
             if(!daySchedule || !docDate || selectedTeachers.length === 0) 
                 return Swal.fire('ข้อมูลไม่ครบ', 'กรุณาเลือกวันในตาราง, วันที่เอกสาร และครูที่ลา', 'warning');
 
             workloadMap = {};
             realtimeWorkload = {};
             window.selectionTracker = {};
-            
             try {
                 const snap = await db.collection("substitutions").where("docDate", "==", docDate).get();
                 snap.forEach(doc => {
@@ -507,11 +449,9 @@
 
             const container = document.getElementById('matchCards');
             container.innerHTML = '';
-
             selectedTeachers.forEach(absentName => {
                 const teacherObj = teachersData.find(t => t.name === absentName);
                 const periods = teacherObj.schedule[daySchedule] || [];
-                
                 if(periods.length === 0) return;
 
                 let html = `<div class="card">
@@ -569,7 +509,6 @@
                 html += `</div></div>`;
                 container.innerHTML += html;
             });
-
             document.getElementById('resultArea').style.display = 'block';
             updateRealtimeSummary();
             setTimeout(() => document.getElementById('resultArea').scrollIntoView({behavior:'smooth'}), 100);
@@ -598,12 +537,10 @@
             if(previousTeacher && previousTeacher !== teacherName) {
                 realtimeWorkload[previousTeacher] = Math.max(0, (realtimeWorkload[previousTeacher] || 0) - 1);
             }
-            
             if(previousTeacher !== teacherName) {
                 realtimeWorkload[teacherName] = (realtimeWorkload[teacherName] || 0) + 1;
                 window.selectionTracker[key] = teacherName;
             }
-
             updateAllBadges();
             updateRealtimeSummary();
         }
@@ -629,16 +566,12 @@
             for(const [name, count] of Object.entries(realtimeWorkload)) {
                 combined[name] = (combined[name] || 0) + count;
             }
-            
             const entries = Object.entries(combined).filter(([_, count]) => count > 0);
-            
             if(entries.length === 0) {
                 grid.innerHTML = '<span style="color:#64748b;">ยังไม่มีการเลือกครูสอนแทน</span>';
                 return;
             }
-            
             entries.sort((a, b) => b[1] - a[1]);
-            
             grid.innerHTML = entries.map(([name, count]) => {
                 let colorClass = '';
                 if(count >= 3) colorClass = 'style="background:#fecaca; border-color:#ef4444;"';
@@ -648,7 +581,7 @@
         }
 
         // ============================================
-        // Preview & PDF Functions (Updated Logic)
+        // PREVIEW & PDF (Signature Layout Updated)
         // ============================================
         async function preparePreview() {
             const data = [];
@@ -711,7 +644,6 @@
         function renderPaper(data, scheduler, academicHead, deputyDirector, director) {
             const container = document.getElementById('paperContainer');
             container.innerHTML = '';
-
             const thaiDateStr = formatThaiDate(docDate);
 
             // Group by substitute teacher
@@ -724,10 +656,8 @@
             for(const [subName, items] of Object.entries(grouped)) {
                 const subObj = teachersData.find(t => t.name === subName);
                 const subDept = subObj ? subObj.department : "";
-
                 items.sort((a,b) => a.period - b.period);
                 
-                // Build table rows
                 let rows = items.map((it, idx) => `
                     <tr>
                         <td>${idx+1}</td>
@@ -741,21 +671,12 @@
                     </tr>
                 `).join('');
 
-                // Add empty rows to fill table (minimum 10 rows)
                 const minRows = 10;
                 for(let k = items.length; k < minRows; k++) {
-                    rows += `<tr>
-                        <td style="height:18px;">&nbsp;</td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>`;
+                    rows += `<tr><td style="height:18px;">&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
                 }
 
+                // ใช้ Table Layout สำหรับลายเซ็น เพื่อให้ตรงตาม Requirement
                 container.innerHTML += `
                 <div class="a4-paper">
                     <div class="doc-code">วก.กทว.303</div>
@@ -804,37 +725,38 @@
                     
                     <div class="doc-closing">จึงเรียนมาเพื่อโปรดทราบ</div>
                     
-                    <div class="sign-section">
-                        <div class="sign-reporter">
-                            ลงชื่อ............................................<br>
-                            (${subName})<br>
-                            ตำแหน่ง ..............ครู............................
-                        </div>
-                    </div>
-                    
-                    <div class="sign-row">
-                        <div class="sign-box left">
-                            <span class="checkbox-item"></span> รับทราบ<br><br>
-                            ลงชื่อ............................................<br>
-                            (${academicHead})<br>
-                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;หัวหน้ากลุ่มบริหารงานวิชาการ<br>
-                        </div>
-                        <div class="sign-box right">
-                            <span class="checkbox-item"></span> รับทราบ ............................................<br><br>
-                            ลงชื่อ............................................<br>
-                            (${deputyDirector})<br>
-                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;รองผู้อำนวยการโรงเรียน<br>
-                        </div>
-                    </div>
-
-                    <div class="sign-row">
-                        <div class="sign-box left"></div> <div class="sign-box right">
-                            <span class="checkbox-item"></span> รับทราบ ............................................<br><br>
-                            ลงชื่อ............................................<br>
-                            (${director})<br>
-                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ผู้อำนวยการโรงเรียนกระดุมทองวิทยา
-                        </div>
-                    </div>
+                    <table class="sign-table">
+                        <tr>
+                            <td>
+                                ลงชื่อ..........................................................<br>
+                                (${subName})<br>
+                                ครูผู้สอนแทน
+                            </td>
+                            <td>
+                                ลงชื่อ..........................................................<br>
+                                (${academicHead})<br>
+                                หัวหน้ากลุ่มบริหารงานวิชาการ
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding-top:20px;">
+                                <div style="text-align:left; padding-left:20px; margin-bottom:5px;">
+                                    ( &nbsp;&nbsp; ) รับทราบ
+                                </div>
+                                ลงชื่อ..........................................................<br>
+                                (${deputyDirector})<br>
+                                รองผู้อำนวยการโรงเรียนกระดุมทองวิทยา
+                            </td>
+                            <td style="padding-top:20px;">
+                                <div style="text-align:left; padding-left:20px; margin-bottom:5px;">
+                                    ( &nbsp;&nbsp; ) รับทราบ
+                                </div>
+                                ลงชื่อ..........................................................<br>
+                                (${director})<br>
+                                ผู้อำนวยการโรงเรียนกระดุมทองวิทยา
+                            </td>
+                        </tr>
+                    </table>
 
                     <div class="footer-system">
                         พิมพ์จากระบบจัดสอนแทนออนไลน์ โดย ครูนนทพัทธ์ หิรัญเรือง
@@ -843,9 +765,6 @@
             }
         }
 
-        // ============================================
-        // History Functions
-        // ============================================
         function loadHistory() {
             const list = document.getElementById('historyList');
             list.innerHTML = '<div style="text-align:center; padding:20px;">🔄 กำลังโหลด...</div>';
@@ -899,9 +818,6 @@
             });
         }
 
-        // ============================================
-        // Dashboard Charts
-        // ============================================
         let deptChartInstance = null;
         let teacherChartInstance = null;
 
