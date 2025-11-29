@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบจัดสอนแทน V.6.6 (Fixed PDF & Realtime)</title>
+    <title>ระบบจัดสอนแทน V.6.7 (PDF Fixed)</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -66,26 +66,7 @@
         .summary-grid { display: flex; flex-wrap: wrap; gap: 10px; }
         .summary-item { background: white; padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; border: 1px solid #fbbf24; }
 
-        /* Modal & PDF */
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(3px); }
-        .modal-content { background: #525659; width: 95%; height: 98%; margin: 10px auto; border-radius: 8px; display: flex; flex-direction: column; }
-        .modal-tools { background: #333; padding: 10px; display: flex; justify-content: flex-end; gap: 10px; color: white; flex-wrap: wrap; }
-        .modal-view { flex-grow: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 20px; }
-
-        /* A4 Layout (TH Sarabun New) */
-        .a4-paper { width: 210mm; min-height: 297mm; background: white; padding: 20mm 25mm; position: relative; font-family: 'Sarabun', sans-serif; color: black; box-sizing: border-box; }
-        .doc-head { display: flex; align-items: flex-start; margin-bottom: 0px; }
-        .garuda { width: 60px; height: auto; }
-        .head-text { flex-grow: 1; text-align: center; padding-right: 60px; }
-        .head-text h2 { font-size: 20pt; font-weight: bold; margin: 15px 0 0 0; line-height: 1; }
-        .doc-meta { margin-top: 10px; font-size: 16pt; line-height: 1.4; }
-        .doc-content { margin-top: 10px; font-size: 16pt; text-indent: 2.5cm; text-align: justify; line-height: 1.4; }
-        .doc-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 16pt; }
-        .doc-table th, .doc-table td { border: 1px solid black; padding: 6px; text-align: center; vertical-align: middle; line-height: 1.1; }
-        .doc-sign { margin-top: 50px; display: flex; justify-content: space-between; font-size: 16pt; }
-        .sign-box { text-align: center; width: 45%; }
-
-        /* Reason Select Styling */
+        /* Reason Select */
         .reason-select { 
             padding: 5px 10px; 
             border-radius: 6px; 
@@ -96,18 +77,181 @@
             min-width: 120px;
         }
 
+        /* Modal */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(3px); }
+        .modal-content { background: #525659; width: 95%; height: 98%; margin: 10px auto; border-radius: 8px; display: flex; flex-direction: column; }
+        .modal-tools { background: #333; padding: 10px; display: flex; justify-content: flex-end; gap: 10px; color: white; flex-wrap: wrap; }
+        .modal-view { flex-grow: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 20px; background: #525659; }
+
+        /* ========== A4 PAPER STYLES (TH Sarabun New) ========== */
+        .a4-paper {
+            width: 210mm;
+            min-height: 297mm;
+            max-height: 297mm;
+            background: white;
+            padding: 15mm 20mm 20mm 25mm;
+            position: relative;
+            font-family: 'Sarabun', 'TH Sarabun New', serif;
+            font-size: 16pt;
+            color: black;
+            box-sizing: border-box;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+        }
+
+        /* Page Number Header */
+        .page-number {
+            position: absolute;
+            top: 8mm;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 16pt;
+            font-family: 'Sarabun', 'TH Sarabun New', serif;
+        }
+
+        /* Document Header */
+        .doc-head {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 0;
+            padding-top: 0;
+        }
+        .garuda {
+            width: 55px;
+            height: auto;
+        }
+        .head-text {
+            flex-grow: 1;
+            text-align: center;
+            padding-right: 55px;
+        }
+        .head-text h2 {
+            font-size: 20pt;
+            font-weight: bold;
+            margin: 10px 0 0 0;
+            line-height: 1;
+        }
+
+        /* Document Meta */
+        .doc-meta {
+            font-size: 16pt;
+            line-height: 1.3;
+            margin-top: 5px;
+        }
+        .doc-meta-row {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        /* Document Content */
+        .doc-content {
+            font-size: 16pt;
+            text-indent: 2.5cm;
+            text-align: justify;
+            line-height: 1.3;
+            margin-top: 8px;
+        }
+
+        /* Document Table */
+        .doc-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 15pt;
+        }
+        .doc-table th, .doc-table td {
+            border: 1px solid black;
+            padding: 4px 6px;
+            text-align: center;
+            vertical-align: middle;
+            line-height: 1.2;
+        }
+        .doc-table th {
+            background: #f5f5f5;
+            font-weight: bold;
+        }
+        .doc-table td.text-left {
+            text-align: left;
+            padding-left: 8px;
+        }
+
+        /* Signatures */
+        .doc-sign {
+            margin-top: 30px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 16pt;
+        }
+        .doc-sign.single {
+            justify-content: flex-start;
+        }
+        .sign-box {
+            text-align: center;
+            width: 45%;
+            line-height: 1.4;
+        }
+        .sign-box.left {
+            text-align: center;
+        }
+
+        /* Horizontal Line */
+        .doc-hr {
+            border: none;
+            border-bottom: 1px solid black;
+            margin: 8px 0;
+        }
+
+        /* Print Styles */
         @media print {
-            body { background: white; padding: 0; }
-            .app-container, .modal-tools { display: none !important; }
-            .modal { position: static; background: white; width: 100%; height: auto; display: block !important; }
-            .modal-content { margin: 0; width: 100%; height: auto; background: white; box-shadow: none; overflow: visible; }
-            .modal-view { padding: 0; display: block; }
-            .a4-paper { margin: 0; page-break-after: always; width: 100%; box-shadow: none; }
+            body { 
+                background: white; 
+                padding: 0; 
+                margin: 0;
+            }
+            .app-container, .modal-tools { 
+                display: none !important; 
+            }
+            .modal { 
+                position: static; 
+                background: white; 
+                width: 100%; 
+                height: auto; 
+                display: block !important; 
+            }
+            .modal-content { 
+                margin: 0; 
+                width: 100%; 
+                height: auto; 
+                background: white; 
+                box-shadow: none; 
+                overflow: visible; 
+            }
+            .modal-view { 
+                padding: 0; 
+                display: block;
+                background: white;
+            }
+            .a4-paper { 
+                margin: 0; 
+                padding: 15mm 20mm 20mm 25mm;
+                page-break-after: always;
+                page-break-inside: avoid;
+                width: 100%; 
+                min-height: auto;
+                max-height: none;
+                box-shadow: none;
+            }
+            .a4-paper:last-child {
+                page-break-after: auto;
+            }
         }
 
         @media (max-width: 768px) {
             .period-title { flex-direction: column; align-items: flex-start; }
             .period-title input, .period-title select { width: 100%; }
+            .a4-paper { width: 100%; min-height: auto; max-height: none; padding: 10mm; }
         }
     </style>
 </head>
@@ -115,8 +259,8 @@
 
     <div class="app-container">
         <div class="header">
-            <h1>ระบบจัดสอนแทน V.6.6</h1>
-            <p>แก้ไข PDF Download, Realtime Counter, เพิ่มสาเหตุการลา</p>
+            <h1>ระบบจัดสอนแทน V.6.7</h1>
+            <p>แก้ไข PDF Layout, เลขหน้า, TH Sarabun 16pt</p>
         </div>
 
         <div class="nav-bar">
@@ -165,7 +309,6 @@
             </div>
 
             <div id="resultArea" style="display: none;">
-                <!-- Realtime Summary Section -->
                 <div class="realtime-summary" id="realtimeSummary">
                     <h4>📊 สรุปภาระงานสอนแทน (วันนี้ - Realtime)</h4>
                     <div class="summary-grid" id="summaryGrid">
@@ -200,7 +343,7 @@
     <div id="previewModal" class="modal">
         <div class="modal-content">
             <div class="modal-tools">
-                <span>ตัวอย่างรายงาน (A4)</span>
+                <span>ตัวอย่างรายงาน (A4 - TH Sarabun)</span>
                 <button onclick="window.print()" class="nav-btn" style="background:#2563eb; color:white; border:none;">🖨️ พิมพ์ / บันทึก PDF</button>
                 <button onclick="downloadPDF_Library()" class="nav-btn" style="background:#be123c; color:white; border:none;">📥 ดาวน์โหลด PDF</button>
                 <button onclick="document.getElementById('previewModal').style.display='none'" class="nav-btn" style="background:#64748b; color:white; border:none;">ปิด</button>
@@ -244,8 +387,8 @@
         let selectedTeachers = [];
         let daySchedule = "";
         let docDate = "";
-        let workloadMap = {};        // จาก Firebase (บันทึกก่อนหน้า)
-        let realtimeWorkload = {};   // จากการเลือกในหน้าจอ (ยังไม่บันทึก)
+        let workloadMap = {};
+        let realtimeWorkload = {};
 
         // --- INIT ---
         window.onload = () => {
@@ -256,8 +399,6 @@
                     <label for="t${i}" style="cursor:pointer; font-size:0.9rem;">${t.name}</label>
                 </div>
             `).join('');
-            
-            // Set Default Date to Today
             document.getElementById('docDate').valueAsDate = new Date();
         };
 
@@ -270,7 +411,6 @@
             if(id === 'dashboard') renderCharts();
         }
 
-        // --- ALLOCATION LOGIC ---
         function toggleSelect(name, cb) {
             if(cb.checked) {
                 if(selectedTeachers.length >= 6) {
@@ -290,9 +430,9 @@
             if(!daySchedule || !docDate || selectedTeachers.length === 0) 
                 return Swal.fire('ข้อมูลไม่ครบ', 'กรุณาเลือกวันในตาราง, วันที่เอกสาร และครูที่ลา', 'warning');
 
-            // 1. Fetch Workload from Firebase (existing records for this date)
             workloadMap = {};
-            realtimeWorkload = {}; // Reset realtime workload
+            realtimeWorkload = {};
+            window.selectionTracker = {};
             
             try {
                 const snap = await db.collection("substitutions").where("docDate", "==", docDate).get();
@@ -302,7 +442,6 @@
                 });
             } catch(e) { console.error("Workload Error:", e); }
 
-            // 2. Render Cards
             const container = document.getElementById('matchCards');
             container.innerHTML = '';
 
@@ -328,16 +467,15 @@
                     html += `<div class="period-block">
                         <div class="period-title">
                             <span class="badge-p">คาบ ${period}</span>
-                            <input type="text" id="subj_${absentName}_${period}" placeholder="รหัสวิชา (ท21101)" style="width:120px; padding:5px;">
-                            <select id="grade_${absentName}_${period}" style="width:100px; padding:5px;">
-                                <option value="">ระดับชั้น</option>
+                            <input type="text" id="subj_${absentName}_${period}" placeholder="รหัสวิชา" style="width:100px; padding:5px;">
+                            <select id="grade_${absentName}_${period}" style="width:80px; padding:5px;">
+                                <option value="">ชั้น</option>
                                 <option value="ม.1">ม.1</option>
                                 <option value="ม.2">ม.2</option>
                                 <option value="ม.3">ม.3</option>
                                 <option value="ม.4">ม.4</option>
                                 <option value="ม.5">ม.5</option>
                                 <option value="ม.6">ม.6</option>
-                                <option value="ม.1-6">ม.1-6</option>
                             </select>
                         </div>`;
                     
@@ -346,8 +484,6 @@
                         candidates.forEach(t => {
                             const totalLoad = (workloadMap[t.name] || 0);
                             const inputName = `rad_${absentName}_${period}`;
-                            
-                            // Show Busy Schedule
                             const busyPeriods = t.schedule[daySchedule] || [];
                             const busyText = busyPeriods.length > 0 ? `สอนคาบ: ${busyPeriods.join(', ')}` : 'ว่างตลอดวัน';
 
@@ -359,7 +495,7 @@
                                         <div class="meta-info">📅 ${busyText}</div>
                                     </div>
                                     <div class="workload-badge" data-teacher="${t.name}">
-                                        บันทึกแล้ว: ${totalLoad} | เลือกใหม่: <span class="realtime-count">0</span>
+                                        บันทึก: ${totalLoad} | ใหม่: <span class="realtime-count">0</span>
                                     </div>
                                 </div>
                             `;
@@ -387,44 +523,29 @@
                 .slice(0, 5);
         }
 
-        // --- REALTIME SELECTION & COUNTER ---
         function selectRadio(el, teacherName, absentName, period) {
             const container = el.parentElement;
             const inputName = `rad_${absentName}_${period}`;
+            const key = `${absentName}_${period}`;
             
-            // Get previously selected teacher for this period (if any)
-            const previousRadio = container.querySelector(`input[name="${inputName}"]:checked`);
-            let previousTeacher = null;
-            if(previousRadio && previousRadio.value !== teacherName) {
-                previousTeacher = previousRadio.value;
-            }
+            // Get previous selection
+            const previousTeacher = window.selectionTracker[key];
             
-            // Deselect all in this period
+            // Deselect all
             container.querySelectorAll('.candidate-opt').forEach(x => x.classList.remove('selected'));
-            
-            // Select current
             el.classList.add('selected');
             el.querySelector('input').checked = true;
 
-            // Update realtime workload
-            if(previousTeacher) {
+            // Update workload
+            if(previousTeacher && previousTeacher !== teacherName) {
                 realtimeWorkload[previousTeacher] = Math.max(0, (realtimeWorkload[previousTeacher] || 0) - 1);
             }
             
-            // Check if this is a new selection or toggle
-            const key = `${absentName}_${period}`;
-            if(!window.selectionTracker) window.selectionTracker = {};
-            
-            if(window.selectionTracker[key] !== teacherName) {
-                // New selection for this slot
-                if(window.selectionTracker[key]) {
-                    // Had a previous selection, already decremented above
-                }
+            if(previousTeacher !== teacherName) {
                 realtimeWorkload[teacherName] = (realtimeWorkload[teacherName] || 0) + 1;
                 window.selectionTracker[key] = teacherName;
             }
 
-            // Update all badges
             updateAllBadges();
             updateRealtimeSummary();
         }
@@ -437,28 +558,20 @@
                     const totalCount = (workloadMap[teacherName] || 0) + realtimeCount;
                     
                     badge.querySelector('.realtime-count').textContent = realtimeCount;
-                    
-                    // Update badge color based on total load
                     badge.classList.remove('load-high', 'load-medium');
-                    if(totalCount >= 3) {
-                        badge.classList.add('load-high');
-                    } else if(totalCount >= 2) {
-                        badge.classList.add('load-medium');
-                    }
+                    if(totalCount >= 3) badge.classList.add('load-high');
+                    else if(totalCount >= 2) badge.classList.add('load-medium');
                 }
             });
         }
 
         function updateRealtimeSummary() {
             const grid = document.getElementById('summaryGrid');
-            
-            // Combine Firebase workload + realtime selections
             const combined = {...workloadMap};
             for(const [name, count] of Object.entries(realtimeWorkload)) {
                 combined[name] = (combined[name] || 0) + count;
             }
             
-            // Filter only those with work today
             const entries = Object.entries(combined).filter(([_, count]) => count > 0);
             
             if(entries.length === 0) {
@@ -466,20 +579,13 @@
                 return;
             }
             
-            // Sort by count descending
             entries.sort((a, b) => b[1] - a[1]);
             
             grid.innerHTML = entries.map(([name, count]) => {
-                const fromDb = workloadMap[name] || 0;
-                const fromRealtime = realtimeWorkload[name] || 0;
                 let colorClass = '';
                 if(count >= 3) colorClass = 'style="background:#fecaca; border-color:#ef4444;"';
                 else if(count >= 2) colorClass = 'style="background:#fef08a; border-color:#eab308;"';
-                
-                return `<div class="summary-item" ${colorClass}>
-                    ${name.replace(/นาย|นาง|นางสาว/g, '')}: <strong>${count}</strong> คาบ
-                    ${fromDb > 0 ? `<span style="font-size:0.75rem; color:#64748b;">(บันทึก:${fromDb})</span>` : ''}
-                </div>`;
+                return `<div class="summary-item" ${colorClass}>${name.replace(/นาย|นาง|นางสาว/g, '')}: <strong>${count}</strong></div>`;
             }).join('');
         }
 
@@ -510,12 +616,12 @@
                         const grade = document.getElementById(`grade_${absent}_${period}`).value || "-";
                         data.push({
                             absent: absent,
-                            period: period,
+                            period: parseInt(period),
                             sub: radio.value,
                             dept: radio.dataset.dept,
                             subject: subj,
                             grade: grade,
-                            reason: reason  // เพิ่มสาเหตุ
+                            reason: reason
                         });
                     }
                 });
@@ -523,7 +629,6 @@
 
             if(!isValid) return Swal.fire('เตือน', 'กรุณาเลือกผู้สอนแทนอย่างน้อย 1 รายการ', 'warning');
 
-            // Save to Firebase
             try {
                 await db.collection("substitutions").add({
                     created_at: firebase.firestore.FieldValue.serverTimestamp(),
@@ -533,13 +638,8 @@
                     scheduler: scheduler,
                     director: director
                 });
-                console.log("Saved to Firebase successfully");
-            } catch(e) { 
-                console.error("Firebase save error:", e); 
-                Swal.fire('เตือน', 'บันทึกข้อมูลไม่สำเร็จ: ' + e.message, 'error');
-            }
+            } catch(e) { console.error("Firebase save error:", e); }
 
-            // Generate HTML for PDF
             renderPaper(data, scheduler, director);
             document.getElementById('previewModal').style.display = 'block';
         }
@@ -550,7 +650,10 @@
 
             const dateParts = docDate.split('-');
             const thaiMonths = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
-            const thaiDateStr = `${parseInt(dateParts[2])} เดือน ${thaiMonths[parseInt(dateParts[1])-1]} พ.ศ. ${parseInt(dateParts[0])+543}`;
+            const dayNum = parseInt(dateParts[2]);
+            const monthName = thaiMonths[parseInt(dateParts[1])-1];
+            const yearBE = parseInt(dateParts[0]) + 543;
+            const thaiDateStr = `${dayNum} ${monthName} พ.ศ. ${yearBE}`;
 
             // Group by substitute teacher
             const grouped = {};
@@ -559,15 +662,21 @@
                 grouped[x.sub].push(x);
             });
 
+            let totalPages = Object.keys(grouped).length;
+            let currentPage = 0;
+
             for(const [subName, items] of Object.entries(grouped)) {
+                currentPage++;
                 const subObj = teachersData.find(t => t.name === subName);
                 const subDept = subObj ? subObj.department : "";
 
-                items.sort((a,b)=>a.period - b.period);
+                items.sort((a,b) => a.period - b.period);
+                
+                // สร้างแถวในตาราง (สูงสุด 6 แถว เพื่อให้พอดีหน้า)
                 let rows = items.map((it, idx) => `
                     <tr>
                         <td>${idx+1}</td>
-                        <td style="text-align:left;">${it.absent}</td>
+                        <td class="text-left">${it.absent}</td>
                         <td>${it.reason}</td>
                         <td>${it.period}</td>
                         <td>${it.subject}</td>
@@ -576,66 +685,91 @@
                     </tr>
                 `).join('');
 
-                // Add empty rows to make 5 rows minimum
-                for(let k=items.length; k<5; k++) {
-                    rows += `<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
+                // เติมแถวว่างให้ครบ 5 แถว (ถ้าน้อยกว่า)
+                const minRows = 5;
+                for(let k = items.length; k < minRows; k++) {
+                    rows += `<tr><td style="height:25px;">&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
                 }
+
+                // Page number (หน้าแรกไม่มีเลข)
+                const pageNumberHtml = currentPage > 1 ? `<div class="page-number">-${currentPage}-</div>` : '';
 
                 container.innerHTML += `
                 <div class="a4-paper">
+                    ${pageNumberHtml}
                     <div class="doc-head">
                         <img src="https://nonthaphathr.github.io/uploadimg/kruda.png" class="garuda" crossorigin="anonymous">
                         <div class="head-text">
                             <h2>บันทึกข้อความ</h2>
                         </div>
                     </div>
+                    
                     <div class="doc-meta">
-                        <b>ส่วนราชการ</b> โรงเรียนกระดุมทองวิทยา ตำบลหนองหัวช้าง อำเภอกันทรารมย์ จังหวัดศรีสะเกษ<br>
-                        <b>ที่</b> ศก 51008.08/......... <b>วันที่</b> ${thaiDateStr}<br>
+                        <b>ส่วนราชการ</b> โรงเรียนกระดุมทองวิทยา ตำบลหนองหัวช้าง อำเภอกันทรารมย์ จังหวัดศรีสะเกษ
+                    </div>
+                    <div class="doc-meta">
+                        <b>ที่</b> ศก 51008.08/......... &nbsp;&nbsp;&nbsp; <b>วันที่</b> ${thaiDateStr}
+                    </div>
+                    <div class="doc-meta">
                         <b>เรื่อง</b> รายงานผลการสอนแทน
                     </div>
-                    <div style="border-bottom:1px solid black; margin:10px 0;"></div>
+                    
+                    <hr class="doc-hr">
+                    
                     <div class="doc-meta"><b>เรียน</b> ผู้อำนวยการโรงเรียนกระดุมทองวิทยา</div>
+                    
                     <div class="doc-content">
-                        ตามที่ข้าพเจ้า ${subName} ตำแหน่ง ครู ${subDept} ได้รับมอบหมายให้ปฏิบัติราชการแทน เมื่อวันที่ ${thaiDateStr} ตามความทราบแล้วนั้น<br>
+                        ตามที่ข้าพเจ้า ${subName} ตำแหน่ง ครู กลุ่มสาระการเรียนรู้${subDept} ได้รับมอบหมายให้ปฏิบัติราชการแทน เมื่อวันที่ ${thaiDateStr} ตามความทราบแล้วนั้น
+                    </div>
+                    <div class="doc-content" style="margin-top:0;">
                         บัดนี้ ข้าพเจ้าได้ดำเนินการสอนแทนดังกล่าวเสร็จสิ้นเรียบร้อยแล้ว จึงขอรายงานผลการสอนแทน ดังต่อไปนี้
                     </div>
+                    
                     <table class="doc-table">
                         <thead>
                             <tr>
-                                <th style="width:5%">ที่</th>
-                                <th style="width:25%">ปฏิบัติราชการแทน</th>
-                                <th style="width:15%">สาเหตุ</th>
-                                <th style="width:10%">คาบที่</th>
-                                <th style="width:15%">รหัสวิชา</th>
-                                <th style="width:10%">ชั้น</th>
-                                <th style="width:15%">หมายเหตุ</th>
+                                <th style="width:6%;">ที่</th>
+                                <th style="width:26%;">ปฏิบัติราชการแทน</th>
+                                <th style="width:14%;">สาเหตุ</th>
+                                <th style="width:10%;">คาบที่</th>
+                                <th style="width:16%;">รหัสวิชา</th>
+                                <th style="width:10%;">ชั้น</th>
+                                <th style="width:14%;">หมายเหตุ</th>
                             </tr>
                         </thead>
                         <tbody>${rows}</tbody>
                     </table>
-                    <div class="doc-sign">
-                        <div class="sign-box">
-                            <br>ลงชื่อ................................................<br>(${subName})<br>ผู้รายงาน
+                    
+                    <div class="doc-sign single">
+                        <div class="sign-box left">
+                            <br>
+                            ลงชื่อ..............................................<br>
+                            (${subName})<br>
+                            ผู้รายงาน
                         </div>
                     </div>
-                    <div class="doc-sign" style="margin-top:20px;">
+                    
+                    <div class="doc-sign" style="margin-top:25px;">
                         <div class="sign-box">
-                            ลงชื่อ................................................<br>(${scheduler})<br>หัวหน้าฝ่ายวิชาการ/ผู้จัด
+                            ลงชื่อ..............................................<br>
+                            (${scheduler})<br>
+                            หัวหน้าฝ่ายวิชาการ/ผู้จัด
                         </div>
                         <div class="sign-box">
-                            ทราบ<br><br>ลงชื่อ................................................<br>(${director})<br>ผู้อำนวยการโรงเรียนกระดุมทองวิทยา
+                            <div style="text-align:right; margin-bottom:5px;">ทราบ</div>
+                            ลงชื่อ..............................................<br>
+                            (${director})<br>
+                            ผู้อำนวยการโรงเรียนกระดุมทองวิทยา
                         </div>
                     </div>
                 </div>`;
             }
         }
 
-        // --- DOWNLOAD PDF (FIXED) ---
+        // --- DOWNLOAD PDF ---
         async function downloadPDF_Library() {
             const element = document.getElementById('paperContainer');
             
-            // Show loading
             Swal.fire({
                 title: 'กำลังสร้าง PDF...',
                 text: 'กรุณารอสักครู่',
@@ -652,39 +786,32 @@
                         scale: 2,
                         useCORS: true,
                         allowTaint: true,
-                        logging: false,
-                        letterRendering: true
+                        logging: false
                     },
                     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+                    pagebreak: { mode: 'css', before: '.a4-paper', avoid: '.doc-table' }
                 };
 
-                // Clone the container and fix styles for PDF
-                const clone = element.cloneNode(true);
-                clone.style.display = 'block';
-                clone.style.visibility = 'visible';
-                
                 await html2pdf().set(opt).from(element).save();
                 
                 Swal.fire({
                     icon: 'success',
                     title: 'สำเร็จ!',
-                    text: 'ไฟล์ PDF ถูกดาวน์โหลดแล้ว',
+                    text: 'ดาวน์โหลด PDF เรียบร้อย',
                     timer: 2000,
                     showConfirmButton: false
                 });
             } catch(error) {
                 console.error('PDF Error:', error);
                 Swal.fire({
-                    icon: 'error',
-                    title: 'เกิดข้อผิดพลาด',
-                    text: 'ไม่สามารถสร้าง PDF ได้ กรุณาใช้ปุ่ม "พิมพ์ / บันทึก PDF" แทน',
-                    footer: 'Error: ' + error.message
+                    icon: 'info',
+                    title: 'แนะนำ',
+                    html: 'หากดาวน์โหลดไม่สำเร็จ<br>กรุณาใช้ปุ่ม <b>"พิมพ์ / บันทึก PDF"</b> แทน',
                 });
             }
         }
 
-        // --- HISTORY & DASHBOARD ---
+        // --- HISTORY ---
         function loadHistory() {
             const list = document.getElementById('historyList');
             list.innerHTML = '<div style="text-align:center; padding:20px;">🔄 กำลังโหลด...</div>';
@@ -711,21 +838,17 @@
                             <button onclick="deleteLog('${doc.id}')" style="background:#fee2e2; color:red; border:none; padding:5px 15px; cursor:pointer; border-radius:4px; font-family:'Kanit';">🗑️ ลบ</button>
                         </div>
                         <ul style="margin-top:10px; padding-left:20px; font-size:0.9rem;">
-                            ${d.records.map(r => `<li>คาบ ${r.period}: <strong>${r.sub}</strong> แทน ${r.absent} (${r.reason || 'ไปราชการ'})</li>`).join('')}
+                            ${d.records.map(r => `<li>คาบ ${r.period}: <strong>${r.sub}</strong> แทน ${r.absent} (${r.reason || '-'})</li>`).join('')}
                         </ul>
                     `;
                     list.appendChild(item);
                 });
-            })
-            .catch(err => {
-                list.innerHTML = `<div style="color:red; padding:20px;">เกิดข้อผิดพลาด: ${err.message}</div>`;
             });
         }
 
         function deleteLog(id) {
             Swal.fire({ 
                 title: 'ยืนยันการลบ?', 
-                text: 'ข้อมูลจะถูกลบถาวร',
                 icon: 'warning', 
                 showCancelButton: true,
                 confirmButtonColor: '#ef4444',
@@ -733,8 +856,7 @@
                 cancelButtonText: 'ยกเลิก'
             }).then(r => {
                 if(r.isConfirmed) {
-                    db.collection("substitutions").doc(id).delete()
-                    .then(() => {
+                    db.collection("substitutions").doc(id).delete().then(() => {
                         Swal.fire('ลบแล้ว!', '', 'success');
                         loadHistory();
                     });
@@ -742,6 +864,7 @@
             });
         }
 
+        // --- DASHBOARD ---
         let deptChartInstance = null;
         let teacherChartInstance = null;
 
@@ -755,7 +878,6 @@
                     });
                 });
                 
-                // Destroy existing charts
                 if(deptChartInstance) deptChartInstance.destroy();
                 if(teacherChartInstance) teacherChartInstance.destroy();
                 
@@ -763,16 +885,9 @@
                     type: 'doughnut',
                     data: { 
                         labels: Object.keys(dMap), 
-                        datasets: [{
-                            data: Object.values(dMap), 
-                            backgroundColor: ['#3b82f6','#ef4444','#eab308','#22c55e','#8b5cf6','#ec4899']
-                        }] 
+                        datasets: [{data: Object.values(dMap), backgroundColor: ['#3b82f6','#ef4444','#eab308','#22c55e','#8b5cf6','#ec4899']}] 
                     },
-                    options: {
-                        plugins: {
-                            title: { display: true, text: 'สัดส่วนตามกลุ่มสาระ' }
-                        }
-                    }
+                    options: { plugins: { title: { display: true, text: 'สัดส่วนตามกลุ่มสาระ' }}}
                 });
 
                 const top5 = Object.entries(tMap).sort((a,b)=>b[1]-a[1]).slice(0,5);
@@ -780,20 +895,9 @@
                     type: 'bar',
                     data: { 
                         labels: top5.map(x => x[0].replace(/นาย|นาง|นางสาว/g, '')), 
-                        datasets: [{
-                            label: 'จำนวนคาบสอนแทน', 
-                            data: top5.map(x=>x[1]), 
-                            backgroundColor: '#166534'
-                        }] 
+                        datasets: [{label: 'คาบสอนแทน', data: top5.map(x=>x[1]), backgroundColor: '#166534'}] 
                     },
-                    options: {
-                        plugins: {
-                            title: { display: true, text: 'Top 5 ครูสอนแทน' }
-                        },
-                        scales: {
-                            y: { beginAtZero: true }
-                        }
-                    }
+                    options: { plugins: { title: { display: true, text: 'Top 5 ครูสอนแทน' }}, scales: { y: { beginAtZero: true }}}
                 });
             });
         }
