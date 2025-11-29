@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบจัดสอนแทน V.7.3 (Signature Fixed)</title>
+    <title>ระบบจัดสอนแทน V.7.4 (Final Official)</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -94,6 +94,21 @@
             page-break-inside: avoid;
         }
 
+        /* ส่วนหัวตราครุฑ */
+        .header-kruda {
+            height: 3.5cm; /* จองพื้นที่ส่วนหัว */
+            position: relative;
+            margin-bottom: 5px;
+        }
+
+        .garuda {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 1.5cm; /* ขนาดมาตรฐานบันทึกข้อความ */
+            height: auto;
+        }
+
         .doc-code {
             text-align: right;
             font-size: 12pt;
@@ -103,13 +118,13 @@
 
         .doc-title {
             text-align: center;
-            font-size: 20pt;
+            font-size: 29pt; /* ขนาดใหญ่สำหรับคำว่าบันทึกข้อความ */
             font-weight: bold;
-            margin-bottom: 10px;
+            padding-top: 15px; /* ดันลงมานิดหน่อยให้สวยงามเมื่อเทียบกับครุฑ */
         }
 
         .doc-meta {
-            font-size: 14pt;
+            font-size: 16pt;
             line-height: 1.5;
             margin-bottom: 2px;
         }
@@ -126,15 +141,15 @@
         }
 
         .doc-to {
-            font-size: 14pt;
+            font-size: 16pt;
             font-weight: bold;
             font-style: italic;
             margin-bottom: 8px;
         }
 
         .doc-content {
-            font-size: 14pt;
-            text-indent: 2cm;
+            font-size: 16pt;
+            text-indent: 2.5cm;
             text-align: justify;
             line-height: 1.3;
             margin-bottom: 5px;
@@ -144,20 +159,20 @@
             width: 100%;
             border-collapse: collapse;
             margin: 10px 0;
-            font-size: 12pt;
+            font-size: 14pt;
         }
 
         .doc-table th, 
         .doc-table td {
             border: 1px solid black;
-            padding: 3px 5px;
+            padding: 4px 5px;
             text-align: center;
             vertical-align: middle;
             line-height: 1.2;
         }
 
         .doc-table th {
-            background: #f5f5f5;
+            background: white;
             font-weight: bold;
         }
 
@@ -167,8 +182,8 @@
         }
 
         .doc-closing {
-            font-size: 14pt;
-            text-indent: 2cm;
+            font-size: 16pt;
+            text-indent: 2.5cm;
             margin-top: 10px;
         }
 
@@ -185,14 +200,16 @@
             text-align: center;
             padding: 10px;
             width: 50%;
-            font-size: 14pt;
+            font-size: 16pt;
             line-height: 1.4;
         }
 
         .footer-system {
             position: absolute;
             bottom: 10mm;
-            right: 20mm;
+            right: 0;
+            left: 0;
+            text-align: center;
             font-size: 10pt;
             color: #9ca3af;
             font-style: italic;
@@ -232,6 +249,8 @@
             .period-title { flex-direction: column; align-items: flex-start; }
             .period-title input, .period-title select { width: 100%; }
             .a4-paper { width: 100%; min-height: auto; padding: 10mm; font-size: 11pt; }
+            .header-kruda { height: auto; display: flex; flex-direction: column; align-items: center; }
+            .garuda { position: static; margin-bottom: 10px; }
         }
     </style>
 </head>
@@ -239,8 +258,8 @@
 
     <div class="app-container">
         <div class="header">
-            <h1>ระบบจัดสอนแทน V.7.3</h1>
-            <p>✨ แก้ไขการจัดวางลายเซ็น (Fixed Layout)</p>
+            <h1>ระบบจัดสอนแทน V.7.4</h1>
+            <p>✨ เพิ่มตราครุฑและปรับรูปแบบราชการ</p>
         </div>
 
         <div class="nav-bar">
@@ -581,7 +600,7 @@
         }
 
         // ============================================
-        // PREVIEW & PDF (Signature Layout Updated)
+        // PREVIEW & PDF (Final Layout Updated)
         // ============================================
         async function preparePreview() {
             const data = [];
@@ -671,19 +690,21 @@
                     </tr>
                 `).join('');
 
-                const minRows = 10;
+                const minRows = 8;
                 for(let k = items.length; k < minRows; k++) {
                     rows += `<tr><td style="height:18px;">&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
                 }
 
-                // ใช้ Table Layout สำหรับลายเซ็น เพื่อให้ตรงตาม Requirement
                 container.innerHTML += `
                 <div class="a4-paper">
-                    <div class="doc-code">วก.กทว.303</div>
-                    <div class="doc-title">บันทึกข้อความ</div>
+                    <div class="header-kruda">
+                        <img src="https://nonthaphathr.github.io/uploadimg/kruda.png" class="garuda" crossorigin="anonymous">
+                        <div class="doc-code">วก.กทว.303</div>
+                        <div class="doc-title">บันทึกข้อความ</div>
+                    </div>
                     
                     <div class="doc-meta">
-                        <b>ส่วนราชการ</b>&nbsp;&nbsp;&nbsp;โรงเรียนกระดุมทองวิทยา&nbsp;&nbsp;&nbsp;ตำบลหนองหัวช้าง&nbsp;&nbsp;&nbsp;อำเภอกันทรารมย์&nbsp;&nbsp;&nbsp;จังหวัดศรีสะเกษ
+                        <b>ส่วนราชการ</b>&nbsp;&nbsp;&nbsp;โรงเรียนกระดุมทองวิทยา&nbsp;&nbsp;&nbsp;อำเภอกันทรารมย์&nbsp;&nbsp;&nbsp;จังหวัดศรีสะเกษ
                     </div>
                     <div class="doc-meta doc-meta-inline">
                         <span><b>ที่</b>&nbsp;&nbsp;ศก 51008.08/.................</span>
@@ -700,7 +721,7 @@
                     <div class="doc-content">
                         ตามที่ข้าพเจ้า ${subName} ตำแหน่ง ครู กลุ่มสาระฯ${subDept} ได้รับมอบหมายให้ปฏิบัติราชการแทน เมื่อวันที่ ${thaiDateStr} ตามความทราบแล้วนั้น
                     </div>
-                    <div class="doc-content" style="text-indent:2cm;">
+                    <div class="doc-content" style="text-indent:2.5cm;">
                         บัดนี้ ข้าพเจ้าได้ดำเนินการสอนแทนดังกล่าวเสร็จสิ้นเรียบร้อยแล้ว จึงขอรายงานผลการสอนแทน ดังต่อไปนี้
                     </div>
                     
