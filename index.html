@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบจัดสอนแทน V.6.8 (Auto-Fit & PDF Fix)</title>
+    <title>ระบบจัดสอนแทน V.Final (Dual Reports)</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -14,7 +14,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
     <style>
-        /* ใช้ Font Sarabun จาก Google Fonts แทน TH Sarabun New ชั่วคราวเพื่อให้แสดงผลได้ทุกเครื่อง */
         @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Kanit:wght@300;400;500;600;700&display=swap');
 
         :root { --primary: #15803d; --bg: #f0fdf4; }
@@ -42,184 +41,89 @@
         .tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
         .tag { background: #dcfce7; color: #166534; padding: 2px 10px; border-radius: 15px; font-size: 0.8rem; }
 
-        /* Match Cards */
+        /* Cards */
         .card { background: white; border: 1px solid #e2e8f0; border-radius: 10px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
         .card-header { background: #fee2e2; padding: 10px 20px; color: #991b1b; font-weight: 600; border-left: 4px solid #ef4444; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
         .period-block { padding: 15px; border-bottom: 1px dashed #e2e8f0; }
         .period-title { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
         .badge-p { background: #2563eb; color: white; padding: 4px 10px; border-radius: 5px; font-weight: bold; font-size: 0.9rem; }
         
-        /* Candidate Option */
         .candidate-opt { display: flex; align-items: center; gap: 10px; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 5px; cursor: pointer; transition: 0.2s; position: relative; }
         .candidate-opt:hover { background: #f8fafc; }
         .candidate-opt.selected { background: #eff6ff; border-color: #2563eb; outline: 1px solid #2563eb; }
-        .meta-info { font-size: 0.8rem; color: #64748b; margin-top: 2px; }
-        .workload-badge { margin-left: auto; font-size: 0.75rem; padding: 2px 8px; border-radius: 10px; background: #e2e8f0; white-space: nowrap; }
+        .workload-badge { margin-left: auto; font-size: 0.75rem; padding: 2px 8px; border-radius: 10px; background: #e2e8f0; }
         .load-high { background: #fecaca; color: #991b1b; }
         .load-medium { background: #fef08a; color: #854d0e; }
 
         .btn-primary { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-family: 'Kanit'; font-size: 1rem; margin-top: 15px; }
-        .btn-print { background: #2563eb; color: white; padding: 10px 25px; border: none; border-radius: 6px; cursor: pointer; font-family: 'Kanit'; display: flex; align-items: center; gap: 5px; }
-
-        /* Realtime Summary */
-        .realtime-summary { background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 15px; margin-bottom: 20px; }
-        .realtime-summary h4 { color: #b45309; margin-bottom: 10px; }
-        .summary-grid { display: flex; flex-wrap: wrap; gap: 10px; }
-        .summary-item { background: white; padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; border: 1px solid #fbbf24; }
+        
+        .report-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; flex-wrap: wrap; }
+        .btn-action { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-family: 'Kanit'; display: flex; align-items: center; gap: 5px; color: white; }
+        .btn-summary { background: #f59e0b; }
+        .btn-individual { background: #2563eb; }
 
         /* Reason Select */
-        .reason-select { 
-            padding: 5px 10px; 
-            border-radius: 6px; 
-            border: 1px solid #f59e0b; 
-            background: #fffbeb; 
-            font-family: 'Kanit'; 
-            font-size: 0.9rem;
-            min-width: 120px;
+        .reason-select { padding: 5px 10px; border-radius: 6px; border: 1px solid #f59e0b; background: #fffbeb; font-family: 'Kanit'; font-size: 0.9rem; min-width: 120px; }
+
+        /* ========== A4 PAPER STYLES ========== */
+        /* Hidden container for PDF generation */
+        #print-staging-area {
+            position: fixed;
+            top: -9999px;
+            left: 0;
+            width: 210mm; /* Force A4 width */
+            z-index: 99999;
         }
 
-        /* Modal */
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(3px); }
-        .modal-content { background: #525659; width: 95%; height: 98%; margin: 10px auto; border-radius: 8px; display: flex; flex-direction: column; }
-        .modal-tools { background: #333; padding: 10px; display: flex; justify-content: flex-end; gap: 10px; color: white; flex-wrap: wrap; }
-        .modal-view { flex-grow: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 20px; background: #525659; }
-
-        /* ========== A4 PAPER STYLES (Adjusted) ========== */
         .a4-paper {
             width: 210mm;
-            height: 297mm; /* Fix height for single page logic */
+            min-height: 297mm;
             background: white;
-            padding: 15mm 20mm 15mm 25mm; /* Margins */
+            padding: 15mm 20mm 20mm 25mm; /* Top Right Bottom Left */
             position: relative;
-            font-family: 'Sarabun', sans-serif; /* ใช้ Sarabun แทน TH Sarabun New เพื่อความชัวร์ */
+            font-family: 'Sarabun', sans-serif;
             color: black;
             box-sizing: border-box;
-            box-shadow: 0 0 10px rgba(0,0,0,0.3);
-            margin-bottom: 20px;
-            overflow: hidden; /* Prevent spillover */
-            transform-origin: top center; /* For scaling */
+            page-break-after: always; /* Ensure new page for each report */
         }
+        .a4-paper:last-child { page-break-after: auto; }
 
-        /* Document Header */
-        .doc-head {
-            display: flex;
-            align-items: flex-start;
-            margin-bottom: 0;
-            padding-top: 0;
-        }
-        .garuda {
-            width: 60px; /* ปรับขนาดครุฑให้สมดุล */
-            height: auto;
-        }
-        .head-text {
-            flex-grow: 1;
-            text-align: center;
-            padding-right: 60px; /* Balance with garuda */
-        }
-        .head-text h2 {
-            font-size: 16pt; /* USER REQ: 16pt */
-            font-weight: bold;
-            margin: 15px 0 0 0;
-            line-height: 1;
-        }
+        /* Fonts as requested */
+        .th-sarabun { font-family: 'Sarabun', sans-serif; }
+        .font-16 { font-size: 16pt; font-weight: bold; }
+        .font-14 { font-size: 14pt; }
+        .font-12 { font-size: 12pt; }
 
-        /* Document Meta */
-        .doc-meta {
-            font-size: 14pt; /* USER REQ: 14pt */
-            line-height: 1.3;
-            margin-top: 5px;
-        }
+        /* Headers */
+        .doc-head { display: flex; align-items: flex-start; margin-bottom: 10px; }
+        .garuda { width: 60px; height: auto; }
+        .head-text { flex-grow: 1; text-align: center; padding-right: 60px; }
+        .head-text h2 { margin: 15px 0 0 0; line-height: 1; }
+        .doc-code { position: absolute; right: 20mm; top: 15mm; font-size: 12pt; }
 
-        /* Document Content */
-        .doc-content {
-            font-size: 14pt; /* USER REQ: 14pt */
-            text-indent: 2.5cm;
-            text-align: justify;
-            line-height: 1.3;
-            margin-top: 8px;
-        }
+        /* Content */
+        .doc-content { text-indent: 2.5cm; text-align: justify; line-height: 1.3; margin-top: 8px; }
+        .doc-meta { line-height: 1.3; margin-top: 4px; }
 
-        /* Document Table */
-        .doc-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-            font-size: 14pt; /* USER REQ: 14pt */
-        }
-        .doc-table th, .doc-table td {
-            border: 1px solid black;
-            padding: 3px 5px; /* Compact padding */
-            text-align: center;
-            vertical-align: middle;
-            line-height: 1.2;
-        }
-        .doc-table th {
-            background: #f5f5f5;
-            font-weight: bold;
-        }
-        .doc-table td.text-left {
-            text-align: left;
-            padding-left: 8px;
-        }
+        /* Table */
+        .doc-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .doc-table th, .doc-table td { border: 1px solid black; padding: 4px; text-align: center; vertical-align: middle; line-height: 1.1; }
+        .doc-table th { background: #f0f0f0; font-weight: bold; }
+        .text-left { text-align: left !important; padding-left: 5px !important; }
 
         /* Signatures */
-        .doc-sign {
-            margin-top: 20px;
-            display: flex;
-            justify-content: space-between;
-            font-size: 14pt; /* Adjusted to match body */
-        }
-        .doc-sign.single {
-            justify-content: flex-start;
-        }
-        .sign-box {
-            text-align: center;
-            width: 45%;
-            line-height: 1.4;
-        }
+        .signature-section { margin-top: 25px; display: flex; flex-wrap: wrap; justify-content: space-between; row-gap: 20px; }
+        .sign-box { text-align: center; min-width: 45%; flex: 1; }
+        .sign-line { display: inline-block; border-bottom: 1px dotted black; width: 140px; margin: 0 5px; }
 
-        /* Horizontal Line */
-        .doc-hr {
-            border: none;
-            border-bottom: 1px solid black;
-            margin: 8px 0;
-        }
-
-        /* Print Styles */
-        @media print {
-            body { background: white; padding: 0; margin: 0; }
-            .app-container, .modal-tools { display: none !important; }
-            .modal { position: static; background: white; display: block !important; height: auto; }
-            .modal-content { width: 100%; box-shadow: none; margin: 0; height: auto; }
-            .modal-view { padding: 0; background: white; }
-            .a4-paper { 
-                box-shadow: none; 
-                margin: 0; 
-                page-break-after: avoid; 
-                height: auto; /* Allow auto height on print */
-                transform: none !important; /* Reset scale for real print */
-            }
-        }
-        
-        /* Utility for cloning */
-        #temp-print-area {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%;
-            z-index: 9999;
-            background: rgba(0,0,0,0.8);
-            display: flex;
-            justify-content: center;
-            padding: 20px;
-        }
     </style>
 </head>
 <body>
 
     <div class="app-container">
         <div class="header">
-            <h1>ระบบจัดสอนแทน V.6.8</h1>
-            <p>Auto-Fit to One Page & PDF Fix</p>
+            <h1>ระบบจัดสอนแทน V.Final</h1>
+            <p>ใบสรุปสอนแทน (รวม) & บันทึกข้อความ (รายบุคคล)</p>
         </div>
 
         <div class="nav-bar">
@@ -231,55 +135,33 @@
         <div id="allocation" class="page-section active">
             <div class="control-group">
                 <div class="input-row">
-                    <div>
-                        <label>1. เลือกวันในตารางสอน (Logic)</label>
-                        <select id="daySchedule">
-                            <option value="">-- เลือกวัน --</option>
-                            <option value="จันทร์">จันทร์</option>
-                            <option value="อังคาร">อังคาร</option>
-                            <option value="พุธ">พุธ</option>
-                            <option value="พฤหัสบดี">พฤหัสบดี</option>
-                            <option value="ศุกร์">ศุกร์</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label>2. วันที่ในเอกสาร (Record)</label>
-                        <input type="date" id="docDate">
-                    </div>
+                    <div><label>1. เลือกวันในตาราง (Logic)</label><select id="daySchedule"><option value="จันทร์">จันทร์</option><option value="อังคาร">อังคาร</option><option value="พุธ">พุธ</option><option value="พฤหัสบดี">พฤหัสบดี</option><option value="ศุกร์">ศุกร์</option></select></div>
+                    <div><label>2. วันที่เอกสาร (Record)</label><input type="date" id="docDate"></div>
                 </div>
                 <div class="input-row">
-                    <div>
-                        <label>ผู้จัดตาราง (แสดงในรายงาน)</label>
-                        <input type="text" id="schedulerName" value="ครูนนทพัทธ์ หิรัญเรือง">
-                    </div>
-                    <div>
-                        <label>ผู้อำนวยการ (แสดงในรายงาน)</label>
-                        <input type="text" id="directorName" value="นางสุนิสา ใจใหญ่">
-                    </div>
+                    <div><label>ผู้จัดสอนแทน</label><input type="text" id="schedulerName" value="ครูนนทพัทธ์ หิรัญเรือง"></div>
+                    <div><label>หน.ฝ่ายวิชาการ</label><input type="text" id="headAcademic" value="นางสาวสุพัฒตา ศรีเมือง"></div>
+                    <div><label>รอง ผอ.</label><input type="text" id="deputyName" value="นางสุคันทร บาอินทร์"></div>
+                    <div><label>ผู้อำนวยการ</label><input type="text" id="directorName" value="นางสุนิสา ใจใหญ่"></div>
                 </div>
 
-                <label>เลือกครูที่ลา/ไปราชการ (สูงสุด 6 คน)</label>
+                <label>เลือกครูที่ลา (สูงสุด 6 คน)</label>
                 <div class="tags" id="selectedTags"></div>
                 <div class="teacher-grid" id="teacherCheckboxes"></div>
 
-                <button class="btn-primary" onclick="processAllocation()">
-                    🔍 ประมวลผลและตรวจสอบภาระงาน
-                </button>
+                <button class="btn-primary" onclick="processAllocation()">🔍 ตรวจสอบตารางและภาระงาน</button>
             </div>
 
             <div id="resultArea" style="display: none;">
-                <div class="realtime-summary" id="realtimeSummary">
-                    <h4>📊 สรุปภาระงานสอนแทน (วันนี้ - Realtime)</h4>
-                    <div class="summary-grid" id="summaryGrid">
-                        <span style="color:#64748b;">กรุณาเลือกครูสอนแทน...</span>
-                    </div>
-                </div>
-
-                <h3 style="margin-bottom:15px; color:#166534;">ผลการค้นหา (กรุณาระบุรายละเอียด)</h3>
+                <h3 style="margin-bottom:15px; color:#166534;">ผลการจับคู่สอนแทน</h3>
                 <div id="matchCards"></div>
-                <div style="overflow: hidden; margin-top:20px;">
-                    <button class="btn-print" onclick="preparePreview()" style="float:right;">
-                        <i class="fas fa-file-invoice"></i> สร้างรายงานและบันทึก
+                
+                <div class="report-actions">
+                    <button class="btn-action btn-summary" onclick="saveAndPrint('summary')">
+                        <i class="fas fa-file-alt"></i> บันทึก & พิมพ์ใบสรุป (รวม)
+                    </button>
+                    <button class="btn-action btn-individual" onclick="saveAndPrint('individual')">
+                        <i class="fas fa-file-signature"></i> บันทึก & พิมพ์บันทึกข้อความ (รายบุคคล)
                     </button>
                 </div>
             </div>
@@ -290,28 +172,11 @@
             <button onclick="loadHistory()" class="nav-btn" style="margin:10px 0;">🔄 รีเฟรช</button>
             <div id="historyList"></div>
         </div>
-
-        <div id="dashboard" class="page-section">
-            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:20px;">
-                <div class="card" style="padding:15px;"><canvas id="deptChart"></canvas></div>
-                <div class="card" style="padding:15px;"><canvas id="teacherChart"></canvas></div>
-            </div>
-        </div>
+        
+        <div id="dashboard" class="page-section"></div>
     </div>
 
-    <div id="previewModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-tools">
-                <span>ตัวอย่างรายงาน (A4 - Fit to Page)</span>
-                <button onclick="window.print()" class="nav-btn" style="background:#2563eb; color:white; border:none;">🖨️ พิมพ์</button>
-                <button onclick="downloadPDF_AutoFit()" class="nav-btn" style="background:#be123c; color:white; border:none;">📥 ดาวน์โหลด PDF (Fixed)</button>
-                <button onclick="document.getElementById('previewModal').style.display='none'" class="nav-btn" style="background:#64748b; color:white; border:none;">ปิด</button>
-            </div>
-            <div class="modal-view">
-                <div id="paperContainer"></div>
-            </div>
-        </div>
-    </div>
+    <div id="print-staging-area"></div>
 
     <script>
         // --- CONFIG ---
@@ -344,7 +209,6 @@
             { name: "นายนนทพัทธ์ หิรัญเรือง", department: "ภาษาไทย", schedule: { "จันทร์": [2, 4, 5, 6], "อังคาร": [2, 3], "พุธ": [2, 3, 5, 6], "พฤหัสบดี": [2, 6], "ศุกร์": [1, 3, 4] } }
         ];
 
-        // --- STATE ---
         let selectedTeachers = [];
         let daySchedule = "";
         let docDate = "";
@@ -369,14 +233,11 @@
             document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
             event.currentTarget.classList.add('active');
             if(id === 'history') loadHistory();
-            if(id === 'dashboard') renderCharts();
         }
 
         function toggleSelect(name, cb) {
             if(cb.checked) {
-                if(selectedTeachers.length >= 6) {
-                    cb.checked = false; return Swal.fire('เตือน', 'เลือกได้สูงสุด 6 ท่าน', 'warning');
-                }
+                if(selectedTeachers.length >= 6) { cb.checked = false; return Swal.fire('เตือน', 'เลือกได้สูงสุด 6 ท่าน', 'warning'); }
                 selectedTeachers.push(name);
             } else {
                 selectedTeachers = selectedTeachers.filter(t => t !== name);
@@ -388,13 +249,13 @@
             daySchedule = document.getElementById('daySchedule').value;
             docDate = document.getElementById('docDate').value;
 
-            if(!daySchedule || !docDate || selectedTeachers.length === 0) 
-                return Swal.fire('ข้อมูลไม่ครบ', 'กรุณาเลือกวันในตาราง, วันที่เอกสาร และครูที่ลา', 'warning');
+            if(!daySchedule || !docDate || selectedTeachers.length === 0) return Swal.fire('ข้อมูลไม่ครบ', 'กรุณาเลือกวัน, วันที่ และครูที่ลา', 'warning');
 
             workloadMap = {};
             realtimeWorkload = {};
             window.selectionTracker = {};
             
+            // Get current workload from DB
             try {
                 const snap = await db.collection("substitutions").where("docDate", "==", docDate).get();
                 snap.forEach(doc => {
@@ -409,57 +270,34 @@
             selectedTeachers.forEach(absentName => {
                 const teacherObj = teachersData.find(t => t.name === absentName);
                 const periods = teacherObj.schedule[daySchedule] || [];
-                
                 if(periods.length === 0) return;
 
                 let html = `<div class="card">
                     <div class="card-header">
                         <span>${absentName} (ลา)</span>
-                        <select id="reason_${absentName}" class="reason-select">
-                            <option value="ลาป่วย">🤒 ลาป่วย</option>
-                            <option value="ลากิจ">📋 ลากิจ</option>
-                            <option value="ไปราชการ" selected>🚗 ไปราชการ</option>
-                        </select>
+                        <select id="reason_${absentName}" class="reason-select"><option value="ไปราชการ">🚗 ไปราชการ</option><option value="ลาป่วย">🤒 ลาป่วย</option><option value="ลากิจ">📋 ลากิจ</option></select>
                     </div>
                     <div style="padding:15px;">`;
 
                 periods.sort((a,b)=>a-b).forEach(period => {
                     const candidates = findCandidates(daySchedule, period, selectedTeachers);
                     html += `<div class="period-block">
-                        <div class="period-title">
-                            <span class="badge-p">คาบ ${period}</span>
-                            <input type="text" id="subj_${absentName}_${period}" placeholder="รหัสวิชา" style="width:100px; padding:5px;">
-                            <select id="grade_${absentName}_${period}" style="width:80px; padding:5px;">
-                                <option value="">ชั้น</option>
-                                <option value="ม.1">ม.1</option>
-                                <option value="ม.2">ม.2</option>
-                                <option value="ม.3">ม.3</option>
-                                <option value="ม.4">ม.4</option>
-                                <option value="ม.5">ม.5</option>
-                                <option value="ม.6">ม.6</option>
-                            </select>
+                        <div class="period-title"><span class="badge-p">คาบ ${period}</span>
+                        <input type="text" id="subj_${absentName}_${period}" placeholder="รหัสวิชา" style="width:100px; padding:5px;">
+                        <select id="grade_${absentName}_${period}" style="width:80px; padding:5px;"><option value="">ชั้น</option><option value="ม.1">ม.1</option><option value="ม.2">ม.2</option><option value="ม.3">ม.3</option><option value="ม.4">ม.4</option><option value="ม.5">ม.5</option><option value="ม.6">ม.6</option></select>
                         </div>`;
                     
                     if(candidates.length === 0) html += `<div style="color:red">ไม่มีครูว่าง</div>`;
                     else {
                         candidates.forEach(t => {
                             const totalLoad = (workloadMap[t.name] || 0);
-                            const inputName = `rad_${absentName}_${period}`;
                             const busyPeriods = t.schedule[daySchedule] || [];
-                            const busyText = busyPeriods.length > 0 ? `สอนคาบ: ${busyPeriods.join(', ')}` : 'ว่างตลอดวัน';
-
                             html += `
                                 <div class="candidate-opt" onclick="selectRadio(this, '${t.name}', '${absentName}', ${period})">
-                                    <input type="radio" name="${inputName}" value="${t.name}" data-dept="${t.department}">
-                                    <div style="flex:1;">
-                                        <strong>${t.name}</strong> <span style="font-size:0.8rem; color:#64748b;">(${t.department})</span>
-                                        <div class="meta-info">📅 ${busyText}</div>
-                                    </div>
-                                    <div class="workload-badge" data-teacher="${t.name}">
-                                        บันทึก: ${totalLoad} | ใหม่: <span class="realtime-count">0</span>
-                                    </div>
-                                </div>
-                            `;
+                                    <input type="radio" name="rad_${absentName}_${period}" value="${t.name}" data-dept="${t.department}">
+                                    <div style="flex:1;"><strong>${t.name}</strong> <span style="font-size:0.8rem;">(${t.department})</span></div>
+                                    <div class="workload-badge" data-teacher="${t.name}">บันทึก: ${totalLoad} | ใหม่: <span class="realtime-count">0</span></div>
+                                </div>`;
                         });
                     }
                     html += `</div>`;
@@ -469,323 +307,309 @@
             });
 
             document.getElementById('resultArea').style.display = 'block';
-            updateRealtimeSummary();
             setTimeout(() => document.getElementById('resultArea').scrollIntoView({behavior:'smooth'}), 100);
         }
 
         function findCandidates(day, period, exclude) {
-            return teachersData
-                .filter(t => !exclude.includes(t.name) && !(t.schedule[day]||[]).includes(period))
+            return teachersData.filter(t => !exclude.includes(t.name) && !(t.schedule[day]||[]).includes(period))
                 .sort((a,b) => {
                     const loadA = (workloadMap[a.name]||0) + (realtimeWorkload[a.name]||0);
                     const loadB = (workloadMap[b.name]||0) + (realtimeWorkload[b.name]||0);
                     return loadA - loadB;
-                })
-                .slice(0, 5);
+                }).slice(0, 5);
         }
 
         function selectRadio(el, teacherName, absentName, period) {
-            const container = el.parentElement;
-            const inputName = `rad_${absentName}_${period}`;
-            const key = `${absentName}_${period}`;
-            
-            const previousTeacher = window.selectionTracker[key];
-            
-            container.querySelectorAll('.candidate-opt').forEach(x => x.classList.remove('selected'));
+            el.parentElement.querySelectorAll('.candidate-opt').forEach(x => x.classList.remove('selected'));
             el.classList.add('selected');
             el.querySelector('input').checked = true;
-
-            if(previousTeacher && previousTeacher !== teacherName) {
-                realtimeWorkload[previousTeacher] = Math.max(0, (realtimeWorkload[previousTeacher] || 0) - 1);
-            }
             
-            if(previousTeacher !== teacherName) {
-                realtimeWorkload[teacherName] = (realtimeWorkload[teacherName] || 0) + 1;
-                window.selectionTracker[key] = teacherName;
-            }
-
-            updateAllBadges();
-            updateRealtimeSummary();
-        }
-
-        function updateAllBadges() {
-            document.querySelectorAll('.workload-badge').forEach(badge => {
-                const teacherName = badge.dataset.teacher;
-                if(teacherName) {
-                    const realtimeCount = realtimeWorkload[teacherName] || 0;
-                    const totalCount = (workloadMap[teacherName] || 0) + realtimeCount;
-                    
-                    badge.querySelector('.realtime-count').textContent = realtimeCount;
-                    badge.classList.remove('load-high', 'load-medium');
-                    if(totalCount >= 3) badge.classList.add('load-high');
-                    else if(totalCount >= 2) badge.classList.add('load-medium');
+            const key = `${absentName}_${period}`;
+            const prev = window.selectionTracker[key];
+            if(prev && prev !== teacherName) realtimeWorkload[prev] = Math.max(0, (realtimeWorkload[prev]||0)-1);
+            if(prev !== teacherName) { realtimeWorkload[teacherName] = (realtimeWorkload[teacherName]||0)+1; window.selectionTracker[key] = teacherName; }
+            
+            document.querySelectorAll('.workload-badge').forEach(b => {
+                const t = b.dataset.teacher;
+                if(t) {
+                    const rc = realtimeWorkload[t]||0;
+                    b.querySelector('.realtime-count').textContent = rc;
+                    const tot = (workloadMap[t]||0)+rc;
+                    b.classList.remove('load-high','load-medium');
+                    if(tot>=3) b.classList.add('load-high'); else if(tot>=2) b.classList.add('load-medium');
                 }
             });
         }
 
-        function updateRealtimeSummary() {
-            const grid = document.getElementById('summaryGrid');
-            const combined = {...workloadMap};
-            for(const [name, count] of Object.entries(realtimeWorkload)) {
-                combined[name] = (combined[name] || 0) + count;
-            }
-            
-            const entries = Object.entries(combined).filter(([_, count]) => count > 0);
-            
-            if(entries.length === 0) {
-                grid.innerHTML = '<span style="color:#64748b;">ยังไม่มีการเลือกครูสอนแทน</span>';
-                return;
-            }
-            
-            entries.sort((a, b) => b[1] - a[1]);
-            
-            grid.innerHTML = entries.map(([name, count]) => {
-                let colorClass = '';
-                if(count >= 3) colorClass = 'style="background:#fecaca; border-color:#ef4444;"';
-                else if(count >= 2) colorClass = 'style="background:#fef08a; border-color:#eab308;"';
-                return `<div class="summary-item" ${colorClass}>${name.replace(/นาย|นาง|นางสาว/g, '')}: <strong>${count}</strong></div>`;
-            }).join('');
-        }
-
-        // --- PREVIEW & SAVE ---
-        async function preparePreview() {
+        // --- SAVE AND PRINT DISPATCHER ---
+        async function saveAndPrint(mode) {
+            // 1. Gather Data
             const data = [];
             const scheduler = document.getElementById('schedulerName').value;
+            const headAcademic = document.getElementById('headAcademic').value;
+            const deputy = document.getElementById('deputyName').value;
             const director = document.getElementById('directorName').value;
 
-            const cards = document.querySelectorAll('.card');
-            let isValid = false;
-
-            cards.forEach(card => {
-                const headerSpan = card.querySelector('.card-header span');
-                if(!headerSpan) return;
-                
-                const absent = headerSpan.innerText.replace(' (ลา)', '');
-                const reasonSelect = card.querySelector(`#reason_${absent}`);
-                const reason = reasonSelect ? reasonSelect.value : 'ไปราชการ';
-                
+            document.querySelectorAll('.card').forEach(card => {
+                const absent = card.querySelector('.card-header span').innerText.replace(' (ลา)', '');
+                const reason = card.querySelector('select').value;
                 card.querySelectorAll('.period-block').forEach(block => {
-                    const period = block.querySelector('.badge-p').innerText.replace('คาบ ', '');
                     const radio = block.querySelector('input[type="radio"]:checked');
-                    
                     if(radio) {
-                        isValid = true;
-                        const subj = document.getElementById(`subj_${absent}_${period}`).value || "-";
-                        const grade = document.getElementById(`grade_${absent}_${period}`).value || "-";
+                        const period = block.querySelector('.badge-p').innerText.replace('คาบ ', '');
                         data.push({
-                            absent: absent,
-                            period: parseInt(period),
-                            sub: radio.value,
-                            dept: radio.dataset.dept,
-                            subject: subj,
-                            grade: grade,
-                            reason: reason
+                            absent, period: parseInt(period), reason,
+                            sub: radio.value, dept: radio.dataset.dept,
+                            subject: document.getElementById(`subj_${absent}_${period}`).value || "-",
+                            grade: document.getElementById(`grade_${absent}_${period}`).value || "-"
                         });
                     }
                 });
             });
 
-            if(!isValid) return Swal.fire('เตือน', 'กรุณาเลือกผู้สอนแทนอย่างน้อย 1 รายการ', 'warning');
+            if(data.length === 0) return Swal.fire('เตือน', 'กรุณาเลือกผู้สอนแทน', 'warning');
 
+            // 2. Save to Firebase (Optional: Only once if not saved)
             try {
+                // Check if exists for update logic or just add new log
+                // For simplicity, we add new log. You might want to update existing.
                 await db.collection("substitutions").add({
                     created_at: firebase.firestore.FieldValue.serverTimestamp(),
-                    docDate: docDate,
-                    daySchedule: daySchedule,
-                    records: data,
-                    scheduler: scheduler,
-                    director: director
+                    docDate, daySchedule, records: data, scheduler, director
                 });
-            } catch(e) { console.error("Firebase save error:", e); }
+            } catch(e) { console.error("Save error", e); }
 
-            renderPaper(data, scheduler, director);
-            document.getElementById('previewModal').style.display = 'block';
-            
-            // Auto Fit Trigger
-            setTimeout(autoFitContent, 500);
+            // 3. Generate HTML based on mode
+            if(mode === 'summary') {
+                generateSummaryReport(data, scheduler, headAcademic, deputy, director);
+            } else {
+                generateIndividualReport(data, scheduler, headAcademic, director);
+            }
         }
 
-        function renderPaper(data, scheduler, director) {
-            const container = document.getElementById('paperContainer');
-            container.innerHTML = '';
-
-            const dateParts = docDate.split('-');
-            const thaiMonths = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
-            const dayNum = parseInt(dateParts[2]);
-            const monthName = thaiMonths[parseInt(dateParts[1])-1];
-            const yearBE = parseInt(dateParts[0]) + 543;
-            const thaiDateStr = `${dayNum} ${monthName} พ.ศ. ${yearBE}`;
-
-            // Combine all data into one table for single page logic
-            data.sort((a,b) => {
-                 if(a.sub === b.sub) return a.period - b.period;
-                 return a.sub.localeCompare(b.sub);
+        // --- REPORT 1: SUMMARY (วก.กทว.302) ---
+        function generateSummaryReport(data, scheduler, head, deputy, director) {
+            const dateStr = getThaiDate(docDate);
+            
+            // Group by Absent Teacher
+            const grouped = {};
+            data.forEach(d => {
+                if(!grouped[d.absent]) grouped[d.absent] = [];
+                grouped[d.absent].push(d);
             });
 
-            let rows = data.map((it, idx) => `
-                <tr>
-                    <td>${idx+1}</td>
-                    <td class="text-left">${it.sub} แทน<br>${it.absent}</td>
-                    <td>${it.reason}</td>
-                    <td>${it.period}</td>
-                    <td>${it.subject}</td>
-                    <td>${it.grade}</td>
-                    <td>-</td>
-                </tr>
-            `).join('');
-
-            // Minimum rows to look good
-            const minRows = 8;
-            for(let k = data.length; k < minRows; k++) {
-                rows += `<tr><td style="height:25px;">&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
+            let rows = "";
+            let counter = 1;
+            for(const [absent, items] of Object.entries(grouped)) {
+                items.sort((a,b) => a.period - b.period);
+                
+                // First row contains the Absent Teacher name
+                rows += `
+                    <tr>
+                        <td rowspan="${items.length}">${counter++}</td>
+                        <td rowspan="${items.length}" class="text-left">${absent}</td>
+                        <td rowspan="${items.length}">${items[0].reason}</td>
+                        <td>${items[0].period}</td>
+                        <td>${items[0].subject}</td>
+                        <td>${items[0].grade}</td>
+                        <td class="text-left">${items[0].sub}</td>
+                        <td></td>
+                    </tr>
+                `;
+                // Subsequent rows
+                for(let i=1; i<items.length; i++) {
+                    rows += `
+                        <tr>
+                            <td>${items[i].period}</td>
+                            <td>${items[i].subject}</td>
+                            <td>${items[i].grade}</td>
+                            <td class="text-left">${items[i].sub}</td>
+                            <td></td>
+                        </tr>
+                    `;
+                }
             }
 
-            container.innerHTML = `
-                <div class="a4-paper" id="paperContent">
-                    <div class="doc-head">
-                        <img src="https://nonthaphathr.github.io/uploadimg/kruda.png" class="garuda" crossorigin="anonymous">
-                        <div class="head-text">
-                            <h2>บันทึกข้อความ</h2>
-                        </div>
-                    </div>
+            // Fill empty rows to make it look full A4 if needed, or leave as is
+            
+            const html = `
+                <div class="a4-paper th-sarabun font-14">
+                    <div class="doc-code">วก.กทว.302</div>
+                    <center class="font-16">แบบบันทึกการจัดสอนแทน</center>
+                    <center class="font-16">โรงเรียนกระดุมทองวิทยา ต.หนองหัวช้าง อ.กันทรารมย์ จ.ศรีสะเกษ</center>
+                    <center class="font-14">วันที่ ${dateStr} ภาคเรียนที่ 2 ปีการศึกษา 2568</center>
                     
-                    <div class="doc-meta">
-                        <b>ส่วนราชการ</b> โรงเรียนกระดุมทองวิทยา ตำบลหนองหัวช้าง อำเภอกันทรารมย์ จังหวัดศรีสะเกษ
-                    </div>
-                    <div class="doc-meta">
-                        <b>ที่</b> ศก 51008.08/......... &nbsp;&nbsp;&nbsp; <b>วันที่</b> ${thaiDateStr}
-                    </div>
-                    <div class="doc-meta">
-                        <b>เรื่อง</b> รายงานผลการสอนแทน
-                    </div>
-                    
-                    <hr class="doc-hr">
-                    
-                    <div class="doc-meta"><b>เรียน</b> ผู้อำนวยการโรงเรียนกระดุมทองวิทยา</div>
-                    
-                    <div class="doc-content">
-                        ตามที่ข้าพเจ้าและคณะครู ได้รับมอบหมายให้ปฏิบัติราชการสอนแทน เมื่อวันที่ ${thaiDateStr} ตามความทราบแล้วนั้น บัดนี้ การปฏิบัติหน้าที่ดังกล่าวเสร็จสิ้นเรียบร้อยแล้ว จึงขอรายงานผลดังนี้
-                    </div>
-                    
-                    <table class="doc-table">
+                    <table class="doc-table font-14">
                         <thead>
                             <tr>
-                                <th style="width:6%;">ที่</th>
-                                <th style="width:28%;">ผู้สอน / ผู้ลา</th>
-                                <th style="width:12%;">สาเหตุ</th>
-                                <th style="width:10%;">คาบ</th>
-                                <th style="width:15%;">วิชา</th>
-                                <th style="width:10%;">ชั้น</th>
-                                <th style="width:10%;">หมายเหตุ</th>
+                                <th style="width:5%">ที่</th>
+                                <th style="width:20%">ครูประจำวิชา</th>
+                                <th style="width:10%">สาเหตุ</th>
+                                <th style="width:5%">คาบ</th>
+                                <th style="width:10%">รหัสวิชา</th>
+                                <th style="width:8%">ชั้น</th>
+                                <th style="width:22%">ครูสอนแทน</th>
+                                <th style="width:15%">หมายเหตุ/ลงนาม</th>
                             </tr>
                         </thead>
                         <tbody>${rows}</tbody>
                     </table>
-                    
-                    <div class="doc-sign" style="margin-top:30px;">
+
+                    <div class="signature-section font-14">
                         <div class="sign-box">
-                            ลงชื่อ..............................................<br>
-                            (${scheduler})<br>
-                            หัวหน้าฝ่ายวิชาการ/ผู้จัด
+                            <br>ลงชื่อ<span class="sign-line"></span>ผู้จัดสอนแทน<br>(${scheduler})
                         </div>
                         <div class="sign-box">
-                            <div style="text-align:right; margin-bottom:5px;">ทราบ</div>
-                            ลงชื่อ..............................................<br>
-                            (${director})<br>
-                            ผู้อำนวยการโรงเรียน
+                            <br>ลงชื่อ<span class="sign-line"></span>หน.ฝ่ายวิชาการ<br>(${head})
+                        </div>
+                        <div class="sign-box">
+                            <br>ลงชื่อ<span class="sign-line"></span>รองผู้อำนวยการ<br>(${deputy})
+                        </div>
+                        <div class="sign-box">
+                            <br>ลงชื่อ<span class="sign-line"></span>ผู้อำนวยการ<br>(${director})
                         </div>
                     </div>
-                </div>`;
+                </div>
+            `;
+            
+            triggerDownload(html, `ใบสรุปสอนแทน_${docDate}.pdf`);
         }
 
-        // --- AUTO FIT LOGIC ---
-        function autoFitContent() {
-            const paper = document.getElementById('paperContent');
-            if(!paper) return;
+        // --- REPORT 2: INDIVIDUAL (วก.กทว.303) ---
+        function generateIndividualReport(data, scheduler, head, director) {
+            const dateStr = getThaiDate(docDate);
             
-            // Reset scale
-            paper.style.transform = 'scale(1)';
-            
-            // Check overflow (297mm approx 1123px, minus margin roughly 1050px safe area)
-            // But we use scrollHeight vs clientHeight logic
-            let scale = 1;
-            const maxHeight = paper.clientHeight; // 297mm height
-            
-            // Loop verify
-            if (paper.scrollHeight > maxHeight) {
-                // Calculate ratio roughly
-                scale = maxHeight / paper.scrollHeight;
-                // Cap minimum scale to readable level
-                if(scale < 0.6) scale = 0.6; 
-                
-                paper.style.transform = `scale(${scale})`;
-                // Center vertically if needed, but top center is usually best for papers
-            }
-        }
-
-        // --- DOWNLOAD PDF (Fix Blank Page) ---
-        async function downloadPDF_AutoFit() {
-            const originalElement = document.getElementById('paperContent');
-            
-            Swal.fire({
-                title: 'กำลังสร้าง PDF...',
-                text: 'กรุณารอสักครู่',
-                allowOutsideClick: false,
-                didOpen: () => { Swal.showLoading(); }
+            // Group by SUBSTITUTE Teacher
+            const grouped = {};
+            data.forEach(d => {
+                if(!grouped[d.sub]) grouped[d.sub] = [];
+                grouped[d.sub].push(d);
             });
 
-            // 1. CLONE Element to Body (Outside Modal) to prevent blank page issues
-            const clone = originalElement.cloneNode(true);
-            const wrapper = document.createElement('div');
-            wrapper.id = 'temp-print-wrapper';
-            wrapper.style.position = 'fixed';
-            wrapper.style.top = '-9999px'; // Hide off screen
-            wrapper.style.left = '0';
-            wrapper.style.zIndex = '99999';
-            // Copy calculated transform
-            clone.style.transform = originalElement.style.transform;
+            let fullHtml = "";
+
+            for(const [subName, items] of Object.entries(grouped)) {
+                items.sort((a,b) => a.period - b.period);
+                const dept = items[0].dept || "วิทยาศาสตร์ฯ"; // Fallback or get from data
+
+                let rows = items.map((it, idx) => `
+                    <tr>
+                        <td>${idx+1}</td>
+                        <td class="text-left">${it.absent}</td>
+                        <td>${it.reason}</td>
+                        <td>${it.period}</td>
+                        <td>${it.subject}</td>
+                        <td>${it.grade}</td>
+                        <td>-</td>
+                    </tr>
+                `).join('');
+
+                // Fill rows to 8
+                for(let i=items.length; i<8; i++) {
+                    rows += `<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
+                }
+
+                fullHtml += `
+                    <div class="a4-paper th-sarabun font-14">
+                        <div class="doc-code">วก.กทว.303</div>
+                        <div class="doc-head">
+                            <img src="https://nonthaphathr.github.io/uploadimg/kruda.png" class="garuda" crossorigin="anonymous">
+                            <div class="head-text">
+                                <h2 class="font-16">บันทึกข้อความ</h2>
+                            </div>
+                        </div>
+                        <div class="doc-meta font-14">
+                            <b>ส่วนราชการ</b> โรงเรียนกระดุมทองวิทยา ตำบลหนองหัวช้าง อำเภอกันทรารมย์ จังหวัดศรีสะเกษ<br>
+                            <b>ที่</b> ศก 51008.08/......... &nbsp;&nbsp;&nbsp; <b>วันที่</b> ${dateStr}<br>
+                            <b>เรื่อง</b> รายงานผลการสอนแทน
+                        </div>
+                        <hr style="border:none; border-bottom:1px solid black; margin:5px 0;">
+                        <div class="doc-meta font-14"><b>เรียน</b> ผู้อำนวยการโรงเรียนกระดุมทองวิทยา</div>
+                        
+                        <div class="doc-content font-14">
+                            ตามที่ข้าพเจ้า ${subName} ตำแหน่ง ครู กลุ่มสาระการเรียนรู้${dept} ได้รับมอบหมายให้ปฏิบัติราชการแทน เมื่อวันที่ ${dateStr} ตามความทราบแล้วนั้น
+                        </div>
+                        <div class="doc-content font-14" style="margin-top:0;">
+                            บัดนี้ ข้าพเจ้าได้ดำเนินการสอนแทนดังกล่าวเสร็จสิ้นเรียบร้อยแล้ว จึงขอรายงานผลการสอนแทน ดังต่อไปนี้
+                        </div>
+
+                        <table class="doc-table font-14">
+                            <thead>
+                                <tr>
+                                    <th style="width:6%">ที่</th>
+                                    <th style="width:25%">ปฏิบัติราชการแทน</th>
+                                    <th style="width:14%">สาเหตุ</th>
+                                    <th style="width:10%">คาบที่</th>
+                                    <th style="width:15%">รหัสวิชา</th>
+                                    <th style="width:10%">ชั้น</th>
+                                    <th style="width:15%">หมายเหตุ</th>
+                                </tr>
+                            </thead>
+                            <tbody>${rows}</tbody>
+                        </table>
+
+                        <div class="doc-content font-14">จึงเรียนมาเพื่อโปรดทราบ</div>
+
+                        <div class="signature-section font-14">
+                            <div class="sign-box">
+                                <br>ลงชื่อ<span class="sign-line"></span><br>(${subName})<br>ตำแหน่ง ครู
+                            </div>
+                            <div class="sign-box">
+                                <br>ลงชื่อ<span class="sign-line"></span>หัวหน้าฝ่ายวิชาการ<br>(${head})
+                            </div>
+                        </div>
+                        <div class="signature-section font-14" style="justify-content:center;">
+                            <div class="sign-box">
+                                <br>ลงชื่อ<span class="sign-line"></span>ผู้อำนวยการ<br>(${director})
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
             
-            wrapper.appendChild(clone);
-            document.body.appendChild(wrapper);
+            triggerDownload(fullHtml, `บันทึกข้อความรายบุคคล_${docDate}.pdf`);
+        }
 
-            // Wait for images to load in clone
-            await new Promise(r => setTimeout(r, 800));
+        // --- UTILS & PDF GENERATOR ---
+        function getThaiDate(inp) {
+            const d = new Date(inp);
+            const m = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+            return `${d.getDate()} ${m[d.getMonth()]} ${d.getFullYear()+543}`;
+        }
 
-            try {
+        function triggerDownload(htmlContent, filename) {
+            // 1. Inject HTML into Hidden Staging Area
+            const staging = document.getElementById('print-staging-area');
+            staging.innerHTML = htmlContent;
+
+            Swal.fire({ title: 'กำลังสร้าง PDF...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+            // 2. Wait for images to load (Important!)
+            const images = staging.getElementsByTagName('img');
+            const promises = Array.from(images).map(img => {
+                if(img.complete) return Promise.resolve();
+                return new Promise(resolve => { img.onload = resolve; img.onerror = resolve; });
+            });
+
+            Promise.all(promises).then(() => {
+                // 3. Generate PDF from Staging Area
                 const opt = {
                     margin: 0,
-                    filename: `รายงานสอนแทน_${docDate}.pdf`,
+                    filename: filename,
                     image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { 
-                        scale: 2, 
-                        useCORS: true, 
-                        logging: false,
-                        windowWidth: 1200 // Force width to prevent mobile layout capture
-                    },
+                    html2canvas: { scale: 2, useCORS: true, logging: false },
                     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
                 };
 
-                await html2pdf().set(opt).from(clone).save();
-                
-                Swal.fire({
-                    icon: 'success',
-                    title: 'สำเร็จ!',
-                    text: 'ดาวน์โหลด PDF เรียบร้อย',
-                    timer: 2000,
-                    showConfirmButton: false
+                html2pdf().set(opt).from(staging).save().then(() => {
+                    Swal.fire({ icon: 'success', title: 'ดาวน์โหลดสำเร็จ', timer: 1500, showConfirmButton: false });
+                    staging.innerHTML = ''; // Clean up
                 });
-            } catch(error) {
-                console.error('PDF Error:', error);
-                Swal.fire('Error', 'เกิดข้อผิดพลาดในการสร้าง PDF', 'error');
-            } finally {
-                // Remove temp element
-                document.body.removeChild(wrapper);
-            }
+            });
         }
-
-        // --- HISTORY ---
+        
         function loadHistory() {
-            const list = document.getElementById('historyList');
+             const list = document.getElementById('historyList');
             list.innerHTML = '<div style="text-align:center; padding:20px;">🔄 กำลังโหลด...</div>';
             
             db.collection("substitutions").orderBy("created_at", "desc").limit(15).get()
@@ -803,73 +627,10 @@
                     item.style = 'padding:15px; margin-bottom:10px;';
                     item.innerHTML = `
                         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
-                            <div>
-                                <strong>📅 ${d.docDate}</strong>
-                                <span style="font-size:0.8rem; color:#64748b; margin-left:10px;">วัน${d.daySchedule || ''}</span>
-                            </div>
-                            <button onclick="deleteLog('${doc.id}')" style="background:#fee2e2; color:red; border:none; padding:5px 15px; cursor:pointer; border-radius:4px; font-family:'Kanit';">🗑️ ลบ</button>
+                            <div><strong>📅 ${d.docDate}</strong> <span style="font-size:0.8rem; color:#64748b;">(${d.records.length} รายการ)</span></div>
                         </div>
-                        <ul style="margin-top:10px; padding-left:20px; font-size:0.9rem;">
-                            ${d.records.map(r => `<li>คาบ ${r.period}: <strong>${r.sub}</strong> แทน ${r.absent} (${r.reason || '-'})</li>`).join('')}
-                        </ul>
                     `;
                     list.appendChild(item);
-                });
-            });
-        }
-
-        function deleteLog(id) {
-            Swal.fire({ 
-                title: 'ยืนยันการลบ?', 
-                icon: 'warning', 
-                showCancelButton: true,
-                confirmButtonColor: '#ef4444',
-                confirmButtonText: 'ลบ',
-                cancelButtonText: 'ยกเลิก'
-            }).then(r => {
-                if(r.isConfirmed) {
-                    db.collection("substitutions").doc(id).delete().then(() => {
-                        Swal.fire('ลบแล้ว!', '', 'success');
-                        loadHistory();
-                    });
-                }
-            });
-        }
-
-        // --- DASHBOARD ---
-        let deptChartInstance = null;
-        let teacherChartInstance = null;
-
-        function renderCharts() {
-            db.collection("substitutions").get().then(snap => {
-                let dMap = {}, tMap = {};
-                snap.forEach(doc => {
-                    doc.data().records.forEach(r => {
-                        dMap[r.dept||'อื่นๆ'] = (dMap[r.dept||'อื่นๆ']||0)+1;
-                        tMap[r.sub] = (tMap[r.sub]||0)+1;
-                    });
-                });
-                
-                if(deptChartInstance) deptChartInstance.destroy();
-                if(teacherChartInstance) teacherChartInstance.destroy();
-                
-                deptChartInstance = new Chart(document.getElementById('deptChart'), {
-                    type: 'doughnut',
-                    data: { 
-                        labels: Object.keys(dMap), 
-                        datasets: [{data: Object.values(dMap), backgroundColor: ['#3b82f6','#ef4444','#eab308','#22c55e','#8b5cf6','#ec4899']}] 
-                    },
-                    options: { plugins: { title: { display: true, text: 'สัดส่วนตามกลุ่มสาระ' }}}
-                });
-
-                const top5 = Object.entries(tMap).sort((a,b)=>b[1]-a[1]).slice(0,5);
-                teacherChartInstance = new Chart(document.getElementById('teacherChart'), {
-                    type: 'bar',
-                    data: { 
-                        labels: top5.map(x => x[0].replace(/นาย|นาง|นางสาว/g, '')), 
-                        datasets: [{label: 'คาบสอนแทน', data: top5.map(x=>x[1]), backgroundColor: '#166534'}] 
-                    },
-                    options: { plugins: { title: { display: true, text: 'Top 5 ครูสอนแทน' }}, scales: { y: { beginAtZero: true }}}
                 });
             });
         }
