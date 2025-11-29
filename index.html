@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบจัดสอนแทน V.7.6 (1-Page A4 Fixed)</title>
+    <title>ระบบจัดสอนแทน V.7.7 (Perfect A4 & Layout Fix)</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -76,10 +76,11 @@
         .modal-tools { background: #333; padding: 10px; display: flex; justify-content: flex-end; gap: 10px; color: white; flex-wrap: wrap; }
         .modal-view { flex-grow: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 20px; background: #525659; }
 
-        /* ===== A4 Paper - ปรับให้อยู่ใน 1 หน้าพอดี ===== */
+        /* ===== A4 Paper Styles ===== */
         .a4-paper {
             width: 210mm;
-            height: 297mm;
+            min-height: 297mm; /* ใช้ min-height เพื่อความยืดหยุ่น แต่ปกติจะพอดี */
+            height: auto;
             background: white;
             padding: 12mm 15mm 10mm 20mm;
             position: relative;
@@ -90,7 +91,10 @@
             box-sizing: border-box;
             box-shadow: 0 0 10px rgba(0,0,0,0.3);
             margin-bottom: 20px;
-            overflow: hidden;
+            overflow: visible; /* เปลี่ยนเป็น visible เพื่อให้ footer ไม่ถูกตัด */
+            
+            /* แก้ไข 1: เพิ่ม min-width เพื่อให้แสดงผลใน Preview Modal เป็น A4 ไม่บีบเล็ก */
+            min-width: 210mm; 
         }
 
         /* ส่วนหัว - ครุฑและชื่อเอกสาร */
@@ -212,8 +216,10 @@
             text-align: center;
             padding: 3px 5px;
             width: 50%;
-            font-size: 13pt;
+            /* แก้ไข 2: ปรับขนาดฟอนต์ลงนิดหน่อย และใส่ nowrap กันคำตกบรรทัด */
+            font-size: 12pt; 
             line-height: 1.2;
+            white-space: nowrap; 
         }
 
         .sign-row-bottom td {
@@ -224,19 +230,19 @@
             text-align: left;
             padding-left: 15px;
             margin-bottom: 2px;
-            font-size: 13pt;
+            font-size: 12pt;
         }
 
-        /* Footer */
+        /* Footer - แก้ไข 3: ปรับระยะห่าง */
         .footer-system {
-            position: absolute;
-            bottom: 8mm;
-            left: 0;
-            right: 0;
+            /* ลบ Absolute ออก ใช้ Margin แทน เพื่อดันระยะห่างจากลายเซ็น */
+            position: static; 
+            margin-top: 50px; /* เว้นระยะห่างประมาณ 2-3 บรรทัด */
             text-align: center;
             font-size: 10pt;
             color: #666;
             font-style: italic;
+            width: 100%;
         }
 
         /* ===== Print Styles ===== */
@@ -285,11 +291,12 @@
                 margin: 0; 
                 padding: 12mm 15mm 10mm 20mm;
                 width: 210mm;
-                height: 297mm;
+                height: 297mm; /* บังคับสูง A4 ตอนปริ้นท์ */
                 page-break-after: always;
                 page-break-inside: avoid;
                 box-shadow: none;
                 border: none;
+                min-width: auto; /* รีเซ็ตตอนปริ้นท์ */
             }
             
             .a4-paper:last-child {
@@ -308,8 +315,8 @@
 
     <div class="app-container">
         <div class="header">
-            <h1>ระบบจัดสอนแทน V.7.6</h1>
-            <p>✨ แก้ไข Layout ให้อยู่ใน 1 หน้า A4 พอดี</p>
+            <h1>ระบบจัดสอนแทน V.7.7</h1>
+            <p>✨ แก้ไข A4 Preview, คำตกบรรทัด และระยะห่างท้ายกระดาษ</p>
         </div>
 
         <div class="nav-bar">
@@ -749,14 +756,12 @@
 
                 container.innerHTML += `
                 <div class="a4-paper">
-                    <!-- Header with Garuda -->
                     <div class="doc-header">
                         <img src="https://nonthaphathr.github.io/uploadimg/kruda.png" class="garuda" crossorigin="anonymous">
                         <div class="doc-code">วก.กทว.303</div>
                         <div class="doc-title">บันทึกข้อความ</div>
                     </div>
                     
-                    <!-- Document Info -->
                     <div class="doc-meta">
                         <b>ส่วนราชการ</b>&nbsp;&nbsp;โรงเรียนกระดุมทองวิทยา&nbsp;&nbsp;ตำบลหนองหัวช้าง&nbsp;&nbsp;อำเภอกันทรารมย์&nbsp;&nbsp;จังหวัดศรีสะเกษ
                     </div>
@@ -772,7 +777,6 @@
                     
                     <div class="doc-to">เรียน&nbsp;&nbsp;ผู้อำนวยการโรงเรียนกระดุมทองวิทยา</div>
                     
-                    <!-- Content -->
                     <div class="doc-content">
                         ตามที่ข้าพเจ้า ${subName} ตำแหน่ง ครู กลุ่มสาระฯ${subDept} ได้รับมอบหมายให้ปฏิบัติราชการแทน เมื่อวันที่ ${thaiDateStr} ตามความทราบแล้วนั้น
                     </div>
@@ -780,7 +784,6 @@
                         บัดนี้ ข้าพเจ้าได้ดำเนินการสอนแทนดังกล่าวเสร็จสิ้นเรียบร้อยแล้ว จึงขอรายงานผลการสอนแทน ดังต่อไปนี้
                     </div>
                     
-                    <!-- Table -->
                     <table class="doc-table">
                         <colgroup>
                             <col style="width:5%">
@@ -810,10 +813,8 @@
                         <tbody>${rows}</tbody>
                     </table>
                     
-                    <!-- Closing -->
                     <div class="doc-closing">จึงเรียนมาเพื่อโปรดทราบ</div>
                     
-                    <!-- Signatures -->
                     <table class="sign-table">
                         <tr>
                             <td>
@@ -821,7 +822,7 @@
                                 (${subName})
                             </td>
                             <td>
-                                ลงชื่อ................................หัวหน้ากลุ่มบริหารงานวิชาการ<br>
+                                ลงชื่อ........................................หัวหน้ากลุ่มบริหารงานวิชาการ<br>
                                 (${academicHead})
                             </td>
                         </tr>
@@ -841,7 +842,6 @@
                         </tr>
                     </table>
 
-                    <!-- Footer -->
                     <div class="footer-system">
                         พิมพ์จากระบบจัดสอนแทนออนไลน์ โดย ครูนนทพัทธ์ หิรัญเรือง
                     </div>
