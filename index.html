@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบจัดสอนแทน V.7.4 (Final Official)</title>
+    <title>ระบบจัดสอนแทน V.7.5 (Layout Fixed)</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -76,15 +76,16 @@
         .modal-tools { background: #333; padding: 10px; display: flex; justify-content: flex-end; gap: 10px; color: white; flex-wrap: wrap; }
         .modal-view { flex-grow: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 20px; background: #525659; }
 
-        /* ===== A4 Paper Styles ===== */
+        /* ===== A4 Paper Styles (Updated Layout) ===== */
         .a4-paper {
             width: 210mm;
             min-height: 297mm;
             background: white;
+            /* ปรับ Margin ให้สมดุลขึ้น */
             padding: 20mm 20mm 15mm 25mm;
             position: relative;
             font-family: 'Sarabun', sans-serif;
-            font-size: 14pt;
+            font-size: 16pt; /* ปรับ Base size เป็น 16pt ตามมาตรฐาน */
             line-height: 1.15;
             color: black;
             box-sizing: border-box;
@@ -94,50 +95,55 @@
             page-break-inside: avoid;
         }
 
-        /* ส่วนหัวตราครุฑ */
+        /* ส่วนหัวตราครุฑ ปรับใหม่ */
         .header-kruda {
-            height: 3.5cm; /* จองพื้นที่ส่วนหัว */
+            height: 3.5cm; /* จองพื้นที่ความสูงให้พอดีกับครุฑ */
             position: relative;
-            margin-bottom: 5px;
+            margin-bottom: 10px;
         }
 
         .garuda {
             position: absolute;
             left: 0;
             top: 0;
-            width: 1.5cm; /* ขนาดมาตรฐานบันทึกข้อความ */
+            width: 1.5cm; /* ขนาดครุฑมาตรฐาน */
             height: auto;
+            z-index: 2;
         }
 
         .doc-code {
-            text-align: right;
-            font-size: 12pt;
+            position: absolute;
+            right: 0;
+            top: 0; /* วก.กทว. อยู่ขวาบนสุด */
+            font-size: 14pt;
             font-weight: bold;
-            margin-bottom: 5px;
         }
 
         .doc-title {
             text-align: center;
-            font-size: 29pt; /* ขนาดใหญ่สำหรับคำว่าบันทึกข้อความ */
+            font-size: 29pt;
             font-weight: bold;
-            padding-top: 15px; /* ดันลงมานิดหน่อยให้สวยงามเมื่อเทียบกับครุฑ */
+            padding-top: 25px; /* ดันลงมาให้อยู่ระดับขาครุฑโดยประมาณ */
+            margin-bottom: 0;
         }
 
         .doc-meta {
             font-size: 16pt;
-            line-height: 1.5;
-            margin-bottom: 2px;
+            line-height: 1.4;
+            margin-bottom: 4px;
         }
 
+        /* ปรับส่วนวันที่ให้ห่างออกมา */
         .doc-meta-inline {
             display: flex;
             gap: 20px;
+            margin-top: 15px; /* แก้ข้อ 4: ขยับลงมา 3 เคาะ (ประมาณ 15px) */
         }
 
         .doc-line {
             border: none;
             border-bottom: 1px solid black;
-            margin: 8px 0;
+            margin: 10px 0;
         }
 
         .doc-to {
@@ -151,21 +157,21 @@
             font-size: 16pt;
             text-indent: 2.5cm;
             text-align: justify;
-            line-height: 1.3;
-            margin-bottom: 5px;
+            line-height: 1.35;
+            margin-bottom: 8px;
         }
 
         .doc-table {
             width: 100%;
             border-collapse: collapse;
             margin: 10px 0;
-            font-size: 14pt;
+            font-size: 14pt; /* ตารางใช้ 14pt เพื่อให้ข้อความยาวๆ ไม่แตก */
         }
 
         .doc-table th, 
         .doc-table td {
             border: 1px solid black;
-            padding: 4px 5px;
+            padding: 4px 4px; /* ลด Padding เล็กน้อยเพื่อให้มีพื้นที่ข้อความ */
             text-align: center;
             vertical-align: middle;
             line-height: 1.2;
@@ -184,10 +190,10 @@
         .doc-closing {
             font-size: 16pt;
             text-indent: 2.5cm;
-            margin-top: 10px;
+            margin-top: 15px;
         }
 
-        /* Styles สำหรับส่วนลายเซ็นแบบตาราง */
+        /* Styles สำหรับส่วนลายเซ็น */
         .sign-table {
             width: 100%;
             border-collapse: collapse;
@@ -198,10 +204,10 @@
             border: none;
             vertical-align: top;
             text-align: center;
-            padding: 10px;
+            padding: 5px;
             width: 50%;
             font-size: 16pt;
-            line-height: 1.4;
+            line-height: 1.3;
         }
 
         .footer-system {
@@ -219,7 +225,7 @@
         @media print {
             @page {
                 size: A4;
-                margin: 0;
+                margin: 0; /* ตัด Margin ของ Browser ออก */
             }
             body { 
                 background: white; 
@@ -234,7 +240,7 @@
             .modal-view { padding: 0; display: block; background: white; }
             .a4-paper { 
                 margin: 0; 
-                padding: 20mm 20mm 15mm 25mm;
+                padding: 15mm 15mm 10mm 20mm; /* ปรับ Margin ตอนพิมพ์ให้ Fit พอดี */
                 page-break-after: always;
                 page-break-inside: avoid;
                 width: 100%; 
@@ -249,8 +255,10 @@
             .period-title { flex-direction: column; align-items: flex-start; }
             .period-title input, .period-title select { width: 100%; }
             .a4-paper { width: 100%; min-height: auto; padding: 10mm; font-size: 11pt; }
-            .header-kruda { height: auto; display: flex; flex-direction: column; align-items: center; }
-            .garuda { position: static; margin-bottom: 10px; }
+            .header-kruda { height: auto; display: block; }
+            .garuda { position: static; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto; }
+            .doc-code { position: static; text-align: center; margin-bottom: 5px; }
+            .doc-title { padding-top: 0; }
         }
     </style>
 </head>
@@ -258,8 +266,8 @@
 
     <div class="app-container">
         <div class="header">
-            <h1>ระบบจัดสอนแทน V.7.4</h1>
-            <p>✨ เพิ่มตราครุฑและปรับรูปแบบราชการ</p>
+            <h1>ระบบจัดสอนแทน V.7.5</h1>
+            <p>✨ ปรับตำแหน่งครุฑ แก้คำนำหน้า และจัดระยะบรรทัด</p>
         </div>
 
         <div class="nav-bar">
@@ -295,7 +303,7 @@
                     </div>
                     <div>
                         <label>หัวหน้ากลุ่มบริหารงานวิชาการ</label>
-                        <input type="text" id="academicHeadName" value="นางสุพัฒตา ศรีเมือง">
+                        <input type="text" id="academicHeadName" value="นางสาวสุพัฒตา ศรีเมือง">
                     </div>
                 </div>
                 <div class="input-row">
@@ -381,6 +389,7 @@
         // ============================================
         // DATA
         // ============================================
+        // แก้ไขชื่อ นาง -> นางสาว ในฐานข้อมูลจำลอง
         const teachersData = [
             { name: "นายวิทยา ใหม่คามิ", department: "สังคมศึกษาฯ", schedule: { "จันทร์": [1, 5, 6, 7], "อังคาร": [3, 5, 6], "พุธ": [1, 2, 3, 5, 6], "พฤหัสบดี": [1, 3, 4, 5, 6], "ศุกร์": [2, 4, 7] } },
             { name: "นางสาวณิชารีย์ คำศรีทา", department: "วิทยาศาสตร์ฯ", schedule: { "จันทร์": [2, 4], "อังคาร": [3, 4, 6], "พุธ": [3, 4, 5, 6], "พฤหัสบดี": [5, 6], "ศุกร์": [4, 5, 6] } },
@@ -707,8 +716,8 @@
                         <b>ส่วนราชการ</b>&nbsp;&nbsp;&nbsp;โรงเรียนกระดุมทองวิทยา&nbsp;&nbsp;&nbsp;อำเภอกันทรารมย์&nbsp;&nbsp;&nbsp;จังหวัดศรีสะเกษ
                     </div>
                     <div class="doc-meta doc-meta-inline">
-                        <span><b>ที่</b>&nbsp;&nbsp;ศก 51008.08/.................</span>
-                        <span><b>วันที่</b>&nbsp;&nbsp;${thaiDateStr}</span>
+                        <span style="flex:1;"><b>ที่</b>&nbsp;&nbsp;ศก 51008.08/.................</span>
+                        <span style="flex:1;"><b>วันที่</b>&nbsp;&nbsp;${thaiDateStr}</span>
                     </div>
                     <div class="doc-meta">
                         <b>เรื่อง</b>&nbsp;&nbsp;&nbsp;รายงานผลการสอนแทน
@@ -726,19 +735,24 @@
                     </div>
                     
                     <table class="doc-table">
+                        <colgroup>
+                            <col style="width:5%">
+                            <col style="width:20%"> <col style="width:10%"> <col style="width:8%">
+                            <col style="width:15%"> <col style="width:8%">
+                            <col style="width:17%"> <col style="width:17%"> </colgroup>
                         <thead>
                             <tr>
-                                <th rowspan="2" style="width:5%;">ที่</th>
-                                <th rowspan="2" style="width:22%;">ปฏิบัติราชการแทน<br>คุณครู</th>
-                                <th rowspan="2" style="width:12%;">สาเหตุที่<br>ปฏิบัติราชการแทน</th>
-                                <th colspan="4" style="width:40%;">การสอนแทน</th>
-                                <th rowspan="2" style="width:10%;">หมายเหตุ</th>
+                                <th rowspan="2">ที่</th>
+                                <th rowspan="2">ปฏิบัติราชการแทน<br>คุณครู</th>
+                                <th rowspan="2">สาเหตุ</th>
+                                <th colspan="4">การสอนแทน</th>
+                                <th rowspan="2">หมายเหตุ</th>
                             </tr>
                             <tr>
-                                <th style="width:8%;">คาบที่</th>
-                                <th style="width:12%;">รหัสวิชา</th>
-                                <th style="width:8%;">ชั้น</th>
-                                <th style="width:12%;">จัดกิจกรรม</th>
+                                <th>คาบ</th>
+                                <th>รหัสวิชา</th>
+                                <th>ชั้น</th>
+                                <th>จัดกิจกรรม</th>
                             </tr>
                         </thead>
                         <tbody>${rows}</tbody>
