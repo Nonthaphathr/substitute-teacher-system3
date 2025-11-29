@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบจัดสอนแทน V.7.7 (Perfect A4 & Layout Fix)</title>
+    <title>ระบบจัดสอนแทน V.7.8 (History PDF & Copy)</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -55,6 +55,8 @@
 
         .btn-primary { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-family: 'Sarabun'; font-size: 1rem; margin-top: 15px; }
         .btn-print { background: #2563eb; color: white; padding: 10px 25px; border: none; border-radius: 6px; cursor: pointer; font-family: 'Sarabun'; display: inline-flex; align-items: center; gap: 5px; margin-left: 10px; }
+        .btn-action-group { display: flex; gap: 5px; }
+        .btn-sm { padding: 4px 10px; border-radius: 4px; border: none; cursor: pointer; font-family: 'Sarabun'; font-size: 0.85rem; display: flex; align-items: center; gap: 4px; }
 
         .realtime-summary { background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 15px; margin-bottom: 20px; }
         .realtime-summary h4 { color: #b45309; margin-bottom: 10px; }
@@ -73,13 +75,28 @@
 
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(3px); }
         .modal-content { background: #525659; width: 95%; height: 98%; margin: 10px auto; border-radius: 8px; display: flex; flex-direction: column; }
+        /* Modal Content for Copy Text (Smaller) */
+        .modal-content-sm { background: white; width: 500px; max-width: 90%; height: auto; margin: 50px auto; border-radius: 8px; display: flex; flex-direction: column; padding: 20px; }
+        
         .modal-tools { background: #333; padding: 10px; display: flex; justify-content: flex-end; gap: 10px; color: white; flex-wrap: wrap; }
         .modal-view { flex-grow: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 20px; background: #525659; }
+
+        textarea.copy-box {
+            width: 100%;
+            height: 250px;
+            padding: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-family: 'Sarabun';
+            font-size: 0.9rem;
+            margin: 15px 0;
+            background: #f8fafc;
+        }
 
         /* ===== A4 Paper Styles ===== */
         .a4-paper {
             width: 210mm;
-            min-height: 297mm; /* ใช้ min-height เพื่อความยืดหยุ่น แต่ปกติจะพอดี */
+            min-height: 297mm;
             height: auto;
             background: white;
             padding: 12mm 15mm 10mm 20mm;
@@ -91,217 +108,55 @@
             box-sizing: border-box;
             box-shadow: 0 0 10px rgba(0,0,0,0.3);
             margin-bottom: 20px;
-            overflow: visible; /* เปลี่ยนเป็น visible เพื่อให้ footer ไม่ถูกตัด */
-            
-            /* แก้ไข 1: เพิ่ม min-width เพื่อให้แสดงผลใน Preview Modal เป็น A4 ไม่บีบเล็ก */
+            overflow: visible;
             min-width: 210mm; 
         }
 
         /* ส่วนหัว - ครุฑและชื่อเอกสาร */
-        .doc-header {
-            position: relative;
-            margin-bottom: 5px;
-        }
-
-        .garuda {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 1.4cm;
-            height: auto;
-        }
-
-        .doc-code {
-            position: absolute;
-            right: 0;
-            top: 0;
-            font-size: 13pt;
-            font-weight: bold;
-        }
-
-        .doc-title {
-            text-align: center;
-            font-size: 26pt;
-            font-weight: bold;
-            padding-top: 8mm;
-            margin-bottom: 3mm;
-        }
+        .doc-header { position: relative; margin-bottom: 5px; }
+        .garuda { position: absolute; left: 0; top: 0; width: 1.4cm; height: auto; }
+        .doc-code { position: absolute; right: 0; top: 0; font-size: 13pt; font-weight: bold; }
+        .doc-title { text-align: center; font-size: 26pt; font-weight: bold; padding-top: 8mm; margin-bottom: 3mm; }
 
         /* ข้อมูลเอกสาร */
-        .doc-meta {
-            font-size: 14pt;
-            line-height: 1.3;
-            margin-bottom: 2px;
-        }
-
-        .doc-meta-row {
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .doc-line {
-            border: none;
-            border-bottom: 1px solid black;
-            margin: 4px 0;
-        }
-
-        .doc-to {
-            font-size: 14pt;
-            font-weight: bold;
-            font-style: italic;
-            margin-bottom: 3px;
-        }
+        .doc-meta { font-size: 14pt; line-height: 1.3; margin-bottom: 2px; }
+        .doc-meta-row { display: flex; justify-content: space-between; }
+        .doc-line { border: none; border-bottom: 1px solid black; margin: 4px 0; }
+        .doc-to { font-size: 14pt; font-weight: bold; font-style: italic; margin-bottom: 3px; }
 
         /* เนื้อหา */
-        .doc-content {
-            font-size: 14pt;
-            text-indent: 2cm;
-            text-align: justify;
-            line-height: 1.25;
-            margin-bottom: 3px;
-        }
+        .doc-content { font-size: 14pt; text-indent: 2cm; text-align: justify; line-height: 1.25; margin-bottom: 3px; }
 
-        /* ตาราง - ปรับขนาดให้กระชับ */
-        .doc-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 5px 0;
-            font-size: 12pt;
-        }
-
-        .doc-table th, 
-        .doc-table td {
-            border: 1px solid black;
-            padding: 2px 3px;
-            text-align: center;
-            vertical-align: middle;
-            line-height: 1.15;
-        }
-
-        .doc-table th {
-            background: white;
-            font-weight: bold;
-            font-size: 11pt;
-        }
-
-        .doc-table td {
-            font-size: 11pt;
-            height: 18px;
-        }
-
-        .doc-table td.text-left {
-            text-align: left;
-            padding-left: 4px;
-        }
+        /* ตาราง */
+        .doc-table { width: 100%; border-collapse: collapse; margin: 5px 0; font-size: 12pt; }
+        .doc-table th, .doc-table td { border: 1px solid black; padding: 2px 3px; text-align: center; vertical-align: middle; line-height: 1.15; }
+        .doc-table th { background: white; font-weight: bold; font-size: 11pt; }
+        .doc-table td { font-size: 11pt; height: 18px; }
+        .doc-table td.text-left { text-align: left; padding-left: 4px; }
 
         /* ปิดท้าย */
-        .doc-closing {
-            font-size: 14pt;
-            text-indent: 2cm;
-            margin-top: 5px;
-            margin-bottom: 5px;
-        }
+        .doc-closing { font-size: 14pt; text-indent: 2cm; margin-top: 5px; margin-bottom: 5px; }
 
-        /* ลายเซ็น - ปรับให้กระชับ */
-        .sign-table {
-            width: 100%;
-            border-collapse: collapse;
-            border: none;
-            margin-top: 8px;
-        }
+        /* ลายเซ็น */
+        .sign-table { width: 100%; border-collapse: collapse; border: none; margin-top: 20px; /* เพิ่มระยะห่างตรงนี้ */ }
+        .sign-table td { border: none; vertical-align: top; text-align: center; padding: 3px 5px; width: 50%; font-size: 12pt; line-height: 1.2; white-space: nowrap; }
+        .sign-row-bottom td { padding-top: 10px; }
+        .checkbox-text { text-align: left; padding-left: 15px; margin-bottom: 2px; font-size: 12pt; }
 
-        .sign-table td {
-            border: none;
-            vertical-align: top;
-            text-align: center;
-            padding: 3px 5px;
-            width: 50%;
-            /* แก้ไข 2: ปรับขนาดฟอนต์ลงนิดหน่อย และใส่ nowrap กันคำตกบรรทัด */
-            font-size: 12pt; 
-            line-height: 1.2;
-            white-space: nowrap; 
-        }
-
-        .sign-row-bottom td {
-            padding-top: 10px;
-        }
-
-        .checkbox-text {
-            text-align: left;
-            padding-left: 15px;
-            margin-bottom: 2px;
-            font-size: 12pt;
-        }
-
-        /* Footer - แก้ไข 3: ปรับระยะห่าง */
-        .footer-system {
-            /* ลบ Absolute ออก ใช้ Margin แทน เพื่อดันระยะห่างจากลายเซ็น */
-            position: static; 
-            margin-top: 50px; /* เว้นระยะห่างประมาณ 2-3 บรรทัด */
-            text-align: center;
-            font-size: 10pt;
-            color: #666;
-            font-style: italic;
-            width: 100%;
-        }
+        /* Footer */
+        .footer-system { position: static; margin-top: 50px; text-align: center; font-size: 10pt; color: #666; font-style: italic; width: 100%; }
 
         /* ===== Print Styles ===== */
         @media print {
-            @page {
-                size: A4;
-                margin: 0;
-            }
-            
-            body { 
-                background: white; 
-                padding: 0; 
-                margin: 0;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-            
-            .app-container, .modal-tools { 
-                display: none !important; 
-            }
-            
-            .modal { 
-                position: static; 
-                background: white; 
-                width: 100%; 
-                height: auto; 
-                display: block !important; 
-            }
-            
-            .modal-content { 
-                margin: 0; 
-                width: 100%; 
-                height: auto; 
-                background: white; 
-                box-shadow: none; 
-                overflow: visible; 
-            }
-            
-            .modal-view { 
-                padding: 0; 
-                display: block;
-                background: white;
-            }
-            
-            .a4-paper { 
-                margin: 0; 
-                padding: 12mm 15mm 10mm 20mm;
-                width: 210mm;
-                height: 297mm; /* บังคับสูง A4 ตอนปริ้นท์ */
-                page-break-after: always;
-                page-break-inside: avoid;
-                box-shadow: none;
-                border: none;
-                min-width: auto; /* รีเซ็ตตอนปริ้นท์ */
-            }
-            
-            .a4-paper:last-child {
-                page-break-after: auto;
-            }
+            @page { size: A4; margin: 0; }
+            body { background: white; padding: 0; margin: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .app-container, .modal-tools { display: none !important; }
+            .modal { position: static; background: white; width: 100%; height: auto; display: block !important; }
+            .modal-content { margin: 0; width: 100%; height: auto; background: white; box-shadow: none; overflow: visible; }
+            .modal-view { padding: 0; display: block; background: white; }
+            .a4-paper { margin: 0; padding: 12mm 15mm 10mm 20mm; width: 210mm; height: 297mm; page-break-after: always; page-break-inside: avoid; box-shadow: none; border: none; min-width: auto; }
+            .a4-paper:last-child { page-break-after: auto; }
+            #copyModal { display: none !important; }
         }
 
         @media (max-width: 768px) {
@@ -315,8 +170,8 @@
 
     <div class="app-container">
         <div class="header">
-            <h1>ระบบจัดสอนแทน V.7.7</h1>
-            <p>✨ แก้ไข A4 Preview, คำตกบรรทัด และระยะห่างท้ายกระดาษ</p>
+            <h1>ระบบจัดสอนแทน V.7.8</h1>
+            <p>✨ History PDF, Copy Text, ปรับระยะห่างลายเซ็น</p>
         </div>
 
         <div class="nav-bar">
@@ -410,7 +265,7 @@
     <div id="previewModal" class="modal">
         <div class="modal-content">
             <div class="modal-tools">
-                <span>ตัวอย่างรายงาน (A4 - 1 หน้าพอดี)</span>
+                <span>ตัวอย่างรายงาน (A4)</span>
                 <button onclick="window.print()" class="nav-btn" style="background:#2563eb; color:white; border:none;">
                     🖨️ พิมพ์ / บันทึก PDF
                 </button>
@@ -420,9 +275,20 @@
         </div>
     </div>
 
+    <div id="copyModal" class="modal" style="z-index: 2000;">
+        <div class="modal-content-sm">
+            <h3 style="color:#15803d;">📋 คัดลอกสรุปรายการ</h3>
+            <textarea id="copyTextBox" class="copy-box"></textarea>
+            <div style="display:flex; justify-content:flex-end; gap:10px;">
+                <button onclick="copyToClipboard()" class="nav-btn" style="background:#15803d; color:white; border:none;">คัดลอก</button>
+                <button onclick="document.getElementById('copyModal').style.display='none'" class="nav-btn" style="background:#64748b; color:white; border:none;">ปิด</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // ============================================
-        // CONFIG
+        // CONFIG & INIT
         // ============================================
         const firebaseConfig = {
             apiKey: "AIzaSyCF7qDDxp6NXk3y7wLiySasqoviGyCKNNw",
@@ -434,6 +300,9 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
+
+        // Global cache for history to access specific data
+        let historyDataCache = []; 
 
         // ============================================
         // DATA
@@ -657,7 +526,7 @@
         }
 
         // ============================================
-        // PREVIEW & PDF - ปรับให้อยู่ใน 1 หน้า A4
+        // PREVIEW & PDF
         // ============================================
         async function preparePreview() {
             const data = [];
@@ -665,6 +534,7 @@
             const academicHead = document.getElementById('academicHeadName').value;
             const deputyDirector = document.getElementById('deputyDirectorName').value;
             const director = document.getElementById('directorName').value;
+            // ใช้ docDate จาก global ที่ user เลือก
 
             const cards = document.querySelectorAll('.card');
             let isValid = false;
@@ -713,14 +583,14 @@
                 });
             } catch(e) { console.error("Firebase save error:", e); }
 
-            renderPaper(data, scheduler, academicHead, deputyDirector, director);
+            renderPaper(data, scheduler, academicHead, deputyDirector, director, docDate);
             document.getElementById('previewModal').style.display = 'block';
         }
 
-        function renderPaper(data, scheduler, academicHead, deputyDirector, director) {
+        function renderPaper(data, scheduler, academicHead, deputyDirector, director, dateStr) {
             const container = document.getElementById('paperContainer');
             container.innerHTML = '';
-            const thaiDateStr = formatThaiDate(docDate);
+            const thaiDateStr = formatThaiDate(dateStr);
 
             // Group by substitute teacher
             const grouped = {};
@@ -748,7 +618,6 @@
                     </tr>
                 `).join('');
 
-                // เติมแถวว่างให้ครบ 12 แถว (พอดีกับพื้นที่)
                 const totalRows = 12;
                 for(let k = items.length; k < totalRows; k++) {
                     rows += `<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
@@ -815,6 +684,8 @@
                     
                     <div class="doc-closing">จึงเรียนมาเพื่อโปรดทราบ</div>
                     
+                    <div style="height:20px;"></div> 
+
                     <table class="sign-table">
                         <tr>
                             <td>
@@ -823,7 +694,7 @@
                             </td>
                             <td>
                                 ลงชื่อ........................................หัวหน้ากลุ่มบริหารงานวิชาการ<br>
-                                (${academicHead})
+                                <span style="position:relative; left:-15px;">(${academicHead})</span>
                             </td>
                         </tr>
                         <tr class="sign-row-bottom">
@@ -849,9 +720,13 @@
             }
         }
 
+        // ============================================
+        // HISTORY & COPY LOGIC
+        // ============================================
         function loadHistory() {
             const list = document.getElementById('historyList');
             list.innerHTML = '<div style="text-align:center; padding:20px;">🔄 กำลังโหลด...</div>';
+            historyDataCache = []; // Reset cache
             
             db.collection("substitutions").orderBy("created_at", "desc").limit(15).get()
             .then(snap => {
@@ -863,6 +738,9 @@
                 
                 snap.forEach(doc => {
                     const d = doc.data();
+                    d.id = doc.id; // Store ID
+                    historyDataCache.push(d); // Add to cache
+
                     const item = document.createElement('div');
                     item.className = 'card';
                     item.style = 'padding:15px; margin-bottom:10px;';
@@ -870,17 +748,60 @@
                     item.innerHTML = `
                         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
                             <div>
-                                <strong>📅 ${d.docDate}</strong>
+                                <strong>📅 ${formatThaiDate(d.docDate)}</strong>
                                 <span style="font-size:0.8rem; color:#64748b; margin-left:10px;">วัน${d.daySchedule || ''}</span>
                             </div>
-                            <button onclick="deleteLog('${doc.id}')" style="background:#fee2e2; color:red; border:none; padding:5px 15px; cursor:pointer; border-radius:4px; font-family:'Sarabun';">🗑️ ลบ</button>
+                            <div class="btn-action-group">
+                                <button onclick="showHistoryPDF('${doc.id}')" class="btn-sm" style="background:#3b82f6; color:white;">🖨️ ดู PDF</button>
+                                <button onclick="showCopyModal('${doc.id}')" class="btn-sm" style="background:#15803d; color:white;">📋 คัดลอก</button>
+                                <button onclick="deleteLog('${doc.id}')" class="btn-sm" style="background:#fee2e2; color:red;">🗑️ ลบ</button>
+                            </div>
                         </div>
                         <ul style="margin-top:10px; padding-left:20px; font-size:0.9rem;">
-                            ${d.records.map(r => `<li>คาบ ${r.period}: <strong>${r.sub}</strong> แทน ${r.absent} (${r.reason || '-'})</li>`).join('')}
+                            ${d.records.map(r => `<li>คาบ ${r.period}: <strong>${r.sub}</strong> แทน ${r.absent}</li>`).join('')}
                         </ul>
                     `;
                     list.appendChild(item);
                 });
+            });
+        }
+
+        function showHistoryPDF(id) {
+            const data = historyDataCache.find(x => x.id === id);
+            if(data) {
+                renderPaper(data.records, data.scheduler, data.academicHead, data.deputyDirector, data.director, data.docDate);
+                document.getElementById('previewModal').style.display = 'block';
+            }
+        }
+
+        function showCopyModal(id) {
+            const data = historyDataCache.find(x => x.id === id);
+            if(!data) return;
+
+            const dateStr = formatThaiDate(data.docDate);
+            const currentUrl = window.location.href;
+            
+            let text = `📢 **สรุปการจัดสอนแทน**\n📅 วันที่: ${dateStr}\n------------------------------\n`;
+            
+            // Sort by period
+            const sortedRecords = [...data.records].sort((a,b) => a.period - b.period);
+            
+            sortedRecords.forEach((r, index) => {
+                text += `${index+1}. คาบ ${r.period}: ${r.sub} แทน ${r.absent} (${r.reason})\n`;
+            });
+            
+            text += `------------------------------\n🔗 กดเพื่อดาวน์โหลด PDF/พิมพ์รายงาน:\n${currentUrl}`;
+
+            document.getElementById('copyTextBox').value = text;
+            document.getElementById('copyModal').style.display = 'block';
+        }
+
+        function copyToClipboard() {
+            const copyText = document.getElementById("copyTextBox");
+            copyText.select();
+            copyText.setSelectionRange(0, 99999); /* For mobile devices */
+            navigator.clipboard.writeText(copyText.value).then(() => {
+                Swal.fire({ icon: 'success', title: 'คัดลอกแล้ว!', timer: 1000, showConfirmButton: false });
             });
         }
 
