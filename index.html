@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบจัดสอนแทน V.6.5 (Fixed & Restored)</title>
+    <title>ระบบจัดสอนแทน V.6.6 (Fixed PDF & Realtime)</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -23,7 +23,7 @@
         .app-container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); overflow: hidden; min-height: 90vh; }
         
         .header { background: linear-gradient(135deg, #166534, #15803d); padding: 20px; color: white; text-align: center; }
-        .nav-bar { display: flex; justify-content: center; gap: 10px; padding: 15px; background: white; border-bottom: 1px solid #e2e8f0; }
+        .nav-bar { display: flex; justify-content: center; gap: 10px; padding: 15px; background: white; border-bottom: 1px solid #e2e8f0; flex-wrap: wrap; }
         .nav-btn { padding: 8px 20px; border-radius: 20px; border: 1px solid #e2e8f0; background: white; cursor: pointer; transition: 0.2s; font-family: 'Kanit'; }
         .nav-btn.active, .nav-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
 
@@ -43,9 +43,9 @@
 
         /* Match Cards */
         .card { background: white; border: 1px solid #e2e8f0; border-radius: 10px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
-        .card-header { background: #fee2e2; padding: 10px 20px; color: #991b1b; font-weight: 600; border-left: 4px solid #ef4444; }
+        .card-header { background: #fee2e2; padding: 10px 20px; color: #991b1b; font-weight: 600; border-left: 4px solid #ef4444; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
         .period-block { padding: 15px; border-bottom: 1px dashed #e2e8f0; }
-        .period-title { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
+        .period-title { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
         .badge-p { background: #2563eb; color: white; padding: 4px 10px; border-radius: 5px; font-weight: bold; font-size: 0.9rem; }
         
         /* Candidate Option */
@@ -53,16 +53,23 @@
         .candidate-opt:hover { background: #f8fafc; }
         .candidate-opt.selected { background: #eff6ff; border-color: #2563eb; outline: 1px solid #2563eb; }
         .meta-info { font-size: 0.8rem; color: #64748b; margin-top: 2px; }
-        .workload-badge { margin-left: auto; font-size: 0.75rem; padding: 2px 8px; border-radius: 10px; background: #e2e8f0; }
+        .workload-badge { margin-left: auto; font-size: 0.75rem; padding: 2px 8px; border-radius: 10px; background: #e2e8f0; white-space: nowrap; }
         .load-high { background: #fecaca; color: #991b1b; }
+        .load-medium { background: #fef08a; color: #854d0e; }
 
         .btn-primary { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-family: 'Kanit'; font-size: 1rem; margin-top: 15px; }
-        .btn-print { background: #2563eb; color: white; padding: 10px 25px; border: none; border-radius: 6px; cursor: pointer; float: right; font-family: 'Kanit'; display: flex; align-items: center; gap: 5px; }
+        .btn-print { background: #2563eb; color: white; padding: 10px 25px; border: none; border-radius: 6px; cursor: pointer; font-family: 'Kanit'; display: flex; align-items: center; gap: 5px; }
+
+        /* Realtime Summary */
+        .realtime-summary { background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 15px; margin-bottom: 20px; }
+        .realtime-summary h4 { color: #b45309; margin-bottom: 10px; }
+        .summary-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+        .summary-item { background: white; padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; border: 1px solid #fbbf24; }
 
         /* Modal & PDF */
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(3px); }
         .modal-content { background: #525659; width: 95%; height: 98%; margin: 10px auto; border-radius: 8px; display: flex; flex-direction: column; }
-        .modal-tools { background: #333; padding: 10px; display: flex; justify-content: flex-end; gap: 10px; color: white; }
+        .modal-tools { background: #333; padding: 10px; display: flex; justify-content: flex-end; gap: 10px; color: white; flex-wrap: wrap; }
         .modal-view { flex-grow: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 20px; }
 
         /* A4 Layout (TH Sarabun New) */
@@ -78,6 +85,17 @@
         .doc-sign { margin-top: 50px; display: flex; justify-content: space-between; font-size: 16pt; }
         .sign-box { text-align: center; width: 45%; }
 
+        /* Reason Select Styling */
+        .reason-select { 
+            padding: 5px 10px; 
+            border-radius: 6px; 
+            border: 1px solid #f59e0b; 
+            background: #fffbeb; 
+            font-family: 'Kanit'; 
+            font-size: 0.9rem;
+            min-width: 120px;
+        }
+
         @media print {
             body { background: white; padding: 0; }
             .app-container, .modal-tools { display: none !important; }
@@ -86,14 +104,19 @@
             .modal-view { padding: 0; display: block; }
             .a4-paper { margin: 0; page-break-after: always; width: 100%; box-shadow: none; }
         }
+
+        @media (max-width: 768px) {
+            .period-title { flex-direction: column; align-items: flex-start; }
+            .period-title input, .period-title select { width: 100%; }
+        }
     </style>
 </head>
 <body>
 
     <div class="app-container">
         <div class="header">
-            <h1>ระบบจัดสอนแทน V.6.5</h1>
-            <p>แก้ไขระบบนับคาบ & กู้คืนตารางสอน & PDF Download</p>
+            <h1>ระบบจัดสอนแทน V.6.6</h1>
+            <p>แก้ไข PDF Download, Realtime Counter, เพิ่มสาเหตุการลา</p>
         </div>
 
         <div class="nav-bar">
@@ -142,10 +165,18 @@
             </div>
 
             <div id="resultArea" style="display: none;">
+                <!-- Realtime Summary Section -->
+                <div class="realtime-summary" id="realtimeSummary">
+                    <h4>📊 สรุปภาระงานสอนแทน (วันนี้ - Realtime)</h4>
+                    <div class="summary-grid" id="summaryGrid">
+                        <span style="color:#64748b;">กรุณาเลือกครูสอนแทน...</span>
+                    </div>
+                </div>
+
                 <h3 style="margin-bottom:15px; color:#166534;">ผลการค้นหา (กรุณาระบุรายละเอียด)</h3>
                 <div id="matchCards"></div>
                 <div style="overflow: hidden; margin-top:20px;">
-                    <button class="btn-print" onclick="preparePreview()">
+                    <button class="btn-print" onclick="preparePreview()" style="float:right;">
                         <i class="fas fa-file-invoice"></i> สร้างรายงานและบันทึก
                     </button>
                 </div>
@@ -171,11 +202,10 @@
             <div class="modal-tools">
                 <span>ตัวอย่างรายงาน (A4)</span>
                 <button onclick="window.print()" class="nav-btn" style="background:#2563eb; color:white; border:none;">🖨️ พิมพ์ / บันทึก PDF</button>
-                <button onclick="downloadPDF_Library()" class="nav-btn" style="background:#be123c; color:white; border:none;">📥 ดาวน์โหลด (Beta)</button>
+                <button onclick="downloadPDF_Library()" class="nav-btn" style="background:#be123c; color:white; border:none;">📥 ดาวน์โหลด PDF</button>
                 <button onclick="document.getElementById('previewModal').style.display='none'" class="nav-btn" style="background:#64748b; color:white; border:none;">ปิด</button>
             </div>
-            <div class="modal-view" id="paperContainer">
-                </div>
+            <div class="modal-view" id="paperContainer"></div>
         </div>
     </div>
 
@@ -214,7 +244,8 @@
         let selectedTeachers = [];
         let daySchedule = "";
         let docDate = "";
-        let workloadMap = {}; 
+        let workloadMap = {};        // จาก Firebase (บันทึกก่อนหน้า)
+        let realtimeWorkload = {};   // จากการเลือกในหน้าจอ (ยังไม่บันทึก)
 
         // --- INIT ---
         window.onload = () => {
@@ -259,8 +290,10 @@
             if(!daySchedule || !docDate || selectedTeachers.length === 0) 
                 return Swal.fire('ข้อมูลไม่ครบ', 'กรุณาเลือกวันในตาราง, วันที่เอกสาร และครูที่ลา', 'warning');
 
-            // 1. Fetch Workload (From specific DATE, not just day of week)
+            // 1. Fetch Workload from Firebase (existing records for this date)
             workloadMap = {};
+            realtimeWorkload = {}; // Reset realtime workload
+            
             try {
                 const snap = await db.collection("substitutions").where("docDate", "==", docDate).get();
                 snap.forEach(doc => {
@@ -269,7 +302,7 @@
                 });
             } catch(e) { console.error("Workload Error:", e); }
 
-            // 2. Render
+            // 2. Render Cards
             const container = document.getElementById('matchCards');
             container.innerHTML = '';
 
@@ -280,7 +313,14 @@
                 if(periods.length === 0) return;
 
                 let html = `<div class="card">
-                    <div class="card-header"><span>${absentName} (ลา)</span></div>
+                    <div class="card-header">
+                        <span>${absentName} (ลา)</span>
+                        <select id="reason_${absentName}" class="reason-select">
+                            <option value="ลาป่วย">🤒 ลาป่วย</option>
+                            <option value="ลากิจ">📋 ลากิจ</option>
+                            <option value="ไปราชการ" selected>🚗 ไปราชการ</option>
+                        </select>
+                    </div>
                     <div style="padding:15px;">`;
 
                 periods.sort((a,b)=>a-b).forEach(period => {
@@ -304,22 +344,23 @@
                     if(candidates.length === 0) html += `<div style="color:red">ไม่มีครูว่าง</div>`;
                     else {
                         candidates.forEach(t => {
-                            const load = workloadMap[t.name] || 0;
-                            const loadClass = load > 1 ? 'load-high' : '';
+                            const totalLoad = (workloadMap[t.name] || 0);
                             const inputName = `rad_${absentName}_${period}`;
                             
-                            // Restore: Show Busy Schedule
+                            // Show Busy Schedule
                             const busyPeriods = t.schedule[daySchedule] || [];
                             const busyText = busyPeriods.length > 0 ? `สอนคาบ: ${busyPeriods.join(', ')}` : 'ว่างตลอดวัน';
 
                             html += `
-                                <div class="candidate-opt" onclick="selectRadio(this)">
+                                <div class="candidate-opt" onclick="selectRadio(this, '${t.name}', '${absentName}', ${period})">
                                     <input type="radio" name="${inputName}" value="${t.name}" data-dept="${t.department}">
                                     <div style="flex:1;">
                                         <strong>${t.name}</strong> <span style="font-size:0.8rem; color:#64748b;">(${t.department})</span>
                                         <div class="meta-info">📅 ${busyText}</div>
                                     </div>
-                                    <div class="workload-badge ${loadClass}">วันนี้สอนแล้ว: ${load}</div>
+                                    <div class="workload-badge" data-teacher="${t.name}">
+                                        บันทึกแล้ว: ${totalLoad} | เลือกใหม่: <span class="realtime-count">0</span>
+                                    </div>
                                 </div>
                             `;
                         });
@@ -331,20 +372,115 @@
             });
 
             document.getElementById('resultArea').style.display = 'block';
+            updateRealtimeSummary();
             setTimeout(() => document.getElementById('resultArea').scrollIntoView({behavior:'smooth'}), 100);
         }
 
         function findCandidates(day, period, exclude) {
             return teachersData
                 .filter(t => !exclude.includes(t.name) && !(t.schedule[day]||[]).includes(period))
-                .sort((a,b) => (workloadMap[a.name]||0) - (workloadMap[b.name]||0))
+                .sort((a,b) => {
+                    const loadA = (workloadMap[a.name]||0) + (realtimeWorkload[a.name]||0);
+                    const loadB = (workloadMap[b.name]||0) + (realtimeWorkload[b.name]||0);
+                    return loadA - loadB;
+                })
                 .slice(0, 5);
         }
 
-        function selectRadio(el) {
-            el.parentElement.querySelectorAll('.candidate-opt').forEach(x => x.classList.remove('selected'));
+        // --- REALTIME SELECTION & COUNTER ---
+        function selectRadio(el, teacherName, absentName, period) {
+            const container = el.parentElement;
+            const inputName = `rad_${absentName}_${period}`;
+            
+            // Get previously selected teacher for this period (if any)
+            const previousRadio = container.querySelector(`input[name="${inputName}"]:checked`);
+            let previousTeacher = null;
+            if(previousRadio && previousRadio.value !== teacherName) {
+                previousTeacher = previousRadio.value;
+            }
+            
+            // Deselect all in this period
+            container.querySelectorAll('.candidate-opt').forEach(x => x.classList.remove('selected'));
+            
+            // Select current
             el.classList.add('selected');
             el.querySelector('input').checked = true;
+
+            // Update realtime workload
+            if(previousTeacher) {
+                realtimeWorkload[previousTeacher] = Math.max(0, (realtimeWorkload[previousTeacher] || 0) - 1);
+            }
+            
+            // Check if this is a new selection or toggle
+            const key = `${absentName}_${period}`;
+            if(!window.selectionTracker) window.selectionTracker = {};
+            
+            if(window.selectionTracker[key] !== teacherName) {
+                // New selection for this slot
+                if(window.selectionTracker[key]) {
+                    // Had a previous selection, already decremented above
+                }
+                realtimeWorkload[teacherName] = (realtimeWorkload[teacherName] || 0) + 1;
+                window.selectionTracker[key] = teacherName;
+            }
+
+            // Update all badges
+            updateAllBadges();
+            updateRealtimeSummary();
+        }
+
+        function updateAllBadges() {
+            document.querySelectorAll('.workload-badge').forEach(badge => {
+                const teacherName = badge.dataset.teacher;
+                if(teacherName) {
+                    const realtimeCount = realtimeWorkload[teacherName] || 0;
+                    const totalCount = (workloadMap[teacherName] || 0) + realtimeCount;
+                    
+                    badge.querySelector('.realtime-count').textContent = realtimeCount;
+                    
+                    // Update badge color based on total load
+                    badge.classList.remove('load-high', 'load-medium');
+                    if(totalCount >= 3) {
+                        badge.classList.add('load-high');
+                    } else if(totalCount >= 2) {
+                        badge.classList.add('load-medium');
+                    }
+                }
+            });
+        }
+
+        function updateRealtimeSummary() {
+            const grid = document.getElementById('summaryGrid');
+            
+            // Combine Firebase workload + realtime selections
+            const combined = {...workloadMap};
+            for(const [name, count] of Object.entries(realtimeWorkload)) {
+                combined[name] = (combined[name] || 0) + count;
+            }
+            
+            // Filter only those with work today
+            const entries = Object.entries(combined).filter(([_, count]) => count > 0);
+            
+            if(entries.length === 0) {
+                grid.innerHTML = '<span style="color:#64748b;">ยังไม่มีการเลือกครูสอนแทน</span>';
+                return;
+            }
+            
+            // Sort by count descending
+            entries.sort((a, b) => b[1] - a[1]);
+            
+            grid.innerHTML = entries.map(([name, count]) => {
+                const fromDb = workloadMap[name] || 0;
+                const fromRealtime = realtimeWorkload[name] || 0;
+                let colorClass = '';
+                if(count >= 3) colorClass = 'style="background:#fecaca; border-color:#ef4444;"';
+                else if(count >= 2) colorClass = 'style="background:#fef08a; border-color:#eab308;"';
+                
+                return `<div class="summary-item" ${colorClass}>
+                    ${name.replace(/นาย|นาง|นางสาว/g, '')}: <strong>${count}</strong> คาบ
+                    ${fromDb > 0 ? `<span style="font-size:0.75rem; color:#64748b;">(บันทึก:${fromDb})</span>` : ''}
+                </div>`;
+            }).join('');
         }
 
         // --- PREVIEW & SAVE ---
@@ -357,7 +493,13 @@
             let isValid = false;
 
             cards.forEach(card => {
-                const absent = card.querySelector('.card-header span').innerText.replace(' (ลา)', '');
+                const headerSpan = card.querySelector('.card-header span');
+                if(!headerSpan) return;
+                
+                const absent = headerSpan.innerText.replace(' (ลา)', '');
+                const reasonSelect = card.querySelector(`#reason_${absent}`);
+                const reason = reasonSelect ? reasonSelect.value : 'ไปราชการ';
+                
                 card.querySelectorAll('.period-block').forEach(block => {
                     const period = block.querySelector('.badge-p').innerText.replace('คาบ ', '');
                     const radio = block.querySelector('input[type="radio"]:checked');
@@ -372,7 +514,8 @@
                             sub: radio.value,
                             dept: radio.dataset.dept,
                             subject: subj,
-                            grade: grade
+                            grade: grade,
+                            reason: reason  // เพิ่มสาเหตุ
                         });
                     }
                 });
@@ -380,19 +523,23 @@
 
             if(!isValid) return Swal.fire('เตือน', 'กรุณาเลือกผู้สอนแทนอย่างน้อย 1 รายการ', 'warning');
 
-            // Save
+            // Save to Firebase
             try {
                 await db.collection("substitutions").add({
                     created_at: firebase.firestore.FieldValue.serverTimestamp(),
-                    docDate: docDate, // Key for Workload
-                    daySchedule: daySchedule, // Key for Logic
+                    docDate: docDate,
+                    daySchedule: daySchedule,
                     records: data,
                     scheduler: scheduler,
                     director: director
                 });
-            } catch(e) { console.error(e); }
+                console.log("Saved to Firebase successfully");
+            } catch(e) { 
+                console.error("Firebase save error:", e); 
+                Swal.fire('เตือน', 'บันทึกข้อมูลไม่สำเร็จ: ' + e.message, 'error');
+            }
 
-            // Generate HTML
+            // Generate HTML for PDF
             renderPaper(data, scheduler, director);
             document.getElementById('previewModal').style.display = 'block';
         }
@@ -405,6 +552,7 @@
             const thaiMonths = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
             const thaiDateStr = `${parseInt(dateParts[2])} เดือน ${thaiMonths[parseInt(dateParts[1])-1]} พ.ศ. ${parseInt(dateParts[0])+543}`;
 
+            // Group by substitute teacher
             const grouped = {};
             data.forEach(x => {
                 if(!grouped[x.sub]) grouped[x.sub] = [];
@@ -420,7 +568,7 @@
                     <tr>
                         <td>${idx+1}</td>
                         <td style="text-align:left;">${it.absent}</td>
-                        <td>ไปราชการ</td>
+                        <td>${it.reason}</td>
                         <td>${it.period}</td>
                         <td>${it.subject}</td>
                         <td>${it.grade}</td>
@@ -428,12 +576,15 @@
                     </tr>
                 `).join('');
 
-                for(let k=items.length; k<5; k++) rows += `<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
+                // Add empty rows to make 5 rows minimum
+                for(let k=items.length; k<5; k++) {
+                    rows += `<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
+                }
 
                 container.innerHTML += `
                 <div class="a4-paper">
                     <div class="doc-head">
-                        <img src="https://nonthaphathr.github.io/uploadimg/kruda.png" class="garuda">
+                        <img src="https://nonthaphathr.github.io/uploadimg/kruda.png" class="garuda" crossorigin="anonymous">
                         <div class="head-text">
                             <h2>บันทึกข้อความ</h2>
                         </div>
@@ -480,50 +631,119 @@
             }
         }
 
-        // --- DOWNLOAD PDF (Option) ---
-        function downloadPDF_Library() {
+        // --- DOWNLOAD PDF (FIXED) ---
+        async function downloadPDF_Library() {
             const element = document.getElementById('paperContainer');
-            const opt = {
-                margin: 0,
-                filename: `รายงานสอนแทน_${docDate}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2 },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-            // Ensure element is visible
-            html2pdf().set(opt).from(element).save();
+            
+            // Show loading
+            Swal.fire({
+                title: 'กำลังสร้าง PDF...',
+                text: 'กรุณารอสักครู่',
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); }
+            });
+
+            try {
+                const opt = {
+                    margin: 0,
+                    filename: `รายงานสอนแทน_${docDate}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { 
+                        scale: 2,
+                        useCORS: true,
+                        allowTaint: true,
+                        logging: false,
+                        letterRendering: true
+                    },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+                };
+
+                // Clone the container and fix styles for PDF
+                const clone = element.cloneNode(true);
+                clone.style.display = 'block';
+                clone.style.visibility = 'visible';
+                
+                await html2pdf().set(opt).from(element).save();
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: 'สำเร็จ!',
+                    text: 'ไฟล์ PDF ถูกดาวน์โหลดแล้ว',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            } catch(error) {
+                console.error('PDF Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'เกิดข้อผิดพลาด',
+                    text: 'ไม่สามารถสร้าง PDF ได้ กรุณาใช้ปุ่ม "พิมพ์ / บันทึก PDF" แทน',
+                    footer: 'Error: ' + error.message
+                });
+            }
         }
 
         // --- HISTORY & DASHBOARD ---
         function loadHistory() {
             const list = document.getElementById('historyList');
-            list.innerHTML = 'Loading...';
-            db.collection("substitutions").orderBy("created_at", "desc").limit(15).get().then(snap => {
+            list.innerHTML = '<div style="text-align:center; padding:20px;">🔄 กำลังโหลด...</div>';
+            
+            db.collection("substitutions").orderBy("created_at", "desc").limit(15).get()
+            .then(snap => {
                 list.innerHTML = '';
+                if(snap.empty) {
+                    list.innerHTML = '<div style="text-align:center; padding:20px; color:#64748b;">ไม่มีข้อมูล</div>';
+                    return;
+                }
+                
                 snap.forEach(doc => {
                     const d = doc.data();
                     const item = document.createElement('div');
                     item.className = 'card';
                     item.style = 'padding:15px; margin-bottom:10px;';
                     item.innerHTML = `
-                        <div style="display:flex; justify-content:space-between;">
-                            <strong>📅 ${d.docDate}</strong>
-                            <button onclick="deleteLog('${doc.id}')" style="background:#fee2e2; color:red; border:none; padding:3px 10px; cursor:pointer; border-radius:4px;">ลบ</button>
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                            <div>
+                                <strong>📅 ${d.docDate}</strong>
+                                <span style="font-size:0.8rem; color:#64748b; margin-left:10px;">วัน${d.daySchedule || ''}</span>
+                            </div>
+                            <button onclick="deleteLog('${doc.id}')" style="background:#fee2e2; color:red; border:none; padding:5px 15px; cursor:pointer; border-radius:4px; font-family:'Kanit';">🗑️ ลบ</button>
                         </div>
-                        <ul style="margin-top:5px; padding-left:20px; font-size:0.9rem;">
-                            ${d.records.map(r => `<li>คาบ ${r.period}: ${r.sub} (${r.subject})</li>`).join('')}
+                        <ul style="margin-top:10px; padding-left:20px; font-size:0.9rem;">
+                            ${d.records.map(r => `<li>คาบ ${r.period}: <strong>${r.sub}</strong> แทน ${r.absent} (${r.reason || 'ไปราชการ'})</li>`).join('')}
                         </ul>
                     `;
                     list.appendChild(item);
                 });
+            })
+            .catch(err => {
+                list.innerHTML = `<div style="color:red; padding:20px;">เกิดข้อผิดพลาด: ${err.message}</div>`;
             });
         }
 
         function deleteLog(id) {
-            Swal.fire({ title:'ยืนยันลบ?', icon:'warning', showCancelButton:true }).then(r => {
-                if(r.isConfirmed) db.collection("substitutions").doc(id).delete().then(loadHistory);
+            Swal.fire({ 
+                title: 'ยืนยันการลบ?', 
+                text: 'ข้อมูลจะถูกลบถาวร',
+                icon: 'warning', 
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                confirmButtonText: 'ลบ',
+                cancelButtonText: 'ยกเลิก'
+            }).then(r => {
+                if(r.isConfirmed) {
+                    db.collection("substitutions").doc(id).delete()
+                    .then(() => {
+                        Swal.fire('ลบแล้ว!', '', 'success');
+                        loadHistory();
+                    });
+                }
             });
         }
+
+        let deptChartInstance = null;
+        let teacherChartInstance = null;
 
         function renderCharts() {
             db.collection("substitutions").get().then(snap => {
@@ -535,15 +755,45 @@
                     });
                 });
                 
-                new Chart(document.getElementById('deptChart'), {
+                // Destroy existing charts
+                if(deptChartInstance) deptChartInstance.destroy();
+                if(teacherChartInstance) teacherChartInstance.destroy();
+                
+                deptChartInstance = new Chart(document.getElementById('deptChart'), {
                     type: 'doughnut',
-                    data: { labels:Object.keys(dMap), datasets:[{data:Object.values(dMap), backgroundColor:['#3b82f6','#ef4444','#eab308','#22c55e']}] }
+                    data: { 
+                        labels: Object.keys(dMap), 
+                        datasets: [{
+                            data: Object.values(dMap), 
+                            backgroundColor: ['#3b82f6','#ef4444','#eab308','#22c55e','#8b5cf6','#ec4899']
+                        }] 
+                    },
+                    options: {
+                        plugins: {
+                            title: { display: true, text: 'สัดส่วนตามกลุ่มสาระ' }
+                        }
+                    }
                 });
 
                 const top5 = Object.entries(tMap).sort((a,b)=>b[1]-a[1]).slice(0,5);
-                new Chart(document.getElementById('teacherChart'), {
+                teacherChartInstance = new Chart(document.getElementById('teacherChart'), {
                     type: 'bar',
-                    data: { labels:top5.map(x=>x[0]), datasets:[{label:'คาบ', data:top5.map(x=>x[1]), backgroundColor:'#166534'}] }
+                    data: { 
+                        labels: top5.map(x => x[0].replace(/นาย|นาง|นางสาว/g, '')), 
+                        datasets: [{
+                            label: 'จำนวนคาบสอนแทน', 
+                            data: top5.map(x=>x[1]), 
+                            backgroundColor: '#166534'
+                        }] 
+                    },
+                    options: {
+                        plugins: {
+                            title: { display: true, text: 'Top 5 ครูสอนแทน' }
+                        },
+                        scales: {
+                            y: { beginAtZero: true }
+                        }
+                    }
                 });
             });
         }
