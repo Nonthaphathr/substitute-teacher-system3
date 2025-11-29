@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบจัดสอนแทน V.7.0 (Google Docs)</title>
+    <title>ระบบจัดสอนแทน V.7.0 (Local Print Only)</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -13,12 +13,11 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
-    <!-- Google API -->
-    <script src="https://apis.google.com/js/api.js"></script>
-    <script async defer src="https://accounts.google.com/gsi/client"></script>
-
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Kanit:wght@300;400;500;600;700&display=swap');
+        /* Import ฟอนต์สำหรับหน้าเว็บทั่วไป */
+        @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap');
+        /* Import ฟอนต์สำหรับเอกสารราชการ (Sarabun ใกล้เคียง TH Sarabun New) */
+        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap');
 
         :root { --primary: #15803d; --bg: #f0fdf4; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -81,166 +80,150 @@
         .modal-tools { background: #333; padding: 10px; display: flex; justify-content: flex-end; gap: 10px; color: white; flex-wrap: wrap; }
         .modal-view { flex-grow: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 20px; background: #525659; }
 
+        /* ========================================= */
+        /* CSS สำหรับกระดาษ A4 และรูปแบบบันทึกข้อความ */
+        /* ========================================= */
         .a4-paper {
             width: 210mm;
-            min-height: 297mm;
-            max-height: 297mm;
+            height: 297mm; /* Fix ความสูงให้เป๊ะ */
             background: white;
-            padding: 15mm 20mm 20mm 25mm;
+            /* ระยะขอบมาตรฐาน: ซ้าย 3cm (25mm เผื่อเย็บ), ขวา 2cm, บน 2.5cm, ล่าง 2cm */
+            padding: 25mm 20mm 20mm 25mm; 
             position: relative;
-            font-family: 'Sarabun', 'TH Sarabun New', serif;
-            font-size: 16pt;
+            font-family: 'Sarabun', sans-serif;
             color: black;
             box-sizing: border-box;
-            overflow: hidden;
             box-shadow: 0 0 10px rgba(0,0,0,0.3);
             margin-bottom: 20px;
+            overflow: hidden; /* ห้ามล้น */
         }
 
-        .page-number {
-            position: absolute;
-            top: 8mm;
-            left: 0;
-            right: 0;
-            text-align: center;
-            font-size: 16pt;
-            font-family: 'Sarabun', 'TH Sarabun New', serif;
+        /* จัดการ Font Size ให้แม่นยำ */
+        .doc-content, .doc-meta, .doc-sign, .doc-table td, .doc-table th {
+            font-size: 16pt !important;
+            line-height: 1.25; /* ระยะบรรทัดกระชับแบบราชการ */
         }
 
-        .doc-head {
+        .garuda-container {
             display: flex;
-            align-items: flex-start;
-            margin-bottom: 0;
-            padding-top: 0;
+            align-items: flex-end; /* ให้ครุฑอยู่ระดับเดียวกับข้อความล่าง */
+            margin-bottom: 10px;
+            height: 35mm; /* จองพื้นที่ส่วนหัว */
+            position: relative;
         }
+
         .garuda {
-            width: 55px;
+            width: 30mm; /* ขนาดครุฑมาตรฐานประมาณ 3 ซม. */
             height: auto;
+            position: absolute;
+            left: 0;
+            top: 0;
         }
+
         .head-text {
-            flex-grow: 1;
+            width: 100%;
             text-align: center;
-            padding-right: 55px;
+            padding-top: 15mm; /* ดันคำว่าบันทึกข้อความลงมา */
         }
+
         .head-text h2 {
-            font-size: 20pt;
+            font-size: 29pt !important; /* ขนาดหัวข้อบันทึกข้อความ ใหญ่พิเศษ */
             font-weight: bold;
-            margin: 10px 0 0 0;
             line-height: 1;
+            margin: 0;
         }
 
         .doc-meta {
-            font-size: 16pt;
-            line-height: 1.3;
-            margin-top: 5px;
+            margin-bottom: 4px;
+            text-align: justify;
         }
-        .doc-meta-row {
-            display: flex;
-            flex-wrap: wrap;
+        
+        /* เส้นประ หรือ เส้นทึบ แล้วแต่แบบ */
+        .doc-hr {
+            border: none;
+            border-bottom: 1px solid black;
+            margin: 5px 0 15px 0;
         }
 
         .doc-content {
-            font-size: 16pt;
-            text-indent: 2.5cm;
             text-align: justify;
-            line-height: 1.3;
-            margin-top: 8px;
+            text-indent: 2.5cm;
+            margin-bottom: 6px;
         }
 
         .doc-table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 10px;
-            font-size: 15pt;
+            margin-bottom: 15px;
         }
-        .doc-table th, .doc-table td {
+        
+        .doc-table th {
+            background: white; /* ราชการไม่นิยมถมสีเทา */
+            font-weight: bold;
+            text-align: center;
+            vertical-align: middle;
+            border: 1px solid black;
+            padding: 5px;
+        }
+        
+        .doc-table td {
             border: 1px solid black;
             padding: 4px 6px;
             text-align: center;
             vertical-align: middle;
-            line-height: 1.2;
         }
-        .doc-table th {
-            background: #f5f5f5;
-            font-weight: bold;
-        }
-        .doc-table td.text-left {
-            text-align: left;
-            padding-left: 8px;
-        }
+        
+        .doc-table td.text-left { text-align: left; }
 
         .doc-sign {
-            margin-top: 30px;
+            margin-top: 25px;
             display: flex;
             justify-content: space-between;
-            font-size: 16pt;
+            align-items: flex-start;
         }
-        .doc-sign.single {
-            justify-content: flex-start;
-        }
+        
         .sign-box {
             text-align: center;
             width: 45%;
             line-height: 1.4;
         }
-        .sign-box.left {
+
+        .page-number {
+            position: absolute;
+            top: 10mm;
+            width: 100%;
             text-align: center;
+            font-size: 16pt;
+            left: 0;
         }
 
-        .doc-hr {
-            border: none;
-            border-bottom: 1px solid black;
-            margin: 8px 0;
-        }
-
+        /* สำหรับหน้าจอพิมพ์ (Print/PDF) */
         @media print {
-            body { 
-                background: white; 
-                padding: 0; 
+            body { background: white; padding: 0; margin: 0; }
+            .app-container, .modal-tools { display: none !important; }
+            .modal { position: static; background: white; width: 100%; height: auto; display: block !important; }
+            .modal-content { margin: 0; width: 100%; height: auto; background: white; box-shadow: none; border: none; }
+            .modal-view { padding: 0; display: block; background: white; overflow: visible; }
+            
+            .a4-paper {
                 margin: 0;
-            }
-            .app-container, .modal-tools { 
-                display: none !important; 
-            }
-            .modal { 
-                position: static; 
-                background: white; 
-                width: 100%; 
-                height: auto; 
-                display: block !important; 
-            }
-            .modal-content { 
-                margin: 0; 
-                width: 100%; 
-                height: auto; 
-                background: white; 
-                box-shadow: none; 
-                overflow: visible; 
-            }
-            .modal-view { 
-                padding: 0; 
-                display: block;
-                background: white;
-            }
-            .a4-paper { 
-                margin: 0; 
-                padding: 15mm 20mm 20mm 25mm;
+                padding: 25mm 20mm 20mm 25mm; 
+                width: 100%;
+                height: 297mm; /* บังคับความสูงตอน Print */
                 page-break-after: always;
-                page-break-inside: avoid;
-                width: 100%; 
-                min-height: auto;
-                max-height: none;
                 box-shadow: none;
+                border: none;
             }
-            .a4-paper:last-child {
-                page-break-after: auto;
-            }
+            .a4-paper:last-child { page-break-after: auto; }
+            
+            /* ซ่อนพื้นหลังสีเวลาพิมพ์ */
+            * { -webkit-print-color-adjust: exact; }
         }
 
         @media (max-width: 768px) {
             .period-title { flex-direction: column; align-items: flex-start; }
             .period-title input, .period-title select { width: 100%; }
-            .a4-paper { width: 100%; min-height: auto; max-height: none; padding: 10mm; }
         }
     </style>
 </head>
@@ -249,7 +232,7 @@
     <div class="app-container">
         <div class="header">
             <h1>ระบบจัดสอนแทน V.7.0</h1>
-            <p>✨ Google Docs Integration - สร้างเอกสารบน Google Drive</p>
+            <p>✨ สร้างเอกสาร PDF (Local)</p>
         </div>
 
         <div class="nav-bar">
@@ -308,11 +291,8 @@
                 <h3 style="margin-bottom:15px; color:#166534;">ผลการค้นหา (กรุณาระบุรายละเอียด)</h3>
                 <div id="matchCards"></div>
                 <div style="overflow: hidden; margin-top:20px;">
-                    <button class="btn-print" onclick="createGoogleDocs()" style="float:right; background:#0f9d58;">
-                        <i class="fas fa-file-alt"></i> สร้าง Google Docs
-                    </button>
                     <button class="btn-print" onclick="preparePreview()" style="float:right;">
-                        <i class="fas fa-eye"></i> ดูตัวอย่าง (HTML)
+                        <i class="fas fa-eye"></i> ดูตัวอย่าง / พิมพ์เอกสาร
                     </button>
                 </div>
             </div>
@@ -335,8 +315,8 @@
     <div id="previewModal" class="modal">
         <div class="modal-content">
             <div class="modal-tools">
-                <span>ตัวอย่างรายงาน (A4 - TH Sarabun)</span>
-                <button onclick="window.print()" class="nav-btn" style="background:#2563eb; color:white; border:none;">🖨️ พิมพ์ / บันทึก PDF</button>
+                <span>ตัวอย่างรายงาน (A4 - TH Sarabun Layout)</span>
+                <button onclick="window.print()" class="nav-btn" style="background:#2563eb; color:white; border:none;">🖨️ สั่งพิมพ์ (แนะนำ)</button>
                 <button onclick="downloadPDF_Library()" class="nav-btn" style="background:#be123c; color:white; border:none;">📥 ดาวน์โหลด PDF</button>
                 <button onclick="document.getElementById('previewModal').style.display='none'" class="nav-btn" style="background:#64748b; color:white; border:none;">ปิด</button>
             </div>
@@ -346,16 +326,10 @@
 
     <script>
         // ============================================
-        // CONFIG
+        // CONFIG & INITIALIZATION
         // ============================================
         
-        // ⚠️ สำคัญ: ใส่ API Key และ Client ID ที่ได้จาก Google Cloud Console
-        const GOOGLE_API_KEY = 'AIzaSyBnDklft0-E1HehGY2Hg7IeNuXLlXItA2s';
-        const GOOGLE_CLIENT_ID = 'Y629533203696-p1rpf2tjrepd8008hh7kkm6ju8emn1ij.apps.googleusercontent.com';
-        const TEMPLATE_DOC_ID = '1GUbAmqzbtjc_24fk41SoA9Gtt0SFRJTEATURFfuRknU';
-        const SCOPES = 'https://www.googleapis.com/auth/documents https://www.googleapis.com/auth/drive.file';
-
-        // Firebase
+        // Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyCF7qDDxp6NXk3y7wLiySasqoviGyCKNNw",
             authDomain: "sornthan-fc0f1.firebaseapp.com",
@@ -366,11 +340,6 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-
-        // Google API state
-        let tokenClient;
-        let gapiInited = false;
-        let gisInited = false;
 
         // ============================================
         // DATA
@@ -399,287 +368,9 @@
         let realtimeWorkload = {};
 
         // ============================================
-        // GOOGLE API INITIALIZATION
-        // ============================================
-        function gapiLoaded() {
-            gapi.load('client', initializeGapiClient);
-        }
-
-        async function initializeGapiClient() {
-            try {
-                await gapi.client.init({
-                    apiKey: GOOGLE_API_KEY,
-                    discoveryDocs: [
-                        'https://docs.googleapis.com/$discovery/rest?version=v1',
-                        'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'
-                    ],
-                });
-                gapiInited = true;
-                console.log('✅ Google API initialized');
-            } catch(e) {
-                console.error('Google API init error:', e);
-            }
-        }
-
-        function gisLoaded() {
-            tokenClient = google.accounts.oauth2.initTokenClient({
-                client_id: GOOGLE_CLIENT_ID,
-                scope: SCOPES,
-                callback: '',
-            });
-            gisInited = true;
-            console.log('✅ Google Identity Services initialized');
-        }
-
-        // ============================================
-        // GOOGLE DOCS FUNCTIONS
-        // ============================================
-        async function createGoogleDocs() {
-            // ตรวจสอบ API Keys
-            if(GOOGLE_API_KEY === 'YOUR_API_KEY_HERE' || GOOGLE_CLIENT_ID === 'YOUR_CLIENT_ID_HERE.apps.googleusercontent.com') {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'ยังไม่ได้ตั้งค่า Google API',
-                    html: 'กรุณาแก้ไข <code>GOOGLE_API_KEY</code> และ <code>GOOGLE_CLIENT_ID</code> ในโค้ด<br><br>ดูวิธีการตั้งค่าใน README.md',
-                    confirmButtonText: 'เข้าใจแล้ว'
-                });
-                return;
-            }
-
-            const formData = collectFormData();
-            if (!formData.items || formData.items.length === 0) {
-                return Swal.fire('เตือน', 'กรุณาเลือกผู้สอนแทนอย่างน้อย 1 รายการ', 'warning');
-            }
-
-            if (!gapiInited || !gisInited) {
-                Swal.fire('กำลังโหลด', 'กรุณารอสักครู่...', 'info');
-                setTimeout(createGoogleDocs, 1000);
-                return;
-            }
-
-            tokenClient.callback = async (resp) => {
-                if (resp.error !== undefined) {
-                    console.error(resp);
-                    Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถเข้าสู่ระบบ Google ได้', 'error');
-                    return;
-                }
-                await processGoogleDocs(formData);
-            };
-
-            if (gapi.client.getToken() === null) {
-                tokenClient.requestAccessToken({prompt: 'consent'});
-            } else {
-                tokenClient.requestAccessToken({prompt: ''});
-            }
-        }
-
-        async function processGoogleDocs(formData) {
-            Swal.fire({
-                title: 'กำลังสร้างเอกสาร Google Docs...',
-                text: 'กรุณารอสักครู่',
-                allowOutsideClick: false,
-                didOpen: () => { Swal.showLoading(); }
-            });
-
-            const scheduler = document.getElementById('schedulerName').value;
-            const director = document.getElementById('directorName').value;
-            const thaiDate = formatThaiDate(docDate);
-            
-            const grouped = {};
-            formData.items.forEach(x => {
-                if (!grouped[x.sub]) grouped[x.sub] = [];
-                grouped[x.sub].push(x);
-            });
-
-            const createdDocs = [];
-
-            for (const [subName, items] of Object.entries(grouped)) {
-                const subObj = teachersData.find(t => t.name === subName);
-                items.sort((a, b) => a.period - b.period);
-                
-                try {
-                    const docId = await createSingleGoogleDoc({
-                        substitute: subName,
-                        department: subObj.department,
-                        scheduler: scheduler,
-                        director: director,
-                        thaiDate: thaiDate,
-                        items: items
-                    });
-                    
-                    createdDocs.push({
-                        name: subName,
-                        docId: docId
-                    });
-                } catch (error) {
-                    console.error('Error creating doc for', subName, error);
-                }
-            }
-
-            // บันทึกลง Firebase
-            try {
-                await db.collection("substitutions").add({
-                    created_at: firebase.firestore.FieldValue.serverTimestamp(),
-                    docDate: docDate,
-                    daySchedule: daySchedule,
-                    records: formData.items,
-                    scheduler: scheduler,
-                    director: director,
-                    googleDocs: createdDocs
-                });
-            } catch(e) { 
-                console.error("Firebase save error:", e); 
-            }
-
-            showGoogleDocsResults(createdDocs);
-        }
-
-        async function createSingleGoogleDoc(data) {
-            // 1. Copy template
-            const copyResponse = await gapi.client.drive.files.copy({
-                fileId: TEMPLATE_DOC_ID,
-                resource: {
-                    name: `รายงานสอนแทน_${data.substitute}_${data.thaiDate.replace(/\s+/g, '_')}`
-                }
-            });
-
-            const newDocId = copyResponse.result.id;
-            console.log('📄 Created doc:', newDocId);
-
-            // 2. Build text replacements
-            const requests = buildTextReplacements(data);
-
-            // 3. Execute batch update
-            await gapi.client.docs.documents.batchUpdate({
-                documentId: newDocId,
-                resource: { requests: requests }
-            });
-
-            // 4. Insert table rows with data
-            await fillTableData(newDocId, data.items);
-
-            return newDocId;
-        }
-
-        function buildTextReplacements(data) {
-            const replacements = [
-                { find: '{{เลขที่เอกสาร}}', replace: '.....................' },
-                { find: '{{วันที่ไทย}}', replace: data.thaiDate },
-                { find: '{{ชื่อผู้สอนแทน}}', replace: data.substitute },
-                { find: '{{กลุ่มสาระ}}', replace: data.department },
-                { find: '{{ชื่อหัวหน้าวิชาการ}}', replace: data.scheduler },
-                { find: '{{ชื่อผู้อำนวยการ}}', replace: data.director }
-            ];
-
-            return replacements.map(r => ({
-                replaceAllText: {
-                    containsText: { text: r.find, matchCase: true },
-                    replaceText: r.replace
-                }
-            }));
-        }
-
-        async function fillTableData(docId, items) {
-            // สำหรับการใส่ข้อมูลในตาราง ต้องหา cell indices
-            // วิธีง่าย: แทนที่ placeholder ในแถว template แล้วเพิ่มแถว
-            
-            const requests = [];
-            
-            // แทนที่ข้อมูลในแถวแรก (template row)
-            if(items.length > 0) {
-                const firstItem = items[0];
-                requests.push(
-                    { replaceAllText: { containsText: { text: '{{แถว}}' }, replaceText: '1' }},
-                    { replaceAllText: { containsText: { text: '{{ชื่อครูที่ลา}}' }, replaceText: firstItem.absent }},
-                    { replaceAllText: { containsText: { text: '{{สาเหตุ}}' }, replaceText: firstItem.reason }},
-                    { replaceAllText: { containsText: { text: '{{คาบที่}}' }, replaceText: String(firstItem.period) }},
-                    { replaceAllText: { containsText: { text: '{{รหัสวิชา}}' }, replaceText: firstItem.subject }},
-                    { replaceAllText: { containsText: { text: '{{ชั้น}}' }, replaceText: firstItem.grade }}
-                );
-            }
-
-            if(requests.length > 0) {
-                await gapi.client.docs.documents.batchUpdate({
-                    documentId: docId,
-                    resource: { requests: requests }
-                });
-            }
-
-            // สำหรับแถวที่เหลือ ต้องใช้ insertTableRow และ insertText
-            // ซึ่งซับซ้อน - วิธีง่ายคือให้ user แก้ใน Google Docs
-        }
-
-        function showGoogleDocsResults(docs) {
-            let html = '<div style="text-align:left;">';
-            
-            docs.forEach(doc => {
-                const docUrl = `https://docs.google.com/document/d/${doc.docId}/edit`;
-                const pdfUrl = `https://docs.google.com/document/d/${doc.docId}/export?format=pdf`;
-                
-                html += `
-                    <div style="background:#f0fdf4; border:1px solid #86efac; border-radius:8px; padding:15px; margin-bottom:15px;">
-                        <strong style="font-size:1.1em;">📄 ${doc.name}</strong><br>
-                        <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
-                            <a href="${docUrl}" target="_blank" style="background:#0f9d58; color:white; padding:8px 15px; border-radius:5px; text-decoration:none; display:inline-block;">
-                                <i class="fas fa-edit"></i> แก้ไขเอกสาร
-                            </a>
-                            <a href="${pdfUrl}" target="_blank" style="background:#d93025; color:white; padding:8px 15px; border-radius:5px; text-decoration:none; display:inline-block;">
-                                <i class="fas fa-file-pdf"></i> ดาวน์โหลด PDF
-                            </a>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            html += '</div>';
-            
-            Swal.fire({
-                title: '✅ สร้างเอกสารสำเร็จ!',
-                html: html,
-                icon: 'success',
-                width: '700px',
-                confirmButtonText: 'ปิด',
-                confirmButtonColor: '#15803d'
-            });
-        }
-
-        // ============================================
         // UTILITY FUNCTIONS
         // ============================================
-        function collectFormData() {
-            const items = [];
-            
-            document.querySelectorAll('.card').forEach(card => {
-                const headerSpan = card.querySelector('.card-header span');
-                if (!headerSpan) return;
-                
-                const absent = headerSpan.innerText.replace(' (ลา)', '');
-                const reasonSelect = card.querySelector(`#reason_${absent}`);
-                const reason = reasonSelect ? reasonSelect.value : 'ไปราชการ';
-                
-                card.querySelectorAll('.period-block').forEach(block => {
-                    const period = block.querySelector('.badge-p').innerText.replace('คาบ ', '');
-                    const radio = block.querySelector('input[type="radio"]:checked');
-                    
-                    if (radio) {
-                        const subj = document.getElementById(`subj_${absent}_${period}`).value || "-";
-                        const grade = document.getElementById(`grade_${absent}_${period}`).value || "-";
-                        items.push({
-                            absent: absent,
-                            period: parseInt(period),
-                            sub: radio.value,
-                            dept: radio.dataset.dept,
-                            subject: subj,
-                            grade: grade,
-                            reason: reason
-                        });
-                    }
-                });
-            });
-            
-            return { items: items };
-        }
-
+        
         function formatThaiDate(dateStr) {
             const dateParts = dateStr.split('-');
             const thaiMonths = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
@@ -687,15 +378,13 @@
             const dayNum = parseInt(dateParts[2]);
             const monthName = thaiMonths[parseInt(dateParts[1]) - 1];
             const yearBE = parseInt(dateParts[0]) + 543;
-            return `${dayNum} ${monthName} ${yearBE}`;
+            return `${dayNum} ${monthName} ${yearBE}`; // ตัด พ.ศ. ออกเพื่อให้กระชับตามตัวอย่าง
         }
 
         // ============================================
-        // MAIN APP FUNCTIONS (เดิม)
+        // MAIN APP FUNCTIONS
         // ============================================
         window.onload = () => {
-            gapiLoaded();
-            
             const container = document.getElementById('teacherCheckboxes');
             container.innerHTML = teachersData.map((t, i) => `
                 <div style="display:flex; align-items:center; gap:8px;">
@@ -888,7 +577,9 @@
             }).join('');
         }
 
-        // Preview & Save (เดิม)
+        // ============================================
+        // PREVIEW & SAVE FUNCTIONS (UPDATED FOR A4)
+        // ============================================
         async function preparePreview() {
             const data = [];
             const scheduler = document.getElementById('schedulerName').value;
@@ -928,6 +619,7 @@
 
             if(!isValid) return Swal.fire('เตือน', 'กรุณาเลือกผู้สอนแทนอย่างน้อย 1 รายการ', 'warning');
 
+            // บันทึก Firebase
             try {
                 await db.collection("substitutions").add({
                     created_at: firebase.firestore.FieldValue.serverTimestamp(),
@@ -947,12 +639,8 @@
             const container = document.getElementById('paperContainer');
             container.innerHTML = '';
 
-            const dateParts = docDate.split('-');
-            const thaiMonths = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
-            const dayNum = parseInt(dateParts[2]);
-            const monthName = thaiMonths[parseInt(dateParts[1])-1];
-            const yearBE = parseInt(dateParts[0]) + 543;
-            const thaiDateStr = `${dayNum} ${monthName} พ.ศ. ${yearBE}`;
+            const thaiDateStr = formatThaiDate(docDate);
+            const fullThaiDateStr = `${thaiDateStr.replace(/(\d{4})/, "พ.ศ. $1")}`;
 
             const grouped = {};
             data.forEach(x => {
@@ -981,17 +669,15 @@
                     </tr>
                 `).join('');
 
-                const minRows = 5;
+                // เติมแถวว่างให้เต็มตาราง (เพื่อให้ดูเป็นเอกสารราชการ)
+                const minRows = 8;
                 for(let k = items.length; k < minRows; k++) {
                     rows += `<tr><td style="height:25px;">&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
                 }
 
-                const pageNumberHtml = currentPage > 1 ? `<div class="page-number">-${currentPage}-</div>` : '';
-
                 container.innerHTML += `
                 <div class="a4-paper">
-                    ${pageNumberHtml}
-                    <div class="doc-head">
+                    <div class="garuda-container">
                         <img src="https://nonthaphathr.github.io/uploadimg/kruda.png" class="garuda" crossorigin="anonymous">
                         <div class="head-text">
                             <h2>บันทึกข้อความ</h2>
@@ -1002,7 +688,10 @@
                         <b>ส่วนราชการ</b> โรงเรียนกระดุมทองวิทยา ตำบลหนองหัวช้าง อำเภอกันทรารมย์ จังหวัดศรีสะเกษ
                     </div>
                     <div class="doc-meta">
-                        <b>ที่</b> ศก 51008.08/......... &nbsp;&nbsp;&nbsp; <b>วันที่</b> ${thaiDateStr}
+                        <div style="display:flex;">
+                            <div style="width:50%;"><b>ที่</b> ศก 51008.08/.........</div>
+                            <div style="width:50%;"><b>วันที่</b> ${fullThaiDateStr}</div>
+                        </div>
                     </div>
                     <div class="doc-meta">
                         <b>เรื่อง</b> รายงานผลการสอนแทน
@@ -1013,7 +702,7 @@
                     <div class="doc-meta"><b>เรียน</b> ผู้อำนวยการโรงเรียนกระดุมทองวิทยา</div>
                     
                     <div class="doc-content">
-                        ตามที่ข้าพเจ้า ${subName} ตำแหน่ง ครู กลุ่มสาระการเรียนรู้${subDept} ได้รับมอบหมายให้ปฏิบัติราชการแทน เมื่อวันที่ ${thaiDateStr} ตามความทราบแล้วนั้น
+                        ตามที่ข้าพเจ้า ${subName} ตำแหน่ง ครู กลุ่มสาระการเรียนรู้${subDept} ได้รับมอบหมายให้ปฏิบัติราชการแทน เมื่อวันที่ ${fullThaiDateStr} ตามความทราบแล้วนั้น
                     </div>
                     <div class="doc-content" style="margin-top:0;">
                         บัดนี้ ข้าพเจ้าได้ดำเนินการสอนแทนดังกล่าวเสร็จสิ้นเรียบร้อยแล้ว จึงขอรายงานผลการสอนแทน ดังต่อไปนี้
@@ -1035,7 +724,8 @@
                     </table>
                     
                     <div class="doc-sign single">
-                        <div class="sign-box left">
+                        <div class="sign-box"></div>
+                        <div class="sign-box">
                             <br>
                             ลงชื่อ..............................................<br>
                             (${subName})<br>
@@ -1043,14 +733,14 @@
                         </div>
                     </div>
                     
-                    <div class="doc-sign" style="margin-top:25px;">
+                    <div class="doc-sign" style="margin-top:20px;">
                         <div class="sign-box">
                             ลงชื่อ..............................................<br>
                             (${scheduler})<br>
                             หัวหน้าฝ่ายวิชาการ/ผู้จัด
                         </div>
                         <div class="sign-box">
-                            <div style="text-align:right; margin-bottom:5px;">ทราบ</div>
+                            <div style="text-align:center; margin-bottom:5px;">ทราบ</div>
                             ลงชื่อ..............................................<br>
                             (${director})<br>
                             ผู้อำนวยการโรงเรียนกระดุมทองวิทยา
@@ -1071,18 +761,17 @@
             });
 
             try {
+                // Config นี้สำคัญมาก เพื่อให้ PDF ไม่เพี้ยน
                 const opt = {
-                    margin: 0,
+                    margin: 0, // ตั้งเป็น 0 เพราะเรามี padding ใน css แล้ว
                     filename: `รายงานสอนแทน_${docDate}.pdf`,
                     image: { type: 'jpeg', quality: 0.98 },
                     html2canvas: { 
-                        scale: 2,
+                        scale: 2, // เพิ่มความชัด
                         useCORS: true,
-                        allowTaint: true,
-                        logging: false
+                        scrollY: 0
                     },
-                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                    pagebreak: { mode: 'css', before: '.a4-paper', avoid: '.doc-table' }
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
                 };
 
                 await html2pdf().set(opt).from(element).save();
@@ -1097,9 +786,9 @@
             } catch(error) {
                 console.error('PDF Error:', error);
                 Swal.fire({
-                    icon: 'info',
-                    title: 'แนะนำ',
-                    html: 'หากดาวน์โหลดไม่สำเร็จ<br>กรุณาใช้ปุ่ม <b>"พิมพ์ / บันทึก PDF"</b> แทน',
+                    icon: 'error',
+                    title: 'เกิดข้อผิดพลาด',
+                    text: 'กรุณาลองใหม่อีกครั้ง หรือใช้ปุ่ม "สั่งพิมพ์"'
                 });
             }
         }
@@ -1122,16 +811,6 @@
                     item.className = 'card';
                     item.style = 'padding:15px; margin-bottom:10px;';
                     
-                    let googleDocsLinks = '';
-                    if(d.googleDocs && d.googleDocs.length > 0) {
-                        googleDocsLinks = '<div style="margin-top:10px; padding:10px; background:#f0fdf4; border-radius:5px;">';
-                        googleDocsLinks += '<strong>📄 Google Docs:</strong><br>';
-                        d.googleDocs.forEach(doc => {
-                            googleDocsLinks += `<a href="https://docs.google.com/document/d/${doc.docId}/edit" target="_blank" style="color:#0f9d58; margin-right:15px;">${doc.name}</a>`;
-                        });
-                        googleDocsLinks += '</div>';
-                    }
-                    
                     item.innerHTML = `
                         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
                             <div>
@@ -1143,7 +822,6 @@
                         <ul style="margin-top:10px; padding-left:20px; font-size:0.9rem;">
                             ${d.records.map(r => `<li>คาบ ${r.period}: <strong>${r.sub}</strong> แทน ${r.absent} (${r.reason || '-'})</li>`).join('')}
                         </ul>
-                        ${googleDocsLinks}
                     `;
                     list.appendChild(item);
                 });
