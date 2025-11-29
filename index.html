@@ -3,77 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบจัดสอนแทน V.3.5 (Full Options)</title>
+    <title>ระบบจัดสอนแทน V.3.5 (Offline Compatible)</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Kanit:wght@300;400;500;600;700&display=swap');
 
         /* --- Base Style --- */
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Kanit', sans-serif;
-            background: linear-gradient(135deg, #1e293b 0%, #334155 25%, #475569 50%, #64748b 75%, #94a3b8 100%);
-            min-height: 100vh;
-            padding: 20px;
-            color: #1f2937;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 24px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-            overflow: hidden;
-            min-height: 80vh;
-        }
-
-        .header {
-            background: linear-gradient(135deg, rgba(30, 64, 175, 0.9) 0%, rgba(79, 70, 229, 0.9) 50%, rgba(124, 58, 237, 0.9) 100%);
-            color: white; padding: 30px; text-align: center; border-bottom: 2px solid rgba(255, 255, 255, 0.2);
-        }
-
+        body { font-family: 'Kanit', sans-serif; background: linear-gradient(135deg, #1e293b 0%, #334155 25%, #475569 50%, #64748b 75%, #94a3b8 100%); min-height: 100vh; padding: 20px; color: #1f2937; }
+        .container { max-width: 1200px; margin: 0 auto; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); border: 2px solid rgba(255, 255, 255, 0.3); border-radius: 24px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15); overflow: hidden; min-height: 80vh; }
+        .header { background: linear-gradient(135deg, rgba(30, 64, 175, 0.9) 0%, rgba(79, 70, 229, 0.9) 50%, rgba(124, 58, 237, 0.9) 100%); color: white; padding: 30px; text-align: center; border-bottom: 2px solid rgba(255, 255, 255, 0.2); }
+        
         /* --- Nav Menu --- */
         .nav-menu { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; padding-top: 20px; flex-wrap: wrap;}
         .nav-btn { background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 10px 20px; border-radius: 30px; cursor: pointer; transition: 0.3s; font-family: 'Kanit'; backdrop-filter: blur(5px); }
         .nav-btn.active, .nav-btn:hover { background: #4f46e5; border-color: #4f46e5; box-shadow: 0 0 15px rgba(79, 70, 229, 0.4); }
-
+        
         .page-section { display: none; padding: 30px; }
         .page-section.active { display: block; animation: fadeIn 0.5s; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- Inputs & Selection --- */
+        /* --- UI Elements --- */
         .input-group label { display: block; margin-bottom: 8px; font-weight: 500; }
         select { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #ccc; font-family: 'Kanit'; font-size: 1rem; }
-        
         .selected-teachers-display { padding: 10px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 12px; min-height: 45px; display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
         .teacher-tag { background: linear-gradient(135deg, #3b82f6, #6366f1); color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; display: flex; align-items: center; gap: 6px; }
         .teacher-checkboxes { background: white; border: 1px solid #ddd; border-radius: 12px; max-height: 250px; overflow-y: auto; }
         .teacher-checkbox-item { padding: 10px 15px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 10px; cursor: pointer; }
-        
-        /* --- Teacher Radio Cards --- */
         .sub-card { background: white; border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-left: 5px solid #ef4444; }
         .period-row { display: flex; align-items: flex-start; padding: 15px; border-bottom: 1px solid #f1f5f9; gap: 15px; flex-wrap: wrap; }
         .period-badge { background: #3b82f6; color: white; padding: 6px 12px; border-radius: 8px; font-weight: bold; min-width: 80px; text-align: center; }
-        
         .teacher-option { display: flex; align-items: center; gap: 10px; padding: 10px; border: 2px solid #e2e8f0; border-radius: 10px; cursor: pointer; transition: 0.2s; margin-bottom: 5px; width: 100%; background: #f8fafc; }
         .teacher-option:hover { border-color: #06b6d4; background: #fff; }
         .teacher-option.selected { border-color: #4f46e5; background: #eef2ff; }
         .teacher-option input[type="radio"] { width: 18px; height: 18px; accent-color: #4f46e5; }
         .schedule-hint { font-size: 0.8rem; color: #64748b; margin-top: 2px; }
-
-        /* --- Buttons --- */
         .process-btn { background: linear-gradient(135deg, #059669 0%, #047857 100%); color: white; padding: 15px; border: none; border-radius: 12px; font-size: 1.1rem; width: 100%; cursor: pointer; font-family: 'Kanit'; transition: 0.3s; }
         .process-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(5, 150, 105, 0.3); }
         .save-btn { background: #2563eb; color: white; padding: 12px 25px; border: none; border-radius: 10px; cursor: pointer; float: right; display: flex; align-items: center; gap: 8px; font-family: 'Kanit'; }
-
-        /* --- Table Style for History --- */
         .history-table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; border-radius: 10px; overflow: hidden; }
         .history-table th, .history-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #ddd; }
         .history-table th { background-color: #f1f5f9; color: #1f2937; font-weight: 600; }
@@ -81,27 +55,13 @@
         .btn-del { background: #fee2e2; color: #dc2626; } .btn-del:hover { background: #fecaca; }
         .btn-print { background: #e0e7ff; color: #4338ca; } .btn-print:hover { background: #c7d2fe; }
 
-        /* --- Print CSS (FIXED) --- */
         @media print {
             body { background: white !important; color: black !important; -webkit-print-color-adjust: exact; }
             .container { box-shadow: none; border: none; background: white; margin: 0; padding: 0; min-height: auto; }
             .nav-menu, .header, .input-section, .dashboard-grid, .nav-btn, .process-btn, .save-btn, #resultArea, #teacherCheckboxes, #selectedTeachersDisplay, .subtitle, .developer-credit, .page-section:not(#allocation) { display: none !important; }
-            
-            /* Hide the normal content of allocation tab too, only show printArea */
             #allocation { padding: 0 !important; display: block !important; }
             #allocation > *:not(#printArea) { display: none !important; }
-
-            #printArea { 
-                display: block !important; 
-                position: absolute; 
-                top: 0; 
-                left: 0; 
-                width: 100%; 
-                background: white; 
-                font-family: 'Sarabun', sans-serif !important;
-                z-index: 9999;
-            }
-
+            #printArea { display: block !important; position: absolute; top: 0; left: 0; width: 100%; background: white; font-family: 'Sarabun', sans-serif !important; z-index: 9999; }
             table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 14pt; color: black; }
             th, td { border: 1px solid black; padding: 10px; text-align: left; color: black; }
             th { background-color: #f3f3f3 !important; text-align: center; font-weight: bold; }
@@ -181,12 +141,12 @@
                         <tr>
                             <th>วันที่</th>
                             <th>ครูที่ลา</th>
-                            <th>รายละเอียด (คาบ/คนสอนแทน)</th>
+                            <th>รายละเอียด</th>
                             <th>จัดการ</th>
                         </tr>
                     </thead>
                     <tbody id="historyTableBody">
-                        <tr><td colspan="4" style="text-align:center;">กำลังโหลดข้อมูล...</td></tr>
+                        <tr><td colspan="4" style="text-align:center;">กำลังโหลด...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -210,11 +170,8 @@
 
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-        // --- FIREBASE CONFIG ---
+    <script>
+        // --- 1. CONFIG FIREBASE (COMPAT) ---
         const firebaseConfig = {
             apiKey: "AIzaSyCF7qDDxp6NXk3y7wLiySasqoviGyCKNNw",
             authDomain: "sornthan-fc0f1.firebaseapp.com",
@@ -223,10 +180,10 @@
             messagingSenderId: "915683105444",
             appId: "1:915683105444:web:c1add040ea1afb344ae431"
         };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
-        // --- TEACHERS DATA ---
+        // --- 2. DATA ---
         const teachersData = [
             { name: "นายวิทยา ใหม่คามิ", department: "5. กลุ่มสาระการเรียนรู้สังคมศึกษา ศาสนาและวัฒนธรรม", schedule: { "จันทร์": [1, 5, 6, 7], "อังคาร": [3, 5, 6], "พุธ": [1, 2, 3, 5, 6], "พฤหัสบดี": [1, 3, 4, 5, 6], "ศุกร์": [2, 4, 7] } },
             { name: "นางสาวณิชารีย์ คำศรีทา", department: "2. กลุ่มสาระการเรียนรู้วิทยาศาสตร์และเทคโนโลยี", schedule: { "จันทร์": [2, 4], "อังคาร": [3, 4, 6], "พุธ": [3, 4, 5, 6], "พฤหัสบดี": [5, 6], "ศุกร์": [4, 5, 6] } },
@@ -244,19 +201,13 @@
             { name: "นายนนทพัทธ์ หิรัญเรือง", department: "3. กลุ่มสาระการเรียนรู้ภาษาไทย", schedule: { "จันทร์": [2, 4, 5, 6], "อังคาร": [2, 3], "พุธ": [2, 3, 5, 6], "พฤหัสบดี": [2, 6], "ศุกร์": [1, 3, 4] } }
         ];
 
-        // --- GLOBAL VARIABLES ---
+        // --- 3. LOGIC ---
         let selectedTeachers = [];
         const MAX_SELECTION = 6;
         let chartDeptInstance = null;
         let chartTeacherInstance = null;
 
-        // Expose to window for inline onclicks
-        window.toggleTeacherSelection = toggleTeacherSelection;
-        window.removeTeacher = removeTeacher;
-        window.deleteRecord = deleteRecord;
-        window.reprintRecord = reprintRecord;
-
-        // --- NAVIGATION ---
+        // Navigation
         function switchTab(tabId) {
             document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
@@ -283,7 +234,6 @@
         // Init
         loadTeachers();
 
-        // --- LOGIC 1: SELECTION & SCHEDULE DISPLAY ---
         function loadTeachers() {
             const container = document.getElementById('teacherCheckboxes');
             container.innerHTML = '';
@@ -361,8 +311,6 @@
                         available.forEach(t => {
                             const safeName = absentName.replace(/\s+/g, '');
                             const inputName = `sub_${safeName}_${period}`;
-                            
-                            // Show Schedule Info (NEW Feature)
                             const teacherSchedule = t.schedule[day] || [];
                             const scheduleText = teacherSchedule.length > 0 ? teacherSchedule.join(', ') : 'ว่างทั้งวัน';
                             
@@ -387,7 +335,7 @@
             setTimeout(() => document.getElementById('resultArea').scrollIntoView({behavior: 'smooth'}), 100);
         }
 
-        window.updateRadioStyle = function(label) {
+        function updateRadioStyle(label) {
             label.parentElement.querySelectorAll('.teacher-option').forEach(l => l.classList.remove('selected'));
             label.classList.add('selected');
         }
@@ -395,14 +343,13 @@
         function findAvailableTeachers(day, period, exclude) {
             return teachersData
                 .filter(t => !exclude.includes(t.name) && !(t.schedule[day] || []).includes(period))
-                .map(t => ({...t, score: 0})) // Mock score
-                .slice(0, 5); // Pick top 5
+                .map(t => ({...t, score: 0})) 
+                .slice(0, 5); 
         }
 
         function getShortDept(d) { return d.includes('.') ? d.split('.')[1].trim() : d; }
 
-        // --- LOGIC 2: SAVE, PRINT & HISTORY ---
-        async function confirmAndPrint() {
+        function confirmAndPrint() {
             const dataToSave = [];
             const day = document.getElementById('daySelect').value;
             
@@ -426,17 +373,19 @@
             if(dataToSave.length === 0) return Swal.fire('เตือน', 'กรุณาเลือกผู้สอนแทนอย่างน้อย 1 รายการ', 'warning');
 
             Swal.fire({title:'กำลังบันทึก...', didOpen:()=>Swal.showLoading()});
-            try {
-                // Save Group
-                await addDoc(collection(db, "substitutions"), {
-                    created_at: serverTimestamp(),
-                    day: day,
-                    records: dataToSave
-                });
+            
+            // Firebase Compat Add
+            db.collection("substitutions").add({
+                created_at: firebase.firestore.FieldValue.serverTimestamp(),
+                day: day,
+                records: dataToSave
+            }).then(() => {
                 Swal.close();
                 generatePrintView(day, dataToSave);
                 window.print();
-            } catch(e) { Swal.fire('Error', e.message, 'error'); }
+            }).catch((e) => {
+                Swal.fire('Error', e.message, 'error');
+            });
         }
 
         function generatePrintView(day, data) {
@@ -477,26 +426,21 @@
             div.innerHTML = html;
         }
 
-        // --- HISTORY TAB LOGIC ---
-        async function loadHistory() {
+        // History
+        function loadHistory() {
             const tbody = document.getElementById('historyTableBody');
             tbody.innerHTML = '<tr><td colspan="4" style="text-align:center">กำลังโหลด...</td></tr>';
             
-            try {
-                const q = query(collection(db, "substitutions"), orderBy("created_at", "desc"));
-                const snap = await getDocs(q);
-                
+            db.collection("substitutions").orderBy("created_at", "desc").get().then((snap) => {
                 if(snap.empty) {
                     tbody.innerHTML = '<tr><td colspan="4" style="text-align:center">ไม่พบประวัติ</td></tr>';
                     return;
                 }
-
                 tbody.innerHTML = '';
                 snap.forEach(doc => {
                     const data = doc.data();
                     const records = data.records || [];
                     const detailText = records.map(r => `คาบ ${r.period}: ${r.sub_teacher} (แทน ${r.absent_teacher})`).join('<br>');
-                    // Store data in JSON string for reprint
                     const jsonStr = JSON.stringify(data).replace(/"/g, '&quot;');
                     
                     const tr = document.createElement('tr');
@@ -511,49 +455,50 @@
                     `;
                     tbody.appendChild(tr);
                 });
-            } catch(e) { console.error(e); }
+            });
         }
 
-        window.deleteRecord = async function(id) {
-            if(!await Swal.fire({title:'ยืนยันลบ?', icon:'warning', showCancelButton:true}).then(r=>r.isConfirmed)) return;
-            try {
-                await deleteDoc(doc(db, "substitutions", id));
-                Swal.fire('ลบแล้ว', '', 'success');
-                loadHistory();
-            } catch(e) { Swal.fire('Error', e.message, 'error'); }
+        function deleteRecord(id) {
+            Swal.fire({title:'ยืนยันลบ?', icon:'warning', showCancelButton:true}).then(r=>{
+                if(r.isConfirmed) {
+                    db.collection("substitutions").doc(id).delete().then(() => {
+                        Swal.fire('ลบแล้ว', '', 'success');
+                        loadHistory();
+                    });
+                }
+            });
         }
 
-        window.reprintRecord = function(jsonStr) {
+        function reprintRecord(jsonStr) {
             const data = JSON.parse(jsonStr);
             generatePrintView(data.day, data.records);
             window.print();
         }
 
-        // --- DASHBOARD LOGIC ---
-        async function renderDashboard() {
-            const snap = await getDocs(collection(db, "substitutions"));
-            let deptStats = {}, teacherStats = {};
-            snap.forEach(doc => {
-                (doc.data().records||[]).forEach(r => {
-                    const dept = getShortDept(r.department||'Other');
-                    deptStats[dept] = (deptStats[dept]||0)+1;
-                    teacherStats[r.sub_teacher] = (teacherStats[r.sub_teacher]||0)+1;
+        // Dashboard
+        function renderDashboard() {
+            db.collection("substitutions").get().then((snap) => {
+                let deptStats = {}, teacherStats = {};
+                snap.forEach(doc => {
+                    (doc.data().records||[]).forEach(r => {
+                        const dept = getShortDept(r.department||'Other');
+                        deptStats[dept] = (deptStats[dept]||0)+1;
+                        teacherStats[r.sub_teacher] = (teacherStats[r.sub_teacher]||0)+1;
+                    });
                 });
-            });
-            
-            // Render Dept Chart
-            if(chartDeptInstance) chartDeptInstance.destroy();
-            chartDeptInstance = new Chart(document.getElementById('deptChart'), {
-                type: 'pie',
-                data: { labels: Object.keys(deptStats), datasets:[{data: Object.values(deptStats), backgroundColor:['#f87171','#60a5fa','#fbbf24','#34d399','#a78bfa']}] }
-            });
+                
+                if(chartDeptInstance) chartDeptInstance.destroy();
+                chartDeptInstance = new Chart(document.getElementById('deptChart'), {
+                    type: 'pie',
+                    data: { labels: Object.keys(deptStats), datasets:[{data: Object.values(deptStats), backgroundColor:['#f87171','#60a5fa','#fbbf24','#34d399','#a78bfa']}] }
+                });
 
-            // Render Teacher Chart
-            if(chartTeacherInstance) chartTeacherInstance.destroy();
-            const top5 = Object.entries(teacherStats).sort((a,b)=>b[1]-a[1]).slice(0,5);
-            chartTeacherInstance = new Chart(document.getElementById('teacherChart'), {
-                type: 'bar',
-                data: { labels: top5.map(i=>i[0]), datasets:[{label:'คาบ', data:top5.map(i=>i[1]), backgroundColor:'#60a5fa'}] }
+                if(chartTeacherInstance) chartTeacherInstance.destroy();
+                const top5 = Object.entries(teacherStats).sort((a,b)=>b[1]-a[1]).slice(0,5);
+                chartTeacherInstance = new Chart(document.getElementById('teacherChart'), {
+                    type: 'bar',
+                    data: { labels: top5.map(i=>i[0]), datasets:[{label:'คาบ', data:top5.map(i=>i[1]), backgroundColor:'#60a5fa'}] }
+                });
             });
         }
     </script>
