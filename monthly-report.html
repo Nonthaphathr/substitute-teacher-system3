@@ -8,11 +8,12 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
 
-        /* TH Sarabun New Font */
+        /* TH Sarabun New Font Setup */
         @font-face {
             font-family: 'THSarabunNew';
             src: url('fonts/thsarabunnew-webfont.eot');
@@ -37,94 +38,142 @@
         
         body { 
             font-family: 'Sarabun', sans-serif; 
-            background: #f0f4f8; 
-            padding: 20px; 
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); /* Gradient background */
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: #334155;
         }
 
-        /* Control Panel */
+        /* --- Modern Control Panel --- */
         .control-panel {
-            max-width: 900px;
+            max-width: 800px;
             margin: 0 auto 30px;
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            animation: fadeSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+            position: relative;
+        }
+
+        @keyframes fadeSlideIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
         }
 
         .control-panel h2 {
             color: #1e3a8a;
-            margin-bottom: 20px;
+            font-size: 1.8rem;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 15px;
+            margin: 0;
         }
 
-        .form-group {
-            margin-bottom: 20px;
+        /* ปุ่มกลับหน้าหลัก */
+        .btn-home {
+            background: #fff;
+            color: #64748b;
+            border: 1px solid #e2e8f0;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
         }
+
+        .btn-home:hover {
+            background: #f1f5f9;
+            color: #334155;
+            transform: translateX(-2px);
+        }
+
+        .form-group { margin-bottom: 24px; }
 
         .form-group label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             font-weight: 600;
-            color: #334155;
+            color: #475569;
+            font-size: 1rem;
         }
 
         .form-group input,
         .form-group select {
             width: 100%;
-            padding: 12px;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
+            padding: 14px 18px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
             font-family: 'Sarabun', sans-serif;
             font-size: 1rem;
+            transition: all 0.3s;
+            background: #f8fafc;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
         }
 
         .form-row {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
         }
 
         .btn-generate {
-            background: linear-gradient(135deg, #1e3a8a, #2563eb);
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
             color: white;
-            padding: 15px 40px;
+            padding: 18px;
             border: none;
-            border-radius: 10px;
+            border-radius: 14px;
             font-size: 1.1rem;
             font-weight: 600;
             cursor: pointer;
             width: 100%;
-            margin-top: 20px;
+            margin-top: 10px;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
         }
 
         .btn-generate:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+            box-shadow: 0 12px 25px rgba(37, 99, 235, 0.4);
         }
 
-        .btn-generate:disabled {
-            background: #94a3b8;
-            cursor: not-allowed;
-        }
-
-        /* A4 Paper */
+        /* --- Report Styles --- */
         .a4-paper {
             width: 210mm;
             min-height: 297mm;
             height: 297mm;
             background: white;
             padding: 20mm;
-            margin: 0 auto 20px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+            margin: 0 auto 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
             font-family: 'THSarabunNew', sans-serif;
             color: black;
             position: relative;
             overflow: hidden;
-            min-width: 210mm;
         }
 
         /* Cover Page */
@@ -140,35 +189,35 @@
         .cover-logos {
             display: flex;
             gap: 40px;
-            margin-bottom: 40px;
+            margin-bottom: 50px;
             align-items: center;
         }
 
         .cover-logo {
             width: 120px;
             height: 120px;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
         }
 
         .cover-title {
-            font-size: 24pt;
+            font-size: 26pt;
             font-weight: bold;
-            margin-bottom: 15px;
-            line-height: 1.5;
+            margin-bottom: 20px;
+            line-height: 1.4;
         }
 
         .cover-subtitle {
-            font-size: 18pt;
-            margin-bottom: 10px;
-            line-height: 1.5;
+            font-size: 20pt;
+            margin-bottom: 15px;
         }
 
         .cover-author {
-            margin-top: 60px;
-            font-size: 16pt;
+            margin-top: 80px;
+            font-size: 18pt;
             line-height: 1.8;
         }
 
-        /* Memo Page - Exactly matching main code */
+        /* --- Memo Layout (Strict Preservation of Structure) --- */
         .memo-layout { 
             font-family: 'THSarabunNew', sans-serif !important;
             position: relative;
@@ -198,7 +247,7 @@
         }
         
         .memo-layout .doc-meta { 
-            font-size: 11pt; 
+            font-size: 16pt; /* Standard Memo Font Size */
             line-height: 1.4; 
             margin-bottom: 1px; 
             white-space: nowrap; 
@@ -217,7 +266,7 @@
         .memo-layout .doc-meta-row .doc-date { 
             flex: 0 0 50%;
             text-align: left;
-            padding-left: 10px;
+            padding-left: 10px; /* Reference Point for Alignment */
         }
         
         .memo-layout .doc-line { 
@@ -227,15 +276,14 @@
         }
         
         .memo-layout .doc-to { 
-            font-size: 11pt; 
+            font-size: 16pt; 
             font-weight: bold; 
-            font-style: italic; 
             margin-bottom: 2px; 
             line-height: 1.4; 
         }
         
         .memo-layout .doc-content { 
-            font-size: 11pt; 
+            font-size: 16pt; 
             text-indent: 2.5cm; 
             text-align: justify; 
             line-height: 1.5; 
@@ -243,217 +291,158 @@
         }
 
         .memo-layout .doc-closing { 
-            font-size: 11pt; 
+            font-size: 16pt; 
             text-indent: 2.5cm; 
             margin-top: 8px; 
             margin-bottom: 15px; 
             line-height: 1.4; 
         }
         
+        /* --- Modified Signature Section --- */
         .memo-layout .sign-section { 
             margin-top: 20px;
+            width: 100%;
         }
         
-        .memo-layout .sign-item { 
+        .memo-layout .sign-block {
+            /* Logic: Start at center (50%) like date, flow right */
+            width: 50%;
+            margin-left: 50%; 
+            padding-left: 10px; /* Matches .doc-date padding */
+            text-align: left;
             margin-bottom: 25px;
-            text-align: center;
-            font-size: 11pt;
+            font-size: 16pt;
             line-height: 1.4;
         }
-        
-        .memo-layout .sign-item .checkbox-text { 
-            text-align: center; 
-            margin-bottom: 5px; 
-            font-size: 11pt; 
+
+        .memo-layout .sign-block-comment {
+            margin-top: 10px;
+        }
+
+        .memo-layout .dashed-line {
+            display: block;
+            margin: 5px 0;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .memo-layout .sign-name-position {
+            text-align: center; /* Names are centered relative to the 50% block */
+            width: 100%;
         }
 
         /* Stats Page */
-        .stats-page {
-            font-size: 14pt;
-        }
-
+        .stats-page { font-size: 16pt; }
         .stats-title {
             text-align: center;
-            font-size: 18pt;
+            font-size: 20pt;
             font-weight: bold;
             margin-bottom: 20px;
-            padding-bottom: 10px;
+            padding-bottom: 15px;
             border-bottom: 2px solid #333;
         }
 
         .stats-summary {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
+            gap: 20px;
             margin-bottom: 30px;
         }
 
         .stat-card {
             background: #f8fafc;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #e2e8f0;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #cbd5e1;
+            text-align: center;
         }
 
-        .stat-card h3 {
-            font-size: 14pt;
-            color: #1e3a8a;
-            margin-bottom: 8px;
-        }
+        .stat-card h3 { font-size: 16pt; color: #1e3a8a; margin-bottom: 10px; }
+        .stat-card .stat-value { font-size: 28pt; font-weight: bold; color: #2563eb; }
 
-        .stat-card .stat-value {
-            font-size: 24pt;
-            font-weight: bold;
-            color: #2563eb;
-        }
-
-        .top-teachers {
-            margin-top: 30px;
-        }
-
-        .top-teachers h3 {
-            font-size: 16pt;
-            font-weight: bold;
-            margin-bottom: 15px;
-            color: #1e3a8a;
-        }
-
-        .top-list {
-            background: #f8fafc;
-            padding: 15px;
-            border-radius: 8px;
-        }
-
+        .top-teachers { margin-top: 30px; }
+        .top-teachers h3 { font-size: 18pt; font-weight: bold; margin-bottom: 15px; color: #1e3a8a; }
+        .top-list { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; }
         .top-item {
-            padding: 8px;
+            padding: 12px 20px;
             border-bottom: 1px dashed #cbd5e1;
             display: flex;
             justify-content: space-between;
         }
-
-        .top-item:last-child {
-            border-bottom: none;
-        }
+        .top-item:last-child { border-bottom: none; }
+        .top-item:nth-child(even) { background: #f8fafc; }
 
         /* Print Styles */
         @media print {
-            @page { 
-                size: A4; 
-                margin: 0mm; 
-            }
-            
+            @page { size: A4; margin: 0mm; }
             body { 
-                background: white; 
-                padding: 0; 
-                margin: 0;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
+                background: white; padding: 0; margin: 0; 
+                -webkit-print-color-adjust: exact; print-color-adjust: exact; 
             }
-            
-            .control-panel,
-            .no-print {
-                display: none !important;
-            }
-            
+            .control-panel, .no-print { display: none !important; }
             .a4-paper {
-                margin: 0;
-                padding: 8mm 12mm 8mm 18mm;
-                width: 210mm;
-                height: 280mm;
-                box-shadow: none;
-                border: none;
+                margin: 0; padding: 10mm 15mm 10mm 15mm; /* Adjusted slightly for print margin safety */
+                width: 210mm; height: 297mm;
+                box-shadow: none; border: none;
                 page-break-after: always;
                 page-break-inside: avoid;
-                min-width: auto;
-                position: relative;
-                overflow: hidden;
             }
-            
-            .a4-paper:last-child {
-                page-break-after: auto;
-            }
+            .a4-paper:last-child { page-break-after: auto; }
         }
 
         /* Loading */
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #64748b;
-        }
-
         .spinner {
             border: 4px solid #f3f4f6;
             border-top: 4px solid #2563eb;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            width: 50px;
+            height: 50px;
             animation: spin 1s linear infinite;
             margin: 0 auto 20px;
         }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        #reportContainer {
-            display: none;
-        }
-
+        /* Floating Actions */
         .print-buttons {
             position: fixed;
             bottom: 30px;
             right: 30px;
             display: flex;
-            gap: 10px;
+            gap: 15px;
             z-index: 1000;
         }
 
-        .btn-print {
-            background: #059669;
-            color: white;
+        .btn-action {
             padding: 15px 30px;
             border: none;
-            border-radius: 10px;
+            border-radius: 12px;
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(5, 150, 105, 0.3);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
             transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .btn-print:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(5, 150, 105, 0.4);
-        }
-
-        .btn-back {
-            background: #64748b;
-            color: white;
-            padding: 15px 30px;
-            border: none;
-            border-radius: 10px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(100, 116, 139, 0.3);
-            transition: all 0.3s ease;
-        }
-
-        .btn-back:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(100, 116, 139, 0.4);
-        }
+        .btn-print { background: #059669; color: white; }
+        .btn-print:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(5, 150, 105, 0.4); background: #047857; }
+        
+        .btn-back { background: #475569; color: white; }
+        .btn-back:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(71, 85, 105, 0.4); background: #334155; }
     </style>
 </head>
 <body>
 
-    <!-- Control Panel -->
     <div class="control-panel" id="controlPanel">
-        <h2>📊 สร้างรายงานข้อมูลสถิติการจัดสอนแทนประจำเดือน</h2>
+        <div class="header-row">
+            <a href="index.html" class="btn-home"><i class="fas fa-home"></i> กลับหน้าหลัก</a>
+            <h2><i class="fas fa-chart-pie"></i> สร้างรายงานสรุปการสอนแทน</h2>
+        </div>
         
         <div class="form-group">
-            <label>ชื่อ-นามสกุล ผู้พิมพ์รายงาน</label>
+            <label><i class="fas fa-user-pen"></i> ชื่อ-นามสกุล ผู้พิมพ์รายงาน</label>
             <input type="text" id="reportAuthor" placeholder="เช่น นายนนทพัทธ์ หิรัญเรือง" value="นายนนทพัทธ์ หิรัญเรือง">
         </div>
 
@@ -505,19 +494,15 @@
         </div>
 
         <button class="btn-generate" onclick="generateReport()">
-            📄 สร้างรายงาน
+            <i class="fas fa-file-pdf"></i> สร้างรายงาน
         </button>
     </div>
 
-    <!-- Report Container -->
-    <div id="reportContainer">
-        <!-- Pages will be generated here -->
-    </div>
+    <div id="reportContainer" style="display: none;"></div>
 
-    <!-- Print Buttons -->
     <div class="print-buttons no-print" id="printButtons" style="display: none;">
-        <button class="btn-back" onclick="backToForm()">← กลับไปแก้ไข</button>
-        <button class="btn-print" onclick="window.print()">🖨️ พิมพ์รายงาน</button>
+        <button class="btn-action btn-back" onclick="backToForm()"><i class="fas fa-arrow-left"></i> กลับไปแก้ไข</button>
+        <button class="btn-action btn-print" onclick="window.print()"><i class="fas fa-print"></i> พิมพ์รายงาน</button>
     </div>
 
     <script>
@@ -533,38 +518,22 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // Global variables
-        let reportData = {
-            author: '',
-            month: '',
-            semester: '',
-            year: '',
-            startDate: '',
-            endDate: '',
-            records: [],
-            stats: {}
-        };
+        let reportData = {};
 
-        // Initialize dates
         window.onload = () => {
             const today = new Date();
-            const currentMonth = today.getMonth(); // 0-11
-            
-            // Set month
+            const currentMonth = today.getMonth();
             const monthNames = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
                               'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
             document.getElementById('reportMonth').value = monthNames[currentMonth];
             
-            // Set date range to current month
             const firstDay = new Date(today.getFullYear(), currentMonth, 1);
             const lastDay = new Date(today.getFullYear(), currentMonth + 1, 0);
-            
             document.getElementById('startDate').valueAsDate = firstDay;
             document.getElementById('endDate').valueAsDate = lastDay;
         };
 
         async function generateReport() {
-            // Validate inputs
             const author = document.getElementById('reportAuthor').value.trim();
             const month = document.getElementById('reportMonth').value;
             const semester = document.getElementById('reportSemester').value;
@@ -573,34 +542,31 @@
             const endDate = document.getElementById('endDate').value;
 
             if (!author || !month || !semester || !year || !startDate || !endDate) {
-                return Swal.fire('ข้อมูลไม่ครบ', 'กรุณากรอกข้อมูลให้ครบถ้วน', 'warning');
+                return Swal.fire({
+                    icon: 'warning',
+                    title: 'ข้อมูลไม่ครบ',
+                    text: 'กรุณากรอกข้อมูลให้ครบถ้วน',
+                    confirmButtonColor: '#2563eb'
+                });
             }
 
-            // Store report data
-            reportData.author = author;
-            reportData.month = month;
-            reportData.semester = semester;
-            reportData.year = year;
-            reportData.startDate = startDate;
-            reportData.endDate = endDate;
+            reportData = { author, month, semester, year, startDate, endDate };
 
-            // Show loading
             Swal.fire({
-                title: 'กำลังโหลดข้อมูล...',
-                html: '<div class="spinner"></div>กรุณารอสักครู่',
+                title: 'กำลังประมวลผล...',
+                html: '<div class="spinner"></div>กำลังดึงข้อมูลจากฐานข้อมูล',
                 allowOutsideClick: false,
-                showConfirmButton: false
+                showConfirmButton: false,
+                background: '#fff'
             });
 
             try {
-                // Fetch data from Firebase
                 const snap = await db.collection("substitutions")
                     .where("docDate", ">=", startDate)
                     .where("docDate", "<=", endDate)
                     .get();
 
                 const allRecords = [];
-                const dateGroups = {};
                 const subTeacherCount = {};
                 const absentTeacherCount = {};
                 const dateSet = new Set();
@@ -608,21 +574,14 @@
                 snap.forEach(doc => {
                     const d = doc.data();
                     dateSet.add(d.docDate);
-                    
-                    if (!dateGroups[d.docDate]) {
-                        dateGroups[d.docDate] = [];
-                    }
-                    
                     d.records.forEach(r => {
-                        allRecords.push({ ...r, docDate: d.docDate, daySchedule: d.daySchedule });
-                        dateGroups[d.docDate].push(r);
+                        allRecords.push({ ...r, docDate: d.docDate });
                         subTeacherCount[r.sub] = (subTeacherCount[r.sub] || 0) + 1;
                         absentTeacherCount[r.absent] = (absentTeacherCount[r.absent] || 0) + 1;
                     });
                 });
 
                 reportData.records = allRecords;
-                reportData.dateGroups = dateGroups;
                 reportData.stats = {
                     totalRecords: allRecords.length,
                     totalDays: dateSet.size,
@@ -630,68 +589,53 @@
                     absentTeacherCount: absentTeacherCount
                 };
 
-                // Close loading
                 Swal.close();
 
                 if (allRecords.length === 0) {
-                    return Swal.fire('ไม่พบข้อมูล', `ไม่มีข้อมูลการจัดสอนแทนในช่วง ${startDate} ถึง ${endDate}`, 'info');
+                    return Swal.fire({
+                        icon: 'info',
+                        title: 'ไม่พบข้อมูล',
+                        text: `ไม่มีข้อมูลการจัดสอนแทนในช่วงเวลานี้`,
+                        confirmButtonColor: '#2563eb'
+                    });
                 }
 
-                // Generate report pages
                 renderReport();
-
-                // Hide control panel, show report
                 document.getElementById('controlPanel').style.display = 'none';
                 document.getElementById('reportContainer').style.display = 'block';
                 document.getElementById('printButtons').style.display = 'flex';
-
-                // Scroll to top
                 window.scrollTo(0, 0);
 
             } catch (e) {
                 console.error("Error:", e);
-                Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถโหลดข้อมูลได้', 'error');
+                Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อฐานข้อมูลได้', 'error');
             }
         }
 
         function renderReport() {
             const container = document.getElementById('reportContainer');
-            container.innerHTML = '';
-
-            // Page 1: Cover
-            container.innerHTML += generateCoverPage();
-
-            // Page 2: Memo
-            container.innerHTML += generateMemoPage();
-
-            // Page 3: Statistics
-            container.innerHTML += generateStatsPage();
+            container.innerHTML = generateCoverPage() + generateMemoPage() + generateStatsPage();
         }
 
         function generateCoverPage() {
             const { month, semester, year, author } = reportData;
-            
             return `
                 <div class="a4-paper">
                     <div class="cover-page">
                         <div class="cover-logos">
-                            <img src="https://nonthaphathr.github.io/uploadimg/logoschool.png" class="cover-logo" alt="โลโก้โรงเรียน">
-                            <img src="https://nonthaphathr.github.io/uploadimg/logosonthan.png" class="cover-logo" alt="โลโก้ระบบ">
+                            <img src="https://nonthaphathr.github.io/uploadimg/logoschool.png" class="cover-logo">
+                            <img src="https://nonthaphathr.github.io/uploadimg/logosonthan.png" class="cover-logo">
                         </div>
-                        
                         <div class="cover-title">
                             รายงานข้อมูลสถิติการจัดสอนแทน<br>
                             ประจำเดือน${month}
                         </div>
-                        
                         <div class="cover-subtitle">
                             ภาคเรียนที่ ${semester} ปีการศึกษา ${year}
                         </div>
-                        
                         <div class="cover-author">
                             จัดทำโดย<br>
-                            ${author}<br>
-                            <br>
+                            ${author}<br><br>
                             กลุ่มบริหารงานวิชาการ โรงเรียนกระดุมทองวิทยา<br>
                             สังกัดองค์การบริหารส่วนจังหวัดศรีสะเกษ
                         </div>
@@ -705,11 +649,9 @@
             const today = new Date();
             const thaiMonths = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
                               'กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
-            const dayNum = today.getDate();
-            const monthName = thaiMonths[today.getMonth()];
-            const yearBE = today.getFullYear() + 543;
-            const thaiDateStr = `${dayNum} ${monthName} พ.ศ. ${yearBE}`;
+            const thaiDateStr = `${today.getDate()} ${thaiMonths[today.getMonth()]} พ.ศ. ${today.getFullYear() + 543}`;
             
+            // Note: Updated Order ID to 2568 as requested
             return `
                 <div class="a4-paper memo-layout">
                     <div class="doc-header">
@@ -724,34 +666,47 @@
                     <div class="doc-meta"><b>เรื่อง</b>&nbsp;&nbsp;รายงานข้อมูลสถิติการจัดสอนแทนประจำเดือน${month} ภาคเรียนที่ ${semester} ปีการศึกษา ${year}</div>
                     <hr class="doc-line">
                     <div class="doc-to">เรียน&nbsp;&nbsp;ผู้อำนวยการโรงเรียนกระดุมทองวิทยา</div>
-                    <div class="doc-content">ตามคำสั่งโรงเรียนกระดุมทองวิทยาที่ 39/${parseInt(year)-2511} เรื่อง แต่งตั้งข้าราชการครูและบุคลากรทางการศึกษาปฏิบัติหน้าที่ตามพรรณนางาน ปีการศึกษา ${year} ได้กำหนดให้ผู้รับผิดชอบงานการพัฒนากระบวนการเรียนรู้กลุ่มบริหารงานวิชาการ มีหน้าที่จัดครูเข้าสอนแทน อย่างสม่ำเสมอ พร้อมสรุปรายงานการสอนแทน นั้น</div>
+                    
+                    <div class="doc-content">ตามคำสั่งโรงเรียนกระดุมทองวิทยาที่ 39/2568 เรื่อง แต่งตั้งข้าราชการครูและบุคลากรทางการศึกษาปฏิบัติหน้าที่ตามพรรณนางาน ปีการศึกษา ${year} ได้กำหนดให้ผู้รับผิดชอบงานการพัฒนากระบวนการเรียนรู้กลุ่มบริหารงานวิชาการ มีหน้าที่จัดครูเข้าสอนแทน อย่างสม่ำเสมอ พร้อมสรุปรายงานการสอนแทน นั้น</div>
+                    
                     <div class="doc-content">บัดนี้ ข้าพเจ้า ${author} ผู้รับผิดชอบงานการพัฒนากระบวนการเรียนรู้กลุ่มบริหารงานวิชาการ ได้ดำเนินการสรุปข้อมูลการจัดสอนแทน ประจำเดือน${month} ภาคเรียนที่ ${semester} ปีการศึกษา ${year} จากระบบช่วยจัดสอนแทน โรงเรียนกระดุมทองวิทยา เสร็จสิ้นเรียบร้อยแล้ว รายละเอียดดังที่แนบมาพร้อมนี้</div>
+                    
                     <div class="doc-closing">จึงเรียนมาเพื่อโปรดทราบ</div>
                     
                     <div class="sign-section">
-                        <div class="sign-item">
+                        <div class="sign-block">
                             ลงชื่อ........................................งานพัฒนากระบวนการเรียนรู้<br>
-                            (${author})
+                            <div class="sign-name-position">(${author})</div>
                         </div>
                         
-                        <div class="sign-item">
-                            <div class="checkbox-text">(&nbsp;&nbsp;&nbsp;) รับทราบ</div>
-                            ลงชื่อ........................................หัวหน้ากลุ่มบริหารงานวิชาการ<br>
-                            (นางสาวสุพัฒตา ศรีเมือง)
+                        <div class="sign-block">
+                            <div class="sign-block-comment">ความเห็น หัวหน้ากลุ่มบริหารงานวิชาการ</div>
+                            <div class="dashed-line">...................................................................................................</div>
+                            <div style="margin-top:10px">ลงชื่อ...........................................................................</div>
+                            <div class="sign-name-position">
+                                (นางสาวสุพัฒตา ศรีเมือง)<br>
+                                หัวหน้ากลุ่มบริหารงานวิชาการ
+                            </div>
                         </div>
                         
-                        <div class="sign-item">
-                            <div class="checkbox-text">(&nbsp;&nbsp;&nbsp;) รับทราบ</div>
-                            ลงชื่อ........................................รองผู้อำนวยการโรงเรียน<br>
-                            (นางสุคันทร บาอินทร์)<br>
-                            รองผู้อำนวยการโรงเรียนกระดุมทองวิทยา
+                        <div class="sign-block">
+                            <div class="sign-block-comment">ความเห็น รองผู้อำนวยการโรงเรียน</div>
+                            <div class="dashed-line">...................................................................................................</div>
+                            <div style="margin-top:10px">ลงชื่อ...........................................................................</div>
+                            <div class="sign-name-position">
+                                (นางสุคันทร บาอินทร์)<br>
+                                รองผู้อำนวยการโรงเรียนกระดุมทองวิทยา
+                            </div>
                         </div>
                         
-                        <div class="sign-item">
-                            <div class="checkbox-text">(&nbsp;&nbsp;&nbsp;) รับทราบ</div>
-                            ลงชื่อ........................................ผู้อำนวยการโรงเรียน<br>
-                            (นางสุนิสา ใจใหญ่)<br>
-                            ผู้อำนวยการโรงเรียนกระดุมทองวิทยา
+                        <div class="sign-block">
+                            <div class="sign-block-comment">ความเห็น ผู้อำนวยการโรงเรียน</div>
+                            <div class="dashed-line">...................................................................................................</div>
+                            <div style="margin-top:10px">ลงชื่อ...........................................................................</div>
+                            <div class="sign-name-position">
+                                (นางสุนิสา ใจใหญ่)<br>
+                                ผู้อำนวยการโรงเรียนกระดุมทองวิทยา
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -761,14 +716,10 @@
         function generateStatsPage() {
             const { month, semester, year, stats } = reportData;
             
-            // Sort teachers by count
             const topSubTeachers = Object.entries(stats.subTeacherCount)
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 10);
-            
+                .sort((a, b) => b[1] - a[1]).slice(0, 10);
             const topAbsentTeachers = Object.entries(stats.absentTeacherCount)
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 10);
+                .sort((a, b) => b[1] - a[1]).slice(0, 10);
 
             return `
                 <div class="a4-paper">
@@ -778,33 +729,28 @@
                             โรงเรียนกระดุมทองวิทยา<br>
                             ประจำเดือน${month} ภาคเรียนที่ ${semester} ปีการศึกษา ${year}
                         </div>
-                        
                         <div class="stats-summary">
                             <div class="stat-card">
                                 <h3>📊 จำนวนครั้งทั้งหมด</h3>
                                 <div class="stat-value">${stats.totalRecords}</div>
                                 <div>ครั้ง</div>
                             </div>
-                            
                             <div class="stat-card">
                                 <h3>📅 จำนวนวันที่จัดสอนแทน</h3>
                                 <div class="stat-value">${stats.totalDays}</div>
                                 <div>วัน</div>
                             </div>
-                            
                             <div class="stat-card">
                                 <h3>👥 จำนวนครูที่สอนแทน</h3>
                                 <div class="stat-value">${Object.keys(stats.subTeacherCount).length}</div>
                                 <div>คน</div>
                             </div>
-                            
                             <div class="stat-card">
                                 <h3>📋 จำนวนครูที่ได้รับการแทน</h3>
                                 <div class="stat-value">${Object.keys(stats.absentTeacherCount).length}</div>
                                 <div>คน</div>
                             </div>
                         </div>
-
                         <div class="top-teachers">
                             <h3>🏆 ครูที่ปฏิบัติหน้าที่สอนแทนมากที่สุด 10 อันดับแรก</h3>
                             <div class="top-list">
@@ -816,8 +762,7 @@
                                 `).join('')}
                             </div>
                         </div>
-
-                        <div class="top-teachers" style="margin-top: 30px;">
+                        <div class="top-teachers" style="margin-top: 25px;">
                             <h3>📊 ครูที่ได้รับการสอนแทนมากที่สุด 10 อันดับแรก</h3>
                             <div class="top-list">
                                 ${topAbsentTeachers.map(([name, count], idx) => `
@@ -831,16 +776,6 @@
                     </div>
                 </div>
             `;
-        }
-
-        function formatThaiDate(dateStr) {
-            const dateParts = dateStr.split('-');
-            const thaiMonths = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.',
-                              'ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
-            const dayNum = parseInt(dateParts[2]);
-            const monthName = thaiMonths[parseInt(dateParts[1]) - 1];
-            const yearBE = parseInt(dateParts[0]) + 543;
-            return `${dayNum} ${monthName} ${yearBE}`;
         }
 
         function backToForm() {
