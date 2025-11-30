@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบจัดสอนแทน V.8.2</title>
+    <title>ระบบจัดสอนแทน V.8.2 (TH Sarabun New Official)</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -13,8 +13,53 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
     <style>
+        /* Google Fonts สำหรับ UI และรายงานสรุป (เหมือนเดิม) */
         @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap');
+
+        /* =========================================
+           @FONT-FACE SETUP (TH Sarabun New)
+           สำหรับบันทึกข้อความราชการ
+           ========================================= */
+        @font-face {
+            font-family: 'THSarabunNew';
+            src: url('fonts/thsarabunnew-webfont.eot');
+            src: url('fonts/thsarabunnew-webfont.eot?#iefix') format('embedded-opentype'),
+                 url('fonts/thsarabunnew-webfont.woff') format('woff'),
+                 url('fonts/thsarabunnew-webfont.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'THSarabunNew';
+            src: url('fonts/thsarabunnew_bold-webfont.eot');
+            src: url('fonts/thsarabunnew_bold-webfont.eot?#iefix') format('embedded-opentype'),
+                 url('fonts/thsarabunnew_bold-webfont.woff') format('woff'),
+                 url('fonts/thsarabunnew_bold-webfont.ttf') format('truetype');
+            font-weight: bold;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'THSarabunNew';
+            src: url('fonts/thsarabunnew_italic-webfont.eot');
+            src: url('fonts/thsarabunnew_italic-webfont.eot?#iefix') format('embedded-opentype'),
+                 url('fonts/thsarabunnew_italic-webfont.woff') format('woff'),
+                 url('fonts/thsarabunnew_italic-webfont.ttf') format('truetype');
+            font-weight: normal;
+            font-style: italic;
+        }
+
+        @font-face {
+            font-family: 'THSarabunNew';
+            src: url('fonts/thsarabunnew_bolditalic-webfont.eot');
+            src: url('fonts/thsarabunnew_bolditalic-webfont.eot?#iefix') format('embedded-opentype'),
+                 url('fonts/thsarabunnew_bolditalic-webfont.woff') format('woff'),
+                 url('fonts/thsarabunnew_bolditalic-webfont.ttf') format('truetype');
+            font-weight: bold;
+            font-style: italic;
+        }
 
         :root { 
             --primary: #1e3a8a; 
@@ -24,6 +69,7 @@
             --accent: #2563eb;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        /* ฟอนต์หลักของระบบยังคงเป็น Google Font Sarabun */
         body { font-family: 'Sarabun', sans-serif; background: var(--bg); color: #1e293b; padding: 20px; }
 
         .app-container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 15px; box-shadow: 0 4px 20px rgba(30, 58, 138, 0.1); overflow: hidden; min-height: 90vh; }
@@ -270,29 +316,38 @@
         .a4-paper {
             width: 210mm; min-height: 297mm; height: auto; background: white;
             padding: 12mm 15mm 10mm 20mm; position: relative;
+            /* ค่าเริ่มต้นใช้ Sarabun Google Font (หรือจะถูก Override โดย class ลูก) */
             font-family: 'Sarabun', sans-serif; box-sizing: border-box;
             box-shadow: 0 0 10px rgba(0,0,0,0.3); margin-bottom: 20px; overflow: visible;
             min-width: 210mm; color: black;
         }
 
-        /* ----- Styles for Official Memo (บันทึกข้อความ) ----- */
+        /* ----- Styles for Official Memo (บันทึกข้อความ) ใช้ TH Sarabun New ----- */
+        .memo-layout { 
+            /* บังคับใช้ฟอนต์ TH Sarabun New ที่โหลดเอง */
+            font-family: 'THSarabunNew', sans-serif !important; 
+        }
         .memo-layout .doc-header { position: relative; margin-bottom: 5px; }
         .memo-layout .garuda { position: absolute; left: 0; top: 0; width: 1.4cm; height: auto; }
-        .memo-layout .doc-code { position: absolute; right: 0; top: 0; font-size: 13pt; font-weight: bold; }
-        .memo-layout .doc-title { text-align: center; font-size: 26pt; font-weight: bold; padding-top: 8mm; margin-bottom: 3mm; }
-        .memo-layout .doc-meta { font-size: 14pt; line-height: 1.3; margin-bottom: 2px; }
+        
+        /* ปรับขนาดฟอนต์ให้เข้ากับ TH Sarabun New ซึ่งมักจะตัวเล็กกว่า Google Font */
+        .memo-layout .doc-code { position: absolute; right: 0; top: 0; font-size: 14pt; font-weight: bold; }
+        .memo-layout .doc-title { text-align: center; font-size: 29pt; font-weight: bold; padding-top: 8mm; margin-bottom: 3mm; }
+        .memo-layout .doc-meta { font-size: 16pt; line-height: 1.3; margin-bottom: 2px; }
         .memo-layout .doc-meta-row { display: flex; justify-content: space-between; }
         .memo-layout .doc-line { border: none; border-bottom: 1px solid black; margin: 4px 0; }
-        .memo-layout .doc-to { font-size: 14pt; font-weight: bold; font-style: italic; margin-bottom: 3px; }
-        .memo-layout .doc-content { font-size: 14pt; text-indent: 2cm; text-align: justify; line-height: 1.25; margin-bottom: 3px; }
-        .memo-layout .doc-table { width: 100%; border-collapse: collapse; margin: 5px 0; font-size: 12pt; }
+        .memo-layout .doc-to { font-size: 16pt; font-weight: bold; font-style: italic; margin-bottom: 3px; }
+        .memo-layout .doc-content { font-size: 16pt; text-indent: 2.5cm; text-align: justify; line-height: 1.25; margin-bottom: 3px; }
+        
+        .memo-layout .doc-table { width: 100%; border-collapse: collapse; margin: 5px 0; font-size: 14pt; }
         .memo-layout .doc-table th, .memo-layout .doc-table td { border: 1px solid black; padding: 2px 3px; text-align: center; vertical-align: middle; line-height: 1.15; }
-        .memo-layout .doc-table th { background: white; font-weight: bold; font-size: 11pt; }
-        .memo-layout .doc-closing { font-size: 14pt; text-indent: 2cm; margin-top: 5px; margin-bottom: 5px; }
+        .memo-layout .doc-table th { background: white; font-weight: bold; font-size: 14pt; }
+        
+        .memo-layout .doc-closing { font-size: 16pt; text-indent: 2.5cm; margin-top: 5px; margin-bottom: 5px; }
         .memo-layout .sign-table { width: 100%; border-collapse: collapse; border: none; margin-top: 20px; }
-        .memo-layout .sign-table td { border: none; vertical-align: top; text-align: center; padding: 3px 5px; width: 50%; font-size: 12pt; line-height: 1.2; white-space: nowrap; }
-        .memo-layout .checkbox-text { text-align: left; padding-left: 15px; margin-bottom: 2px; font-size: 12pt; }
-        .memo-layout .footer-system { position: static; margin-top: 50px; text-align: center; font-size: 10pt; color: #666; font-style: italic; width: 100%; }
+        .memo-layout .sign-table td { border: none; vertical-align: top; text-align: center; padding: 3px 5px; width: 50%; font-size: 14pt; line-height: 1.2; white-space: nowrap; }
+        .memo-layout .checkbox-text { text-align: left; padding-left: 15px; margin-bottom: 2px; font-size: 14pt; }
+        .memo-layout .footer-system { position: static; margin-top: 50px; text-align: center; font-size: 12pt; color: #666; font-style: italic; width: 100%; }
 
         /* ----- Styles for Daily Summary Report (รายงานสรุป) with Kanit Font ----- */
         .summary-layout { font-family: 'Kanit', sans-serif; }
@@ -428,7 +483,6 @@
                 <h3 style="margin-bottom:15px; color:var(--primary);">ผลการค้นหา (กรุณาระบุรายละเอียด)</h3>
                 <div id="matchCards"></div>
                 
-                <!-- Save Button -->
                 <div style="margin-top: 20px; padding: 15px; background: #eff6ff; border-radius: 8px; border: 1px solid #93c5fd;">
                     <button class="btn-save" id="btnSave" onclick="saveAllocation()" style="width: 100%;">
                         💾 บันทึกการจัดสอนแทน
@@ -438,7 +492,6 @@
                     </p>
                 </div>
                 
-                <!-- Print Buttons (Initially Disabled) -->
                 <div style="overflow: hidden; margin-top:15px; display:flex; justify-content:flex-end; gap:10px; flex-wrap: wrap;">
                     <button class="btn-summary" id="btnPrintSummary" onclick="prepareSummaryPreview()" disabled>
                         <i class="fas fa-file-alt"></i> พิมพ์ใบสรุป (Daily Report)
@@ -457,7 +510,6 @@
         </div>
 
         <div id="dashboard" class="page-section">
-            <!-- Filter Bar -->
             <div class="filter-bar">
                 <div>
                     <label>ช่วงเวลา:</label>
@@ -488,7 +540,6 @@
                 </button>
             </div>
 
-            <!-- Statistics Cards -->
             <div class="stats-container">
                 <div class="stat-card">
                     <div class="stat-number" id="statTotalRecords">0</div>
@@ -508,7 +559,6 @@
                 </div>
             </div>
 
-            <!-- Charts -->
             <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap:20px; margin-bottom: 20px;">
                 <div class="chart-container">
                     <h4 style="margin-bottom:10px; color: var(--primary);">📊 กราฟสรุปการจัดสอนแทน</h4>
@@ -520,7 +570,6 @@
                 </div>
             </div>
 
-            <!-- Highlight Info -->
             <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap:15px; margin-bottom: 20px;">
                 <div class="card" style="padding:15px;">
                     <h4 style="color:#b45309; margin-bottom:10px;">📅 วันที่จัดสอนแทนมากที่สุด</h4>
@@ -532,7 +581,6 @@
                 </div>
             </div>
 
-            <!-- Data Tables -->
             <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap:20px;">
                 <div class="card" style="padding:15px;">
                     <h4 style="margin-bottom:10px; color: var(--primary);">🏆 ตารางความถี่ครูที่สอนแทน</h4>
@@ -1027,7 +1075,7 @@
                         <div class="doc-code">วก.กทว.303</div>
                         <div class="doc-title">บันทึกข้อความ</div>
                     </div>
-                    <div class="doc-meta"><b>ส่วนราชการ</b>&nbsp;&nbsp;โรงเรียนกระดุมทองวิทยา...</div>
+                    <div class="doc-meta"><b>ส่วนราชการ</b>&nbsp;&nbsp;โรงเรียนกระดุมทองวิทยา&nbsp;&nbsp;ตำบลหนองหัวช้าง&nbsp;&nbsp;อำเภอกันทรารมย์&nbsp;&nbsp;จังหวัดศรีสะเกษ</div>
                     <div class="doc-meta doc-meta-row"><span><b>ที่</b>&nbsp;&nbsp;ศก 51008.08/............</span><span><b>วันที่</b>&nbsp;&nbsp;${thaiDateStr}</span></div>
                     <div class="doc-meta"><b>เรื่อง</b>&nbsp;&nbsp;รายงานผลการสอนแทน</div>
                     <hr class="doc-line">
@@ -1288,7 +1336,7 @@
                     icon: 'success', 
                     title: 'คัดลอกแล้ว!', 
                     timer: 1500, 
-                    showConfirmButton: false,
+                    showConfirmButton: false, 
                     target: document.getElementById('copyModal') 
                 });
             });
@@ -1298,7 +1346,7 @@
             Swal.fire({ 
                 title: 'ยืนยันการลบ?', 
                 icon: 'warning', 
-                showCancelButton: true,
+                showCancelButton: true, 
                 confirmButtonColor: '#ef4444', 
                 confirmButtonText: 'ลบ', 
                 cancelButtonText: 'ยกเลิก' 
