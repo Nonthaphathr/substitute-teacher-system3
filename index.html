@@ -328,39 +328,53 @@
     min-width: 210mm; 
     color: black;
 }
-       /* ----- Styles for Official Memo (บันทึกข้อความ) ใช้ TH Sarabun New ----- */
+    /* ----- Styles for Official Memo (บันทึกข้อความ) ใช้ TH Sarabun New ----- */
 .memo-layout { 
     font-family: 'THSarabunNew', sans-serif !important;
     position: relative;
     min-height: 297mm;
-    padding: 10mm 15mm 25mm 20mm; /* ลด padding: top right bottom left */
+    padding: 10mm 15mm 25mm 20mm;
 }
 .memo-layout .doc-header { position: relative; margin-bottom: 2px; }
 .memo-layout .garuda { position: absolute; left: 0; top: 0; width: 1.3cm; height: auto; }
 
 .memo-layout .doc-code { position: absolute; right: 0; top: 0; font-size: 10pt; font-weight: bold; }
 .memo-layout .doc-title { text-align: center; font-size: 20pt; font-weight: bold; padding-top: 5mm; margin-bottom: 2mm; }
-.memo-layout .doc-meta { font-size: 12pt; line-height: 1.4; margin-bottom: 1px; white-space: nowrap; }
+.memo-layout .doc-meta { font-size: 9pt; line-height: 1.4; margin-bottom: 1px; white-space: nowrap; }
 .memo-layout .doc-meta-row { display: flex; justify-content: space-between; }
-.memo-layout .doc-line { border: none; border-bottom: 1px solid black; margin: 2px 0; }
-.memo-layout .doc-to { font-size: 12pt; font-weight: bold; font-style: italic; margin-bottom: 2px; line-height: 1.4; }
-.memo-layout .doc-content { font-size: 12pt; text-indent: 2.5cm; text-align: justify; line-height: 1.5; margin-bottom: 2px; }
+.memo-layout .doc-line { border: none; border-bottom: 1px solid black; margin: 2px 0 8px 0; } /* เพิ่ม margin-bottom */
+.memo-layout .doc-to { font-size: 9pt; font-weight: bold; font-style: italic; margin-bottom: 2px; line-height: 1.4; }
+.memo-layout .doc-content { font-size: 9pt; text-indent: 2.5cm; text-align: justify; line-height: 1.5; margin-bottom: 2px; }
 
-.memo-layout .doc-table { width: 100%; border-collapse: collapse; margin: 4px 0; font-size: 12pt; }
+.memo-layout .doc-table { width: 100%; border-collapse: collapse; margin: 4px 0; font-size: 9pt; }
 .memo-layout .doc-table th, .memo-layout .doc-table td { border: 1px solid black; padding: 3px 4px; text-align: center; vertical-align: middle; line-height: 1.3; white-space: nowrap; }
-.memo-layout .doc-table th { background: white; font-weight: bold; font-size: 12pt; }
+.memo-layout .doc-table th { background: white; font-weight: bold; font-size: 9pt; }
 .memo-layout .doc-table td.text-left { text-align: left; }
 
-.memo-layout .doc-closing { font-size: 12pt; text-indent: 2.5cm; margin-top: 8px; margin-bottom: 5px; line-height: 1.4; }
+.memo-layout .doc-closing { font-size: 9pt; text-indent: 2.5cm; margin-top: 8px; margin-bottom: 15px; line-height: 1.4; } /* เพิ่ม margin-bottom */
 .memo-layout .sign-table { width: 100%; border-collapse: collapse; border: none; margin-top: 12px; }
-.memo-layout .sign-table td { border: none; vertical-align: top; text-align: center; padding: 2px 5px; width: 50%; font-size: 12pt; line-height: 1.3; white-space: nowrap; }
-.memo-layout .checkbox-text { text-align: left; padding-left: 15px; margin-bottom: 1px; font-size: 12pt; }
+.memo-layout .sign-table td { border: none; vertical-align: top; text-align: center; padding: 2px 5px; width: 50%; font-size: 9pt; line-height: 1.3; white-space: nowrap; }
+.memo-layout .checkbox-text { text-align: left; padding-left: 15px; margin-bottom: 1px; font-size: 9pt; }
 
 /* ชื่อหัวหน้ากลุ่มบริหารงานวิชาการ - ขยับซ้าย */
 .memo-layout .academic-head-name { 
     display: inline-block;
     position: relative;
-    left: -85px;
+    left: -70px;
+}
+
+/* ชื่อครูผู้สอนแทน - ขยับซ้าย */
+.memo-layout .sub-teacher-name { 
+    display: inline-block;
+    position: relative;
+    left: -20px;
+}
+
+/* วันที่ - ขยับซ้าย */
+.memo-layout .doc-date-value { 
+    display: inline-block;
+    position: relative;
+    left: -50px;
 }
 
 /* Footer ติดขอบล่างสุดของกระดาษ */
@@ -1132,7 +1146,10 @@ function renderMemoPaper() {
                 <div class="doc-title">บันทึกข้อความ</div>
             </div>
             <div class="doc-meta"><b>ส่วนราชการ</b>&nbsp;&nbsp;โรงเรียนกระดุมทองวิทยา ตำบลหนองหัวช้าง อำเภอกันทรารมย์ จังหวัดศรีสะเกษ</div>
-            <div class="doc-meta doc-meta-row"><span><b>ที่</b>&nbsp;&nbsp;ศก 51008.08/............</span><span><b>วันที่</b>&nbsp;&nbsp;${thaiDateStr}</span></div>
+            <div class="doc-meta doc-meta-row">
+                <span><b>ที่</b>&nbsp;&nbsp;ศก 51008.08/............</span>
+                <span><b>วันที่</b>&nbsp;&nbsp;<span class="doc-date-value">${thaiDateStr}</span></span>
+            </div>
             <div class="doc-meta"><b>เรื่อง</b>&nbsp;&nbsp;รายงานผลการสอนแทน</div>
             <hr class="doc-line">
             <div class="doc-to">เรียน&nbsp;&nbsp;ผู้อำนวยการโรงเรียนกระดุมทองวิทยา</div>
@@ -1140,15 +1157,15 @@ function renderMemoPaper() {
             <div class="doc-content">บัดนี้ ข้าพเจ้าได้ดำเนินการสอนแทนดังกล่าวเสร็จสิ้นเรียบร้อยแล้ว จึงขอรายงานผลการสอนแทนดังต่อไปนี้</div>
             <table class="doc-table">
                 <colgroup>
-    <col style="width:4%">
-    <col style="width:20%">
-    <col style="width:13%">
-    <col style="width:6%">
-    <col style="width:12%">
-    <col style="width:6%">
-    <col style="width:22%">
-    <col style="width:17%">
-</colgroup>
+                    <col style="width:4%">
+                    <col style="width:20%">
+                    <col style="width:13%">
+                    <col style="width:6%">
+                    <col style="width:12%">
+                    <col style="width:6%">
+                    <col style="width:22%">
+                    <col style="width:17%">
+                </colgroup>
                 <thead>
                     <tr>
                         <th rowspan="2">ที่</th>
@@ -1171,7 +1188,7 @@ function renderMemoPaper() {
                 <tr>
                     <td>
                         ลงชื่อ........................................ครูผู้สอนแทน<br>
-                        (${subName})
+                        <span class="sub-teacher-name">(${subName})</span>
                     </td>
                     <td>
                         ลงชื่อ........................................หัวหน้ากลุ่มบริหารงานวิชาการ<br>
@@ -1412,7 +1429,7 @@ function renderMemoPaper() {
             const dateStr = formatThaiDate(data.docDate);
             const currentUrl = window.location.href;
             
-            let text = `📢 **สรุปการจัดสอนแทน**\n📅 วันที่: ${dateStr}\n------------------------------\n`;
+            let text = `📢 **ขอแจ้งข้อมูลสรุปการจัดสอนแทน**\n📅 วันที่: ${dateStr}\n------------------------------\n`;
             const sortedRecords = [...data.records].sort((a,b) => a.period - b.period);
             
             sortedRecords.forEach((r, index) => {
@@ -1421,7 +1438,7 @@ function renderMemoPaper() {
                 text += `${index+1}. คาบ ${r.period}: ${subName} (แทน ${absentName})\n   - วิชา: ${r.subject} ชั้น: ${r.grade} (${r.reason})\n`;
             });
             
-            text += `------------------------------\n🔗 ลิงก์ระบบ:\n${currentUrl}`;
+            text += `------------------------------\n🔗 คลิกลิงก์ระบบ:\n${currentUrl}`;
 
             document.getElementById('copyTextBox').value = text;
             document.getElementById('copyModal').style.display = 'block';
