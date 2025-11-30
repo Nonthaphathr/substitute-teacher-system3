@@ -347,9 +347,9 @@
 .memo-layout .doc-content { font-size: 12pt; text-indent: 2.5cm; text-align: justify; line-height: 1.5; margin-bottom: 2px; }
 
 .memo-layout .doc-table { width: 100%; border-collapse: collapse; margin: 4px 0; font-size: 12pt; }
-.memo-layout .doc-table th, .memo-layout .doc-table td { border: 1px solid black; padding: 3px 4px; text-align: center; vertical-align: middle; line-height: 1.3; }
+.memo-layout .doc-table th, .memo-layout .doc-table td { border: 1px solid black; padding: 3px 4px; text-align: center; vertical-align: middle; line-height: 1.3; white-space: nowrap; }
 .memo-layout .doc-table th { background: white; font-weight: bold; font-size: 12pt; }
-.memo-layout .doc-table td.text-left { text-align: left; white-space: nowrap; }
+.memo-layout .doc-table td.text-left { text-align: left; }
 
 .memo-layout .doc-closing { font-size: 12pt; text-indent: 2.5cm; margin-top: 8px; margin-bottom: 5px; line-height: 1.4; }
 .memo-layout .sign-table { width: 100%; border-collapse: collapse; border: none; margin-top: 12px; }
@@ -360,7 +360,7 @@
 .memo-layout .academic-head-name { 
     display: inline-block;
     position: relative;
-    left: -35px;
+    left: -85px;
 }
 
 /* Footer ติดขอบล่างสุดของกระดาษ */
@@ -391,8 +391,8 @@
         .summary-layout .sign-dot { margin-top: 25px; border-bottom: 1px dotted black; width: 85%; margin-left: auto; margin-right: auto; height: 1px; }
         .summary-layout .footer-system { position: static; margin-top: 40px; text-align: center; font-size: 9pt; color: #666; font-style: italic; width: 100%; }
 
-       @media print {
-    @page { size: A4; margin: 0; }
+      @media print {
+    @page { size: A4; margin: 0mm; }
     body { background: white; padding: 0; margin: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     .app-container, .modal-tools { display: none !important; }
     .modal { position: static; background: white; width: 100%; height: auto; display: block !important; }
@@ -400,9 +400,9 @@
     .modal-view { padding: 0; display: block; background: white; }
     .a4-paper { 
         margin: 0; 
-        padding: 10mm 15mm 10mm 20mm; 
+        padding: 8mm 12mm 8mm 18mm; 
         width: 210mm; 
-        height: 297mm; 
+        height: 280mm; /* ลดความสูงเพื่อชดเชยระยะขอบเริ่มต้นของ browser */
         page-break-after: always; 
         page-break-inside: avoid; 
         box-shadow: none; 
@@ -412,12 +412,25 @@
         overflow: hidden;
     }
     .a4-paper:last-child { page-break-after: auto; }
+    
+    /* Footer สำหรับการพิมพ์ - ใช้ static position แทน */
     .memo-layout .footer-system {
-        position: absolute;
-        bottom: 10mm;
-        left: 0;
+        position: static !important;
+        margin-top: 15px;
+        text-align: center;
         width: 100%;
     }
+    
+    /* ลดขนาด sign-table เมื่อพิมพ์ */
+    .memo-layout .sign-table {
+        margin-top: 8px;
+    }
+    .memo-layout .sign-table td {
+        font-size: 11pt;
+        line-height: 1.2;
+        padding: 1px 3px;
+    }
+    
     #copyModal { display: none !important; }
 }
 
@@ -1127,15 +1140,15 @@ function renderMemoPaper() {
             <div class="doc-content">บัดนี้ ข้าพเจ้าได้ดำเนินการสอนแทนดังกล่าวเสร็จสิ้นเรียบร้อยแล้ว จึงขอรายงานผลการสอนแทนดังต่อไปนี้</div>
             <table class="doc-table">
                 <colgroup>
-                    <col style="width:5%">
-                    <col style="width:22%">
-                    <col style="width:11%">
-                    <col style="width:7%">
-                    <col style="width:13%">
-                    <col style="width:7%">
-                    <col style="width:18%">
-                    <col style="width:17%">
-                </colgroup>
+    <col style="width:4%">
+    <col style="width:20%">
+    <col style="width:13%">
+    <col style="width:6%">
+    <col style="width:12%">
+    <col style="width:6%">
+    <col style="width:22%">
+    <col style="width:17%">
+</colgroup>
                 <thead>
                     <tr>
                         <th rowspan="2">ที่</th>
