@@ -115,6 +115,7 @@
         .a4-paper {
             width: 210mm;
             min-height: 297mm;
+            height: 297mm;
             background: white;
             padding: 20mm;
             margin: 0 auto 20px;
@@ -122,6 +123,8 @@
             font-family: 'THSarabunNew', sans-serif;
             color: black;
             position: relative;
+            overflow: hidden;
+            min-width: 210mm;
         }
 
         /* Cover Page */
@@ -165,59 +168,145 @@
             line-height: 1.8;
         }
 
-        /* Memo Page */
-        .memo-page {
-            font-size: 16pt;
-            line-height: 1.8;
+        /* Memo Page - Exactly matching main code */
+        .memo-layout { 
+            font-family: 'THSarabunNew', sans-serif !important;
+            position: relative;
+            min-height: 297mm;
+            padding: 10mm 15mm 25mm 20mm;
+        }
+        
+        .memo-layout .doc-header { 
+            position: relative; 
+            margin-bottom: 2px; 
+        }
+        
+        .memo-layout .garuda { 
+            position: absolute; 
+            left: 0; 
+            top: 0; 
+            width: 1.3cm; 
+            height: auto; 
         }
 
-        .garuda {
-            width: 80px;
-            height: auto;
-            display: block;
-            margin: 0 auto 20px;
+        .memo-layout .doc-code { 
+            position: absolute; 
+            right: 0; 
+            top: 0; 
+            font-size: 10pt; 
+            font-weight: bold; 
+        }
+        
+        .memo-layout .doc-title { 
+            text-align: center; 
+            font-size: 20pt; 
+            font-weight: bold; 
+            padding-top: 5mm; 
+            margin-bottom: 2mm; 
+        }
+        
+        .memo-layout .doc-meta { 
+            font-size: 11pt; 
+            line-height: 1.4; 
+            margin-bottom: 1px; 
+            white-space: nowrap; 
+        }
+        
+        .memo-layout .doc-meta-row { 
+            display: flex; 
+            justify-content: flex-start;
+            gap: 0;
+        }
+        
+        .memo-layout .doc-meta-row .doc-ref { 
+            flex: 0 0 50%;
+        }
+        
+        .memo-layout .doc-meta-row .doc-date { 
+            flex: 0 0 50%;
+            text-align: left;
+            padding-left: 10px;
+        }
+        
+        .memo-layout .doc-line { 
+            border: none; 
+            border-bottom: 1px solid black; 
+            margin: 2px 0 8px 0; 
+        }
+        
+        .memo-layout .doc-to { 
+            font-size: 11pt; 
+            font-weight: bold; 
+            font-style: italic; 
+            margin-bottom: 2px; 
+            line-height: 1.4; 
+        }
+        
+        .memo-layout .doc-content { 
+            font-size: 11pt; 
+            text-indent: 2.5cm; 
+            text-align: justify; 
+            line-height: 1.5; 
+            margin-bottom: 2px; 
         }
 
-        .memo-title {
-            text-align: center;
-            font-size: 20pt;
-            font-weight: bold;
-            margin-bottom: 20px;
+        .memo-layout .doc-closing { 
+            font-size: 11pt; 
+            text-indent: 2.5cm; 
+            margin-top: 8px; 
+            margin-bottom: 15px; 
+            line-height: 1.4; 
+        }
+        
+        .memo-layout .sign-table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            border: none; 
+            margin-top: 12px; 
+        }
+        
+        .memo-layout .sign-table td { 
+            border: none; 
+            vertical-align: top; 
+            text-align: center; 
+            padding: 2px 5px; 
+            width: 50%; 
+            font-size: 11pt; 
+            line-height: 1.3; 
+            white-space: nowrap; 
+        }
+        
+        .memo-layout .checkbox-text { 
+            text-align: left; 
+            padding-left: 15px; 
+            margin-bottom: 1px; 
+            font-size: 11pt; 
         }
 
-        .memo-header {
-            margin-bottom: 5px;
-            font-size: 16pt;
+        /* ชื่อหัวหน้ากลุ่มบริหารงานวิชาการ - ขยับซ้าย */
+        .memo-layout .academic-head-name { 
+            display: inline-block;
+            position: relative;
+            left: -70px;
         }
 
-        .memo-line {
-            border: none;
-            border-bottom: 1px solid black;
-            margin: 10px 0 20px 0;
+        /* ชื่อครูผู้จัดพิมพ์รายงาน - ขยับซ้าย */
+        .memo-layout .report-author-name { 
+            display: inline-block;
+            position: relative;
+            left: -20px;
         }
 
-        .memo-to {
-            font-weight: bold;
-            margin-bottom: 15px;
-        }
-
-        .memo-content {
-            text-indent: 3cm;
-            text-align: justify;
-            margin-bottom: 10px;
-        }
-
-        .signature-section {
-            margin-top: 40px;
-        }
-
-        .signature-box {
-            margin-bottom: 30px;
-        }
-
-        .signature-line {
-            margin-top: 40px;
-            text-align: center;
+        /* Footer ติดขอบล่างสุดของกระดาษ */
+        .memo-layout .footer-system { 
+            position: absolute; 
+            bottom: 10mm; 
+            left: 0; 
+            width: 100%; 
+            text-align: center; 
+            font-size: 10pt; 
+            color: #666; 
+            font-style: italic; 
         }
 
         /* Stats Page */
@@ -332,6 +421,9 @@
             body { 
                 background: white; 
                 padding: 0; 
+                margin: 0;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
             }
             
             .control-panel,
@@ -341,12 +433,38 @@
             
             .a4-paper {
                 margin: 0;
+                padding: 8mm 12mm 8mm 18mm;
+                width: 210mm;
+                height: 280mm;
                 box-shadow: none;
+                border: none;
                 page-break-after: always;
+                page-break-inside: avoid;
+                min-width: auto;
+                position: relative;
+                overflow: hidden;
             }
             
             .a4-paper:last-child {
                 page-break-after: auto;
+            }
+
+            /* Footer สำหรับการพิมพ์ - ใช้ static position แทน */
+            .memo-layout .footer-system {
+                position: static !important;
+                margin-top: 15px;
+                text-align: center;
+                width: 100%;
+            }
+            
+            /* ลดขนาด sign-table เมื่อพิมพ์ */
+            .memo-layout .sign-table {
+                margin-top: 8px;
+            }
+            .memo-layout .sign-table td {
+                font-size: 11pt;
+                line-height: 1.2;
+                padding: 1px 3px;
             }
         }
 
@@ -681,83 +799,57 @@
             const today = new Date();
             const thaiMonths = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
                               'กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
-            const dateStr = `${today.getDate()} ${thaiMonths[today.getMonth()]} ${today.getFullYear() + 543}`;
+            const dayNum = today.getDate();
+            const monthName = thaiMonths[today.getMonth()];
+            const yearBE = today.getFullYear() + 543;
+            const thaiDateStr = `${dayNum} ${monthName} พ.ศ. ${yearBE}`;
             
             return `
-                <div class="a4-paper">
-                    <div class="memo-page">
-                        <img src="https://nonthaphathr.github.io/uploadimg/kruda.png" class="garuda" alt="พญาครุฑ">
-                        
-                        <div class="memo-title">บันทึกข้อความ</div>
-                        
-                        <div class="memo-header">
-                            <strong>ส่วนราชการ</strong> กลุ่มบริหารงานวิชาการ โรงเรียนกระดุมทองวิทยา อำเภอกันทรารมย์ จังหวัดศรีสะเกษ
-                        </div>
-                        
-                        <div class="memo-header">
-                            <strong>ที่</strong> ศก 51008.08/............&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                            <strong>วันที่</strong> ${dateStr}
-                        </div>
-                        
-                        <div class="memo-header">
-                            <strong>เรื่อง</strong> รายงานข้อมูลสถิติการจัดสอนแทน ภาคเรียนที่ ${semester} ปีการศึกษา ${year}
-                        </div>
-                        
-                        <hr class="memo-line">
-                        
-                        <div class="memo-to">เรียน ผู้อำนวยการโรงเรียนกระดุมทองวิทยา</div>
-                        
-                        <div class="memo-content">
-                            ตามคำสั่งโรงเรียนกระดุมทองวิทยาที่ 39/${parseInt(year)-2511} เรื่อง แต่งตั้งข้าราชการครูและบุคลากรทางการศึกษา
-                            ปฏิบัติหน้าที่ตามพรรณนางาน ปีการศึกษา ${year} ได้กำหนดให้ผู้รับผิดชอบงานการพัฒนากระบวนการเรียนรู้
-                            กลุ่มบริหารงานวิชาการ มีหน้าที่จัดครูเข้าสอนแทน อย่างสม่ำเสมอ พร้อมสรุปรายงานการสอนแทน นั้น
-                        </div>
-                        
-                        <div class="memo-content">
-                            บัดนี้ ข้าพเจ้า ${author} ผู้รับผิดชอบงานการพัฒนากระบวนการเรียนรู้
-                            กลุ่มบริหารงานวิชาการ ได้ดำเนินการสรุปข้อมูลการจัดสอนแทน ประจำเดือน${month} ภาคเรียนที่ ${semester} 
-                            ปีการศึกษา ${year} จากระบบช่วยจัดสอนแทน โรงเรียนกระดุมทองวิทยา เสร็จสิ้นเรียบร้อยแล้ว 
-                            รายละเอียดดังที่แนบมาพร้อมนี้
-                        </div>
-                        
-                        <div class="memo-content" style="text-indent: 3cm;">
-                            จึงเรียนมาเพื่อโปรดทราบ
-                        </div>
-                        
-                        <div class="signature-section">
-                            <div class="signature-line">
-                                (${author})<br>
-                                งานการพัฒนากระบวนการเรียนรู้
-                            </div>
-                            
-                            <div class="signature-box">
-                                <strong>ความเห็นหัวหน้ากลุ่มบริหารงานวิชาการ</strong><br>
-                                ………………………………………………………………………<br>
-                                <div class="signature-line">
-                                    (นางสาวสุพัฒตา ศรีเมือง)<br>
-                                    หัวหน้าฝ่ายวิชาการ
-                                </div>
-                            </div>
-                            
-                            <div class="signature-box">
-                                <strong>ความเห็นรองผู้อำนวยการโรงเรียน</strong><br>
-                                ………………………………………………………………………<br>
-                                <div class="signature-line">
-                                    (นางสุคันทร บาอินทร์)<br>
-                                    รองผู้อำนวยการโรงเรียนกระดุมทองวิทยา
-                                </div>
-                            </div>
-                            
-                            <div class="signature-box">
-                                <strong>ความเห็นผู้อำนวยการโรงเรียน</strong><br>
-                                ………………………………………………………………………………………………<br>
-                                <div class="signature-line">
-                                    (นางสุนิสา ใจใหญ่)<br>
-                                    ผู้อำนวยการโรงเรียนกระดุมทองวิทยา
-                                </div>
-                            </div>
-                        </div>
+                <div class="a4-paper memo-layout">
+                    <div class="doc-header">
+                        <img src="https://nonthaphathr.github.io/uploadimg/kruda.png" class="garuda" crossorigin="anonymous">
+                        <div class="doc-code">วก.กทว.303</div>
+                        <div class="doc-title">บันทึกข้อความ</div>
                     </div>
+                    <div class="doc-meta"><b>ส่วนราชการ</b>&nbsp;&nbsp;กลุ่มบริหารงานวิชาการ โรงเรียนกระดุมทองวิทยา อำเภอกันทรารมย์ จังหวัดศรีสะเกษ</div>
+                    <div class="doc-meta doc-meta-row">
+                        <span class="doc-ref"><b>ที่</b>&nbsp;&nbsp;ศก 51008.08/............</span>
+                        <span class="doc-date"><b>วันที่</b>&nbsp;&nbsp;${thaiDateStr}</span>
+                    </div>
+                    <div class="doc-meta"><b>เรื่อง</b>&nbsp;&nbsp;รายงานข้อมูลสถิติการจัดสอนแทน ภาคเรียนที่ ${semester} ปีการศึกษา ${year}</div>
+                    <hr class="doc-line">
+                    <div class="doc-to">เรียน&nbsp;&nbsp;ผู้อำนวยการโรงเรียนกระดุมทองวิทยา</div>
+                    <div class="doc-content">ตามคำสั่งโรงเรียนกระดุมทองวิทยาที่ 39/2568 เรื่อง แต่งตั้งข้าราชการครูและบุคลากรทางการศึกษาปฏิบัติหน้าที่ตามพรรณนางาน ปีการศึกษา ${year} ได้กำหนดให้ผู้รับผิดชอบงานการพัฒนากระบวนการเรียนรู้กลุ่มบริหารงานวิชาการ มีหน้าที่จัดครูเข้าสอนแทน อย่างสม่ำเสมอ พร้อมสรุปรายงานการสอนแทน นั้น</div>
+                    <div class="doc-content">บัดนี้ ข้าพเจ้า ${author} ผู้รับผิดชอบงานการพัฒนากระบวนการเรียนรู้กลุ่มบริหารงานวิชาการ ได้ดำเนินการสรุปข้อมูลการจัดสอนแทน ประจำเดือน${month} ภาคเรียนที่ ${semester} ปีการศึกษา ${year} จากระบบช่วยจัดสอนแทน โรงเรียนกระดุมทองวิทยา เสร็จสิ้นเรียบร้อยแล้ว รายละเอียดดังที่แนบมาพร้อมนี้</div>
+                    <div class="doc-closing">จึงเรียนมาเพื่อโปรดทราบ</div>
+                    <table class="sign-table">
+                        <tr>
+                            <td>
+                                ลงชื่อ........................................ครูผู้จัดพิมพ์รายงาน<br>
+                                <span class="report-author-name">(${author})</span>
+                            </td>
+                            <td>
+                                ลงชื่อ........................................หัวหน้ากลุ่มบริหารงานวิชาการ<br>
+                                <span class="academic-head-name">(นางสาวสุพัฒตา ศรีเมือง)</span>
+                            </td>
+                        </tr>
+                        <tr style="height:12px;"><td></td><td></td></tr>
+                        <tr>
+                            <td>
+                                <div class="checkbox-text">(&nbsp;&nbsp;&nbsp;) รับทราบ</div>
+                                ลงชื่อ........................................<br>
+                                (นางสุคันทร บาอินทร์)<br>
+                                รองผู้อำนวยการโรงเรียนกระดุมทองวิทยา
+                            </td>
+                            <td>
+                                <div class="checkbox-text">(&nbsp;&nbsp;&nbsp;) รับทราบ</div>
+                                ลงชื่อ........................................<br>
+                                (นางสุนิสา ใจใหญ่)<br>
+                                ผู้อำนวยการโรงเรียนกระดุมทองวิทยา
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="footer-system">พิมพ์จากระบบจัดสอนแทนออนไลน์ โดย ครูนนทพัทธ์ หิรัญเรือง</div>
                 </div>
             `;
         }
