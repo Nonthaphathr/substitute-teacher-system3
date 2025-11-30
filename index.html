@@ -658,7 +658,7 @@
 
             <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap:20px;">
                 <div class="card" style="padding:15px;">
-                    <h4 style="margin-bottom:10px; color: var(--primary);">🏆 ตารางความถี่ครูที่สอนแทน</h4>
+                    <h4 style="margin-bottom:10px; color: var(--primary);">🏆 ตารางสรุปสถิติครูที่ปฏิบัติหน้าที่สอนแทน</h4>
                     <div style="max-height: 400px; overflow-y: auto;">
                         <table class="data-table" id="subTeacherTable">
                             <thead>
@@ -669,7 +669,7 @@
                     </div>
                 </div>
                 <div class="card" style="padding:15px;">
-                    <h4 style="margin-bottom:10px; color: var(--primary);">📋 ตารางครูที่ได้รับการสอนแทน</h4>
+                    <h4 style="margin-bottom:10px; color: var(--primary);">📋 ตารางสรุปสถิติครูที่ได้รับการสอนแทน</h4>
                     <div style="max-height: 400px; overflow-y: auto;">
                         <table class="data-table" id="absentTeacherTable">
                             <thead>
@@ -1220,87 +1220,84 @@ function renderMemoPaper() {
     }
 }
 
-        function renderSummaryPaper() {
-            const { data, scheduler, academicHead, deputyDirector, director, docDate } = window.lastPreviewData;
-            const container = document.getElementById('paperContainer');
-            container.innerHTML = '';
-            const thaiDateStr = formatThaiDate(docDate);
-            
-            const sorted = [...data].sort((a,b) => a.period - b.period);
-            
-            // Create rows only for actual data with full name including prefix
-            let rows = sorted.map((it, idx) => `
+     function renderSummaryPaper() {
+    const { data, scheduler, academicHead, deputyDirector, director, docDate } = window.lastPreviewData;
+    const container = document.getElementById('paperContainer');
+    container.innerHTML = '';
+    const thaiDateStr = formatThaiDate(docDate);
+    
+    const sorted = [...data].sort((a,b) => a.period - b.period);
+    
+    // Create rows only for actual data with full name including prefix
+    let rows = sorted.map((it, idx) => `
+        <tr>
+            <td>${idx+1}</td>
+            <td class="text-left">${formatTeacherNameFull(it.sub)}</td>
+            <td class="text-left">${formatTeacherNameFull(it.absent)}</td>
+            <td>${it.period}</td>
+            <td>${it.subject}/${it.grade}</td>
+            <td>${it.reason}</td>
+            <td></td>
+        </tr>
+    `).join('');
+
+    container.innerHTML = `
+    <div class="a4-paper summary-layout">
+        <div class="sum-header">
+            <img src="https://nonthaphathr.github.io/uploadimg/logoschool.png" class="logo-img">
+            <div class="sum-title-box">
+                <div class="sum-title">สรุปการจัดสอนแทนประจำวัน</div>
+                <div class="sum-subtitle">โรงเรียนกระดุมทองวิทยา อำเภอกันทรารมย์ จังหวัดศรีสะเกษ</div>
+                <div class="sum-subtitle">วันที่ ${thaiDateStr}</div>
+            </div>
+            <img src="https://nonthaphathr.github.io/uploadimg/logosonthan.png" class="logo-img">
+        </div>
+        
+        <table class="sum-table">
+            <colgroup>
+                <col style="width:5%">
+                <col style="width:22%">
+                <col style="width:22%">
+                <col style="width:7%">
+                <col style="width:15%">
+                <col style="width:13%">
+                <col style="width:16%">
+            </colgroup>
+            <thead>
                 <tr>
-                    <td>${idx+1}</td>
-                    <td class="text-left">${formatTeacherNameFull(it.sub)}</td>
-                    <td class="text-left">${formatTeacherNameFull(it.absent)}</td>
-                    <td>${it.period}</td>
-                    <td>${it.subject}/${it.grade}</td>
-                    <td>${it.reason}</td>
-                    <td></td>
+                    <th>ที่</th>
+                    <th>ครูผู้สอนแทน</th>
+                    <th>ครูผู้ลา/ไปราชการ</th>
+                    <th>คาบ</th>
+                    <th>วิชา/ชั้น</th>
+                    <th>หมายเหตุ</th>
+                    <th>ลงนาม</th>
                 </tr>
-            `).join('');
+            </thead>
+            <tbody>${rows}</tbody>
+        </table>
 
-            container.innerHTML = `
-            <div class="a4-paper summary-layout">
-                <div class="sum-header">
-                    <img src="https://nonthaphathr.github.io/uploadimg/logoschool.png" class="logo-img">
-                    <div class="sum-title-box">
-                        <div class="sum-title">สรุปการจัดสอนแทนประจำวัน</div>
-                        <div class="sum-subtitle">โรงเรียนกระดุมทองวิทยา อำเภอกันทรารมย์ จังหวัดศรีสะเกษ</div>
-                        <div class="sum-subtitle">วันที่ ${thaiDateStr}</div>
-                    </div>
-                    <img src="https://nonthaphathr.github.io/uploadimg/logosonthan.png" class="logo-img">
-                </div>
-                
-                <table class="sum-table">
-                    <colgroup>
-                        <col style="width:5%">
-                        <col style="width:22%">
-                        <col style="width:22%">
-                        <col style="width:7%">
-                        <col style="width:15%">
-                        <col style="width:13%">
-                        <col style="width:16%">
-                    </colgroup>
-                    <thead>
-                        <tr>
-                            <th>ที่</th>
-                            <th>ครูผู้สอนแทน</th>
-                            <th>ครูผู้ลา/ไปราชการ</th>
-                            <th>คาบ</th>
-                            <th>วิชา/ชั้น</th>
-                            <th>หมายเหตุ</th>
-                            <th>ลงนาม</th>
-                        </tr>
-                    </thead>
-                    <tbody>${rows}</tbody>
-                </table>
-
-                <div class="sum-footer">
-                    <div class="sign-box">
-                        <div>(${scheduler})</div>
-                        <div>ผู้จัดตารางสอนแทน</div>
-                    </div>
-                    <div class="sign-box">
-                        <div class="sign-dot"></div>
-                        <div>(${academicHead})</div>
-                        <div>หัวหน้ากลุ่มบริหารงานวิชาการ</div>
-                    </div>
-                    <div class="sign-box">
-                        <div class="sign-dot"></div>
-                        <div>(${deputyDirector})</div>
-                        <div>รองผู้อำนวยการโรงเรียน</div>
-                    </div>
-                    <div class="sign-box">
-                        <div class="sign-dot"></div>
-                        <div>(${director})</div>
-                        <div>ผู้อำนวยการโรงเรียน</div>
-                    </div>
-                </div>
-                <div class="footer-system">พิมพ์จากระบบจัดสอนแทนออนไลน์ โดย ครูนนทพัทธ์ หิรัญเรือง</div>
-            </div>`;
-        }
+        <div class="sum-footer">
+            <div class="sign-box">
+                <br>  <div>(${scheduler})</div>
+                <div>ผู้จัดตารางสอนแทน</div>
+            </div>
+            <div class="sign-box">
+                <br>  <div>(${academicHead})</div>
+                <div>หัวหน้ากลุ่มบริหารงานวิชาการ</div>
+            </div>
+            <div class="sign-box">
+                <br>  <div>(${deputyDirector})</div>
+                <div>รองผู้อำนวยการโรงเรียน</div>
+            </div>
+            <div class="sign-box">
+                <br>  <div>(${director})</div>
+                <div>ผู้อำนวยการโรงเรียน</div>
+            </div>
+        </div>
+        <div class="footer-system">พิมพ์จากระบบช่วยจัดสอนแทนออนไลน์ โดย ครูนนทพัทธ์ หิรัญเรือง</div>
+    </div>`;
+}
 
         // ============================================
         // EDIT MODE LOGIC
