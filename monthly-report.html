@@ -13,7 +13,7 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
 
-        /* TH Sarabun New Font Setup */
+        /* TH Sarabun New Font */
         @font-face {
             font-family: 'THSarabunNew';
             src: url('fonts/thsarabunnew-webfont.eot');
@@ -36,17 +36,18 @@
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
+        /* Global Body Style - Modern Look */
         body { 
             font-family: 'Sarabun', sans-serif; 
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); /* Gradient background */
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             min-height: 100vh;
             padding: 40px 20px;
             color: #334155;
         }
 
-        /* --- Modern Control Panel --- */
+        /* --- Modern Control Panel (UI ใหม่) --- */
         .control-panel {
-            max-width: 800px;
+            max-width: 850px;
             margin: 0 auto 30px;
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
@@ -54,7 +55,6 @@
             border-radius: 24px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.08);
             animation: fadeSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
-            position: relative;
         }
 
         @keyframes fadeSlideIn {
@@ -69,16 +69,6 @@
             margin-bottom: 30px;
         }
 
-        .control-panel h2 {
-            color: #1e3a8a;
-            font-size: 1.8rem;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin: 0;
-        }
-
-        /* ปุ่มกลับหน้าหลัก */
         .btn-home {
             background: #fff;
             color: #64748b;
@@ -94,21 +84,27 @@
             gap: 8px;
             text-decoration: none;
         }
-
         .btn-home:hover {
             background: #f1f5f9;
             color: #334155;
             transform: translateX(-2px);
         }
 
-        .form-group { margin-bottom: 24px; }
+        .control-panel h2 {
+            color: #1e3a8a;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 1.8rem;
+        }
 
+        .form-group { margin-bottom: 24px; }
         .form-group label {
             display: block;
             margin-bottom: 10px;
             font-weight: 600;
             color: #475569;
-            font-size: 1rem;
         }
 
         .form-group input,
@@ -119,8 +115,8 @@
             border-radius: 12px;
             font-family: 'Sarabun', sans-serif;
             font-size: 1rem;
-            transition: all 0.3s;
             background: #f8fafc;
+            transition: all 0.3s;
         }
 
         .form-group input:focus,
@@ -148,32 +144,32 @@
             cursor: pointer;
             width: 100%;
             margin-top: 10px;
-            transition: all 0.3s ease;
             box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
+            transition: all 0.3s ease;
             display: flex;
             justify-content: center;
             align-items: center;
             gap: 10px;
         }
-
         .btn-generate:hover {
             transform: translateY(-2px);
             box-shadow: 0 12px 25px rgba(37, 99, 235, 0.4);
         }
 
-        /* --- Report Styles --- */
+        /* --- A4 Paper & Report Styles (ยึดตามโค้ดเดิมเป๊ะๆ) --- */
         .a4-paper {
             width: 210mm;
             min-height: 297mm;
             height: 297mm;
             background: white;
             padding: 20mm;
-            margin: 0 auto 30px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            margin: 0 auto 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
             font-family: 'THSarabunNew', sans-serif;
             color: black;
             position: relative;
             overflow: hidden;
+            min-width: 210mm;
         }
 
         /* Cover Page */
@@ -185,51 +181,41 @@
             min-height: 257mm;
             text-align: center;
         }
-
         .cover-logos {
             display: flex;
             gap: 40px;
-            margin-bottom: 50px;
+            margin-bottom: 40px;
             align-items: center;
         }
-
-        .cover-logo {
-            width: 120px;
-            height: 120px;
-            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
-        }
-
+        .cover-logo { width: 120px; height: 120px; }
         .cover-title {
-            font-size: 26pt;
+            font-size: 24pt;
             font-weight: bold;
-            margin-bottom: 20px;
-            line-height: 1.4;
-        }
-
-        .cover-subtitle {
-            font-size: 20pt;
             margin-bottom: 15px;
+            line-height: 1.5;
         }
-
-        .cover-author {
-            margin-top: 80px;
+        .cover-subtitle {
             font-size: 18pt;
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+        .cover-author {
+            margin-top: 60px;
+            font-size: 16pt;
             line-height: 1.8;
         }
 
-        /* --- Memo Layout (Strict Preservation of Structure) --- */
+        /* Memo Page - CSS เดิมทั้งหมด */
         .memo-layout { 
             font-family: 'THSarabunNew', sans-serif !important;
             position: relative;
             min-height: 297mm;
             padding: 10mm 15mm 25mm 20mm;
         }
-        
         .memo-layout .doc-header { 
             position: relative; 
             margin-bottom: 2px; 
         }
-        
         .memo-layout .garuda { 
             position: absolute; 
             left: 0; 
@@ -237,7 +223,6 @@
             width: 1.3cm; 
             height: auto; 
         }
-        
         .memo-layout .doc-title { 
             text-align: center; 
             font-size: 20pt; 
@@ -245,164 +230,166 @@
             padding-top: 5mm; 
             margin-bottom: 2mm; 
         }
-        
         .memo-layout .doc-meta { 
-            font-size: 16pt; /* Standard Memo Font Size */
+            font-size: 11pt; /* กลับมาเป็น 11pt */
             line-height: 1.4; 
             margin-bottom: 1px; 
             white-space: nowrap; 
         }
-        
         .memo-layout .doc-meta-row { 
             display: flex; 
             justify-content: flex-start;
             gap: 0;
         }
-        
         .memo-layout .doc-meta-row .doc-ref { 
             flex: 0 0 50%;
         }
-        
         .memo-layout .doc-meta-row .doc-date { 
             flex: 0 0 50%;
             text-align: left;
-            padding-left: 10px; /* Reference Point for Alignment */
+            padding-left: 10px;
         }
-        
         .memo-layout .doc-line { 
             border: none; 
             border-bottom: 1px solid black; 
             margin: 2px 0 8px 0; 
         }
-        
         .memo-layout .doc-to { 
-            font-size: 16pt; 
+            font-size: 11pt; /* กลับมาเป็น 11pt */
             font-weight: bold; 
+            font-style: italic; 
             margin-bottom: 2px; 
             line-height: 1.4; 
         }
-        
         .memo-layout .doc-content { 
-            font-size: 16pt; 
+            font-size: 11pt; /* กลับมาเป็น 11pt */
             text-indent: 2.5cm; 
             text-align: justify; 
             line-height: 1.5; 
             margin-bottom: 2px; 
         }
-
         .memo-layout .doc-closing { 
-            font-size: 16pt; 
+            font-size: 11pt; /* กลับมาเป็น 11pt */
             text-indent: 2.5cm; 
             margin-top: 8px; 
             margin-bottom: 15px; 
             line-height: 1.4; 
         }
         
-        /* --- Modified Signature Section --- */
         .memo-layout .sign-section { 
             margin-top: 20px;
-            width: 100%;
         }
         
-        .memo-layout .sign-block {
-            /* Logic: Start at center (50%) like date, flow right */
+        /* ปรับปรุง CSS ส่วนลายเซ็นให้รองรับการจัดกึ่งกลางกระดาษ */
+        .memo-layout .sign-container {
             width: 50%;
-            margin-left: 50%; 
-            padding-left: 10px; /* Matches .doc-date padding */
-            text-align: left;
+            margin-left: 50%; /* ดันไปเริ่มที่กึ่งกลางกระดาษ */
+            padding-left: 10px; /* ให้ตรงกับวันที่ */
+        }
+
+        .memo-layout .sign-item { 
             margin-bottom: 25px;
-            font-size: 16pt;
+            text-align: left; /* จัดชิดซ้ายภายในกล่อง 50% */
+            font-size: 11pt; /* กลับมาเป็น 11pt */
             line-height: 1.4;
         }
-
-        .memo-layout .sign-block-comment {
-            margin-top: 10px;
-        }
-
-        .memo-layout .dashed-line {
-            display: block;
-            margin: 5px 0;
-            overflow: hidden;
-            white-space: nowrap;
-        }
-
-        .memo-layout .sign-name-position {
-            text-align: center; /* Names are centered relative to the 50% block */
+        
+        /* จัดกลางเฉพาะชื่อและตำแหน่ง */
+        .memo-layout .sign-center-text {
+            text-align: center;
             width: 100%;
         }
 
-        /* Stats Page */
-        .stats-page { font-size: 16pt; }
+        /* Stats Page - CSS เดิมทั้งหมด */
+        .stats-page {
+            font-size: 14pt; /* กลับมาเป็น 14pt */
+        }
         .stats-title {
             text-align: center;
-            font-size: 20pt;
+            font-size: 18pt; /* กลับมาเป็น 18pt */
             font-weight: bold;
             margin-bottom: 20px;
-            padding-bottom: 15px;
+            padding-bottom: 10px;
             border-bottom: 2px solid #333;
         }
-
         .stats-summary {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
+            gap: 15px;
             margin-bottom: 30px;
         }
-
         .stat-card {
             background: #f8fafc;
-            padding: 20px;
-            border-radius: 12px;
-            border: 1px solid #cbd5e1;
-            text-align: center;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
         }
-
-        .stat-card h3 { font-size: 16pt; color: #1e3a8a; margin-bottom: 10px; }
-        .stat-card .stat-value { font-size: 28pt; font-weight: bold; color: #2563eb; }
-
+        .stat-card h3 {
+            font-size: 14pt; /* กลับมาเป็น 14pt */
+            color: #1e3a8a;
+            margin-bottom: 8px;
+        }
+        .stat-card .stat-value {
+            font-size: 24pt; /* กลับมาเป็น 24pt */
+            font-weight: bold;
+            color: #2563eb;
+        }
         .top-teachers { margin-top: 30px; }
-        .top-teachers h3 { font-size: 18pt; font-weight: bold; margin-bottom: 15px; color: #1e3a8a; }
-        .top-list { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; }
+        .top-teachers h3 {
+            font-size: 16pt;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #1e3a8a;
+        }
+        .top-list {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+        }
         .top-item {
-            padding: 12px 20px;
+            padding: 8px;
             border-bottom: 1px dashed #cbd5e1;
             display: flex;
             justify-content: space-between;
         }
         .top-item:last-child { border-bottom: none; }
-        .top-item:nth-child(even) { background: #f8fafc; }
 
-        /* Print Styles */
+        /* Print Styles - เดิมทั้งหมด */
         @media print {
-            @page { size: A4; margin: 0mm; }
-            body { 
-                background: white; padding: 0; margin: 0; 
-                -webkit-print-color-adjust: exact; print-color-adjust: exact; 
+            @page { 
+                size: A4; 
+                margin: 0mm; 
             }
-            .control-panel, .no-print { display: none !important; }
+            body { 
+                background: white; 
+                padding: 0; 
+                margin: 0;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .control-panel,
+            .no-print {
+                display: none !important;
+            }
             .a4-paper {
-                margin: 0; padding: 10mm 15mm 10mm 15mm; /* Adjusted slightly for print margin safety */
-                width: 210mm; height: 297mm;
-                box-shadow: none; border: none;
+                margin: 0;
+                padding: 8mm 12mm 8mm 18mm;
+                width: 210mm;
+                height: 280mm;
+                box-shadow: none;
+                border: none;
                 page-break-after: always;
                 page-break-inside: avoid;
+                min-width: auto;
+                position: relative;
+                overflow: hidden;
             }
-            .a4-paper:last-child { page-break-after: auto; }
+            .a4-paper:last-child {
+                page-break-after: auto;
+            }
         }
 
-        /* Loading */
-        .spinner {
-            border: 4px solid #f3f4f6;
-            border-top: 4px solid #2563eb;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* Floating Actions */
+        /* Floating Buttons - Modern */
         .print-buttons {
             position: fixed;
             bottom: 30px;
@@ -411,7 +398,6 @@
             gap: 15px;
             z-index: 1000;
         }
-
         .btn-action {
             padding: 15px 30px;
             border: none;
@@ -425,12 +411,22 @@
             align-items: center;
             gap: 8px;
         }
-
         .btn-print { background: #059669; color: white; }
-        .btn-print:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(5, 150, 105, 0.4); background: #047857; }
-        
+        .btn-print:hover { transform: translateY(-3px); background: #047857; }
         .btn-back { background: #475569; color: white; }
-        .btn-back:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(71, 85, 105, 0.4); background: #334155; }
+        .btn-back:hover { transform: translateY(-3px); background: #334155; }
+
+        /* Loading */
+        .spinner {
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #2563eb;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -556,8 +552,7 @@
                 title: 'กำลังประมวลผล...',
                 html: '<div class="spinner"></div>กำลังดึงข้อมูลจากฐานข้อมูล',
                 allowOutsideClick: false,
-                showConfirmButton: false,
-                background: '#fff'
+                showConfirmButton: false
             });
 
             try {
@@ -651,7 +646,7 @@
                               'กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
             const thaiDateStr = `${today.getDate()} ${thaiMonths[today.getMonth()]} พ.ศ. ${today.getFullYear() + 543}`;
             
-            // Note: Updated Order ID to 2568 as requested
+            // Note: แก้ไขเลขคำสั่งเป็น 39/2568 และจัดลายเซ็นใหม่
             return `
                 <div class="a4-paper memo-layout">
                     <div class="doc-header">
@@ -674,38 +669,42 @@
                     <div class="doc-closing">จึงเรียนมาเพื่อโปรดทราบ</div>
                     
                     <div class="sign-section">
-                        <div class="sign-block">
-                            ลงชื่อ........................................งานพัฒนากระบวนการเรียนรู้<br>
-                            <div class="sign-name-position">(${author})</div>
-                        </div>
-                        
-                        <div class="sign-block">
-                            <div class="sign-block-comment">ความเห็น หัวหน้ากลุ่มบริหารงานวิชาการ</div>
-                            <div class="dashed-line">...................................................................................................</div>
-                            <div style="margin-top:10px">ลงชื่อ...........................................................................</div>
-                            <div class="sign-name-position">
-                                (นางสาวสุพัฒตา ศรีเมือง)<br>
-                                หัวหน้ากลุ่มบริหารงานวิชาการ
+                        <div class="sign-container">
+                            <div class="sign-item">
+                                <div class="sign-center-text">
+                                    ลงชื่อ........................................งานพัฒนากระบวนการเรียนรู้<br>
+                                    (${author})
+                                </div>
                             </div>
-                        </div>
-                        
-                        <div class="sign-block">
-                            <div class="sign-block-comment">ความเห็น รองผู้อำนวยการโรงเรียน</div>
-                            <div class="dashed-line">...................................................................................................</div>
-                            <div style="margin-top:10px">ลงชื่อ...........................................................................</div>
-                            <div class="sign-name-position">
-                                (นางสุคันทร บาอินทร์)<br>
-                                รองผู้อำนวยการโรงเรียนกระดุมทองวิทยา
+                            
+                            <div class="sign-item">
+                                <div>ความเห็น หัวหน้ากลุ่มบริหารงานวิชาการ</div>
+                                <div>...........................................................................................</div>
+                                <div class="sign-center-text" style="margin-top:5px;">
+                                    ลงชื่อ........................................<br>
+                                    (นางสาวสุพัฒตา ศรีเมือง)<br>
+                                    หัวหน้ากลุ่มบริหารงานวิชาการ
+                                </div>
                             </div>
-                        </div>
-                        
-                        <div class="sign-block">
-                            <div class="sign-block-comment">ความเห็น ผู้อำนวยการโรงเรียน</div>
-                            <div class="dashed-line">...................................................................................................</div>
-                            <div style="margin-top:10px">ลงชื่อ...........................................................................</div>
-                            <div class="sign-name-position">
-                                (นางสุนิสา ใจใหญ่)<br>
-                                ผู้อำนวยการโรงเรียนกระดุมทองวิทยา
+                            
+                            <div class="sign-item">
+                                <div>ความเห็น รองผู้อำนวยการโรงเรียน</div>
+                                <div>...........................................................................................</div>
+                                <div class="sign-center-text" style="margin-top:5px;">
+                                    ลงชื่อ........................................<br>
+                                    (นางสุคันทร บาอินทร์)<br>
+                                    รองผู้อำนวยการโรงเรียนกระดุมทองวิทยา
+                                </div>
+                            </div>
+                            
+                            <div class="sign-item">
+                                <div>ความเห็น ผู้อำนวยการโรงเรียน</div>
+                                <div>...........................................................................................</div>
+                                <div class="sign-center-text" style="margin-top:5px;">
+                                    ลงชื่อ........................................<br>
+                                    (นางสุนิสา ใจใหญ่)<br>
+                                    ผู้อำนวยการโรงเรียนกระดุมทองวิทยา
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -762,7 +761,7 @@
                                 `).join('')}
                             </div>
                         </div>
-                        <div class="top-teachers" style="margin-top: 25px;">
+                        <div class="top-teachers" style="margin-top: 30px;">
                             <h3>📊 ครูที่ได้รับการสอนแทนมากที่สุด 10 อันดับแรก</h3>
                             <div class="top-list">
                                 ${topAbsentTeachers.map(([name, count], idx) => `
