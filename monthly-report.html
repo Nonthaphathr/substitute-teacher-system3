@@ -36,7 +36,6 @@
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
-        /* Global Body Style - Modern Look */
         body { 
             font-family: 'Sarabun', sans-serif; 
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
@@ -45,7 +44,7 @@
             color: #334155;
         }
 
-        /* --- Modern Control Panel (UI ใหม่) --- */
+        /* --- Control Panel --- */
         .control-panel {
             max-width: 850px;
             margin: 0 auto 30px;
@@ -156,7 +155,7 @@
             box-shadow: 0 12px 25px rgba(37, 99, 235, 0.4);
         }
 
-        /* --- A4 Paper & Report Styles (ยึดตามโค้ดเดิมเป๊ะๆ) --- */
+        /* --- A4 Paper & Report Styles --- */
         .a4-paper {
             width: 210mm;
             min-height: 297mm;
@@ -205,7 +204,7 @@
             line-height: 1.8;
         }
 
-        /* Memo Page - CSS เดิมทั้งหมด */
+        /* Memo Page */
         .memo-layout { 
             font-family: 'THSarabunNew', sans-serif !important;
             position: relative;
@@ -231,7 +230,7 @@
             margin-bottom: 2mm; 
         }
         .memo-layout .doc-meta { 
-            font-size: 11pt; /* กลับมาเป็น 11pt */
+            font-size: 11pt;
             line-height: 1.4; 
             margin-bottom: 1px; 
             white-space: nowrap; 
@@ -255,21 +254,21 @@
             margin: 2px 0 8px 0; 
         }
         .memo-layout .doc-to { 
-            font-size: 11pt; /* กลับมาเป็น 11pt */
+            font-size: 11pt;
             font-weight: bold; 
             font-style: italic; 
             margin-bottom: 2px; 
             line-height: 1.4; 
         }
         .memo-layout .doc-content { 
-            font-size: 11pt; /* กลับมาเป็น 11pt */
+            font-size: 11pt;
             text-indent: 2.5cm; 
             text-align: justify; 
             line-height: 1.5; 
             margin-bottom: 2px; 
         }
         .memo-layout .doc-closing { 
-            font-size: 11pt; /* กลับมาเป็น 11pt */
+            font-size: 11pt;
             text-indent: 2.5cm; 
             margin-top: 8px; 
             margin-bottom: 15px; 
@@ -280,33 +279,36 @@
             margin-top: 20px;
         }
         
-        /* ปรับปรุง CSS ส่วนลายเซ็นให้รองรับการจัดกึ่งกลางกระดาษ */
         .memo-layout .sign-container {
             width: 50%;
-            margin-left: 50%; /* ดันไปเริ่มที่กึ่งกลางกระดาษ */
-            padding-left: 10px; /* ให้ตรงกับวันที่ */
+            margin-left: 50%; /* เริ่มกึ่งกลางกระดาษ */
+            padding-left: 10px; 
         }
 
         .memo-layout .sign-item { 
             margin-bottom: 25px;
-            text-align: left; /* จัดชิดซ้ายภายในกล่อง 50% */
-            font-size: 11pt; /* กลับมาเป็น 11pt */
+            text-align: left;
+            font-size: 11pt;
             line-height: 1.4;
         }
         
-        /* จัดกลางเฉพาะชื่อและตำแหน่ง */
         .memo-layout .sign-center-text {
             text-align: center;
             width: 100%;
         }
+        
+        /* สไตล์สำหรับเส้นประ */
+        .memo-layout .dotted-line-block {
+            margin: 12px 0; /* เพิ่มระยะห่างบนล่างให้เขียนง่ายขึ้น */
+        }
 
-        /* Stats Page - CSS เดิมทั้งหมด */
+        /* Stats Page */
         .stats-page {
-            font-size: 14pt; /* กลับมาเป็น 14pt */
+            font-size: 14pt;
         }
         .stats-title {
             text-align: center;
-            font-size: 18pt; /* กลับมาเป็น 18pt */
+            font-size: 18pt;
             font-weight: bold;
             margin-bottom: 20px;
             padding-bottom: 10px;
@@ -325,12 +327,12 @@
             border: 1px solid #e2e8f0;
         }
         .stat-card h3 {
-            font-size: 14pt; /* กลับมาเป็น 14pt */
+            font-size: 14pt;
             color: #1e3a8a;
             margin-bottom: 8px;
         }
         .stat-card .stat-value {
-            font-size: 24pt; /* กลับมาเป็น 24pt */
+            font-size: 24pt;
             font-weight: bold;
             color: #2563eb;
         }
@@ -354,7 +356,7 @@
         }
         .top-item:last-child { border-bottom: none; }
 
-        /* Print Styles - เดิมทั้งหมด */
+        /* Print Styles */
         @media print {
             @page { 
                 size: A4; 
@@ -389,7 +391,7 @@
             }
         }
 
-        /* Floating Buttons - Modern */
+        /* Floating Buttons */
         .print-buttons {
             position: fixed;
             bottom: 30px;
@@ -646,7 +648,6 @@
                               'กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
             const thaiDateStr = `${today.getDate()} ${thaiMonths[today.getMonth()]} พ.ศ. ${today.getFullYear() + 543}`;
             
-            // Note: แก้ไขเลขคำสั่งเป็น 39/2568 และจัดลายเซ็นใหม่
             return `
                 <div class="a4-paper memo-layout">
                     <div class="doc-header">
@@ -672,15 +673,16 @@
                         <div class="sign-container">
                             <div class="sign-item">
                                 <div class="sign-center-text">
-                                    ลงชื่อ........................................งานพัฒนากระบวนการเรียนรู้<br>
-                                    (${author})
+                                    ลงชื่อ........................................<br>
+                                    (${author})<br>
+                                    งานพัฒนากระบวนการเรียนรู้
                                 </div>
                             </div>
                             
                             <div class="sign-item">
                                 <div>ความเห็น หัวหน้ากลุ่มบริหารงานวิชาการ</div>
-                                <div>...........................................................................................</div>
-                                <div class="sign-center-text" style="margin-top:5px;">
+                                <div class="dotted-line-block">...........................................................................................</div>
+                                <div class="sign-center-text">
                                     ลงชื่อ........................................<br>
                                     (นางสาวสุพัฒตา ศรีเมือง)<br>
                                     หัวหน้ากลุ่มบริหารงานวิชาการ
@@ -689,8 +691,8 @@
                             
                             <div class="sign-item">
                                 <div>ความเห็น รองผู้อำนวยการโรงเรียน</div>
-                                <div>...........................................................................................</div>
-                                <div class="sign-center-text" style="margin-top:5px;">
+                                <div class="dotted-line-block">...........................................................................................</div>
+                                <div class="sign-center-text">
                                     ลงชื่อ........................................<br>
                                     (นางสุคันทร บาอินทร์)<br>
                                     รองผู้อำนวยการโรงเรียนกระดุมทองวิทยา
@@ -699,8 +701,8 @@
                             
                             <div class="sign-item">
                                 <div>ความเห็น ผู้อำนวยการโรงเรียน</div>
-                                <div>...........................................................................................</div>
-                                <div class="sign-center-text" style="margin-top:5px;">
+                                <div class="dotted-line-block">...........................................................................................</div>
+                                <div class="sign-center-text">
                                     ลงชื่อ........................................<br>
                                     (นางสุนิสา ใจใหญ่)<br>
                                     ผู้อำนวยการโรงเรียนกระดุมทองวิทยา
