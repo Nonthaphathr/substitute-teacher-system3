@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>รายงานข้อมูลสถิติการจัดสอนแทนประจำเดือน</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
+
+        /* TH Sarabun New Font */
+        @font-face {
+            font-family: 'THSarabunNew';
+            src: url('fonts/thsarabunnew-webfont.eot');
+            src: url('fonts/thsarabunnew-webfont.eot?#iefix') format('embedded-opentype'),
+                 url('fonts/thsarabunnew-webfont.woff') format('woff'),
+                 url('fonts/thsarabunnew-webfont.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'THSarabunNew';
+            src: url('fonts/thsarabunnew_bold-webfont.eot');
+            src: url('fonts/thsarabunnew_bold-webfont.eot?#iefix') format('embedded-opentype'),
+                 url('fonts/thsarabunnew_bold-webfont.woff') format('woff'),
+                 url('fonts/thsarabunnew_bold-webfont.ttf') format('truetype');
+            font-weight: bold;
+            font-style: normal;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            font-family: 'Sarabun', sans-serif; 
+            background: #f0f4f8; 
+            padding: 20px; 
+        }
+
+        /* Control Panel */
+        .control-panel {
+            max-width: 900px;
+            margin: 0 auto 30px;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .control-panel h2 {
+            color: #1e3a8a;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #334155;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-family: 'Sarabun', sans-serif;
+            font-size: 1rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .btn-generate {
+            background: linear-gradient(135deg, #1e3a8a, #2563eb);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-generate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+        }
+
+        .btn-generate:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        /* A4 Paper */
+        .a4-paper {
+            width: 210mm;
+            min-height: 297mm;
+            background: white;
+            padding: 20mm;
+            margin: 0 auto 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+            font-family: 'THSarabunNew', sans-serif;
+            color: black;
+            position: relative;
+        }
+
+        /* Cover Page */
+        .cover-page {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 257mm;
+            text-align: center;
+        }
+
+        .cover-logos {
+            display: flex;
+            gap: 40px;
+            margin-bottom: 40px;
+            align-items: center;
+        }
+
+        .cover-logo {
+            width: 120px;
+            height: 120px;
+        }
+
+        .cover-title {
+            font-size: 24pt;
+            font-weight: bold;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .cover-subtitle {
+            font-size: 18pt;
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+
+        .cover-author {
+            margin-top: 60px;
+            font-size: 16pt;
+            line-height: 1.8;
+        }
+
+        /* Memo Page */
+        .memo-page {
+            font-size: 16pt;
+            line-height: 1.8;
+        }
+
+        .garuda {
+            width: 80px;
+            height: auto;
+            display: block;
+            margin: 0 auto 20px;
+        }
+
+        .memo-title {
+            text-align: center;
+            font-size: 20pt;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .memo-header {
+            margin-bottom: 5px;
+            font-size: 16pt;
+        }
+
+        .memo-line {
+            border: none;
+            border-bottom: 1px solid black;
+            margin: 10px 0 20px 0;
+        }
+
+        .memo-to {
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .memo-content {
+            text-indent: 3cm;
+            text-align: justify;
+            margin-bottom: 10px;
+        }
+
+        .signature-section {
+            margin-top: 40px;
+        }
+
+        .signature-box {
+            margin-bottom: 30px;
+        }
+
+        .signature-line {
+            margin-top: 40px;
+            text-align: center;
+        }
+
+        /* Stats Page */
+        .stats-page {
+            font-size: 14pt;
+        }
+
+        .stats-title {
+            text-align: center;
+            font-size: 18pt;
+            font-weight: bold;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #333;
+        }
+
+        .stats-summary {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .stat-card h3 {
+            font-size: 14pt;
+            color: #1e3a8a;
+            margin-bottom: 8px;
+        }
+
+        .stat-card .stat-value {
+            font-size: 24pt;
+            font-weight: bold;
+            color: #2563eb;
+        }
+
+        .stats-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 14pt;
+        }
+
+        .stats-table th,
+        .stats-table td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .stats-table th {
+            background: #e2e8f0;
+            font-weight: bold;
+        }
+
+        .stats-table td.text-left {
+            text-align: left;
+        }
+
+        .top-teachers {
+            margin-top: 30px;
+        }
+
+        .top-teachers h3 {
+            font-size: 16pt;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #1e3a8a;
+        }
+
+        .top-list {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .top-item {
+            padding: 8px;
+            border-bottom: 1px dashed #cbd5e1;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .top-item:last-child {
+            border-bottom: none;
+        }
+
+        .footer-note {
+            position: absolute;
+            bottom: 15mm;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 12pt;
+            color: #666;
+            font-style: italic;
+        }
+
+        /* Print Styles */
+        @media print {
+            @page { 
+                size: A4; 
+                margin: 0mm; 
+            }
+            
+            body { 
+                background: white; 
+                padding: 0; 
+            }
+            
+            .control-panel,
+            .no-print {
+                display: none !important;
+            }
+            
+            .a4-paper {
+                margin: 0;
+                box-shadow: none;
+                page-break-after: always;
+            }
+            
+            .a4-paper:last-child {
+                page-break-after: auto;
+            }
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #64748b;
+        }
+
+        .spinner {
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #2563eb;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #reportContainer {
+            display: none;
+        }
+
+        .print-buttons {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .btn-print {
+            background: #059669;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(5, 150, 105, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .btn-print:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(5, 150, 105, 0.4);
+        }
+
+        .btn-back {
+            background: #64748b;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(100, 116, 139, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .btn-back:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(100, 116, 139, 0.4);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Control Panel -->
+    <div class="control-panel" id="controlPanel">
+        <h2>📊 สร้างรายงานข้อมูลสถิติการจัดสอนแทนประจำเดือน</h2>
+        
+        <div class="form-group">
+            <label>ชื่อ-นามสกุล ผู้พิมพ์รายงาน</label>
+            <input type="text" id="reportAuthor" placeholder="เช่น นายนนทพัทธ์ หิรัญเรือง" value="นายนนทพัทธ์ หิรัญเรือง">
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>เดือน</label>
+                <select id="reportMonth">
+                    <option value="">-- เลือกเดือน --</option>
+                    <option value="มกราคม">มกราคม</option>
+                    <option value="กุมภาพันธ์">กุมภาพันธ์</option>
+                    <option value="มีนาคม">มีนาคม</option>
+                    <option value="เมษายน">เมษายน</option>
+                    <option value="พฤษภาคม">พฤษภาคม</option>
+                    <option value="มิถุนายน">มิถุนายน</option>
+                    <option value="กรกฎาคม">กรกฎาคม</option>
+                    <option value="สิงหาคม">สิงหาคม</option>
+                    <option value="กันยายน">กันยายน</option>
+                    <option value="ตุลาคม">ตุลาคม</option>
+                    <option value="พฤศจิกายน">พฤศจิกายน</option>
+                    <option value="ธันวาคม">ธันวาคม</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>ภาคเรียน</label>
+                <select id="reportSemester">
+                    <option value="">-- เลือกภาคเรียน --</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>ปีการศึกษา (พ.ศ.)</label>
+                <input type="number" id="reportYear" placeholder="เช่น 2568" value="2568" min="2560" max="2580">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>เลือกช่วงวันที่ (เริ่มต้น)</label>
+                <input type="date" id="startDate">
+            </div>
+
+            <div class="form-group">
+                <label>เลือกช่วงวันที่ (สิ้นสุด)</label>
+                <input type="date" id="endDate">
+            </div>
+        </div>
+
+        <button class="btn-generate" onclick="generateReport()">
+            📄 สร้างรายงาน
+        </button>
+    </div>
+
+    <!-- Report Container -->
+    <div id="reportContainer">
+        <!-- Pages will be generated here -->
+    </div>
+
+    <!-- Print Buttons -->
+    <div class="print-buttons no-print" id="printButtons" style="display: none;">
+        <button class="btn-back" onclick="backToForm()">← กลับไปแก้ไข</button>
+        <button class="btn-print" onclick="window.print()">🖨️ พิมพ์รายงาน</button>
+    </div>
+
+    <script>
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyCF7qDDxp6NXk3y7wLiySasqoviGyCKNNw",
+            authDomain: "sornthan-fc0f1.firebaseapp.com",
+            projectId: "sornthan-fc0f1",
+            storageBucket: "sornthan-fc0f1.firebasestorage.app",
+            messagingSenderId: "915683105444",
+            appId: "1:915683105444:web:c1add040ea1afb344ae431"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Global variables
+        let reportData = {
+            author: '',
+            month: '',
+            semester: '',
+            year: '',
+            startDate: '',
+            endDate: '',
+            records: [],
+            stats: {}
+        };
+
+        // Initialize dates
+        window.onload = () => {
+            const today = new Date();
+            const currentMonth = today.getMonth(); // 0-11
+            
+            // Set month
+            const monthNames = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+                              'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
+            document.getElementById('reportMonth').value = monthNames[currentMonth];
+            
+            // Set date range to current month
+            const firstDay = new Date(today.getFullYear(), currentMonth, 1);
+            const lastDay = new Date(today.getFullYear(), currentMonth + 1, 0);
+            
+            document.getElementById('startDate').valueAsDate = firstDay;
+            document.getElementById('endDate').valueAsDate = lastDay;
+        };
+
+        async function generateReport() {
+            // Validate inputs
+            const author = document.getElementById('reportAuthor').value.trim();
+            const month = document.getElementById('reportMonth').value;
+            const semester = document.getElementById('reportSemester').value;
+            const year = document.getElementById('reportYear').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            if (!author || !month || !semester || !year || !startDate || !endDate) {
+                return Swal.fire('ข้อมูลไม่ครบ', 'กรุณากรอกข้อมูลให้ครบถ้วน', 'warning');
+            }
+
+            // Store report data
+            reportData.author = author;
+            reportData.month = month;
+            reportData.semester = semester;
+            reportData.year = year;
+            reportData.startDate = startDate;
+            reportData.endDate = endDate;
+
+            // Show loading
+            Swal.fire({
+                title: 'กำลังโหลดข้อมูล...',
+                html: '<div class="spinner"></div>กรุณารอสักครู่',
+                allowOutsideClick: false,
+                showConfirmButton: false
+            });
+
+            try {
+                // Fetch data from Firebase
+                const snap = await db.collection("substitutions")
+                    .where("docDate", ">=", startDate)
+                    .where("docDate", "<=", endDate)
+                    .get();
+
+                const allRecords = [];
+                const dateGroups = {};
+                const subTeacherCount = {};
+                const absentTeacherCount = {};
+                const dateSet = new Set();
+
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    dateSet.add(d.docDate);
+                    
+                    if (!dateGroups[d.docDate]) {
+                        dateGroups[d.docDate] = [];
+                    }
+                    
+                    d.records.forEach(r => {
+                        allRecords.push({ ...r, docDate: d.docDate, daySchedule: d.daySchedule });
+                        dateGroups[d.docDate].push(r);
+                        subTeacherCount[r.sub] = (subTeacherCount[r.sub] || 0) + 1;
+                        absentTeacherCount[r.absent] = (absentTeacherCount[r.absent] || 0) + 1;
+                    });
+                });
+
+                reportData.records = allRecords;
+                reportData.dateGroups = dateGroups;
+                reportData.stats = {
+                    totalRecords: allRecords.length,
+                    totalDays: dateSet.size,
+                    subTeacherCount: subTeacherCount,
+                    absentTeacherCount: absentTeacherCount
+                };
+
+                // Close loading
+                Swal.close();
+
+                if (allRecords.length === 0) {
+                    return Swal.fire('ไม่พบข้อมูล', `ไม่มีข้อมูลการจัดสอนแทนในช่วง ${startDate} ถึง ${endDate}`, 'info');
+                }
+
+                // Generate report pages
+                renderReport();
+
+                // Hide control panel, show report
+                document.getElementById('controlPanel').style.display = 'none';
+                document.getElementById('reportContainer').style.display = 'block';
+                document.getElementById('printButtons').style.display = 'flex';
+
+                // Scroll to top
+                window.scrollTo(0, 0);
+
+            } catch (e) {
+                console.error("Error:", e);
+                Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถโหลดข้อมูลได้', 'error');
+            }
+        }
+
+        function renderReport() {
+            const container = document.getElementById('reportContainer');
+            container.innerHTML = '';
+
+            // Page 1: Cover
+            container.innerHTML += generateCoverPage();
+
+            // Page 2: Memo
+            container.innerHTML += generateMemoPage();
+
+            // Page 3: Statistics
+            container.innerHTML += generateStatsPage();
+        }
+
+        function generateCoverPage() {
+            const { month, semester, year, author } = reportData;
+            
+            return `
+                <div class="a4-paper">
+                    <div class="cover-page">
+                        <div class="cover-logos">
+                            <img src="https://nonthaphathr.github.io/uploadimg/logoschool.png" class="cover-logo" alt="โลโก้โรงเรียน">
+                            <img src="https://nonthaphathr.github.io/uploadimg/logosonthan.png" class="cover-logo" alt="โลโก้ระบบ">
+                        </div>
+                        
+                        <div class="cover-title">
+                            รายงานข้อมูลสถิติการจัดสอนแทน<br>
+                            ประจำเดือน${month}
+                        </div>
+                        
+                        <div class="cover-subtitle">
+                            ภาคเรียนที่ ${semester} ปีการศึกษา ${year}
+                        </div>
+                        
+                        <div class="cover-author">
+                            จัดทำโดย<br>
+                            ${author}<br>
+                            <br>
+                            กลุ่มบริหารงานวิชาการ โรงเรียนกระดุมทองวิทยา<br>
+                            สังกัดองค์การบริหารส่วนจังหวัดศรีสะเกษ
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function generateMemoPage() {
+            const { month, semester, year, author } = reportData;
+            const today = new Date();
+            const thaiMonths = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
+                              'กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+            const dateStr = `${today.getDate()} ${thaiMonths[today.getMonth()]} ${today.getFullYear() + 543}`;
+            
+            return `
+                <div class="a4-paper">
+                    <div class="memo-page">
+                        <img src="https://nonthaphathr.github.io/uploadimg/kruda.png" class="garuda" alt="พญาครุฑ">
+                        
+                        <div class="memo-title">บันทึกข้อความ</div>
+                        
+                        <div class="memo-header">
+                            <strong>ส่วนราชการ</strong> กลุ่มบริหารงานวิชาการ โรงเรียนกระดุมทองวิทยา อำเภอกันทรารมย์ จังหวัดศรีสะเกษ
+                        </div>
+                        
+                        <div class="memo-header">
+                            <strong>ที่</strong> ศก 51008.08/............&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            <strong>วันที่</strong> ${dateStr}
+                        </div>
+                        
+                        <div class="memo-header">
+                            <strong>เรื่อง</strong> รายงานข้อมูลสถิติการจัดสอนแทน ภาคเรียนที่ ${semester} ปีการศึกษา ${year}
+                        </div>
+                        
+                        <hr class="memo-line">
+                        
+                        <div class="memo-to">เรียน ผู้อำนวยการโรงเรียนกระดุมทองวิทยา</div>
+                        
+                        <div class="memo-content">
+                            ตามคำสั่งโรงเรียนกระดุมทองวิทยาที่ 39/${parseInt(year)-2511} เรื่อง แต่งตั้งข้าราชการครูและบุคลากรทางการศึกษา
+                            ปฏิบัติหน้าที่ตามพรรณนางาน ปีการศึกษา ${year} ได้กำหนดให้ผู้รับผิดชอบงานการพัฒนากระบวนการเรียนรู้
+                            กลุ่มบริหารงานวิชาการ มีหน้าที่จัดครูเข้าสอนแทน อย่างสม่ำเสมอ พร้อมสรุปรายงานการสอนแทน นั้น
+                        </div>
+                        
+                        <div class="memo-content">
+                            บัดนี้ ข้าพเจ้า ${author} ผู้รับผิดชอบงานการพัฒนากระบวนการเรียนรู้
+                            กลุ่มบริหารงานวิชาการ ได้ดำเนินการสรุปข้อมูลการจัดสอนแทน ประจำเดือน${month} ภาคเรียนที่ ${semester} 
+                            ปีการศึกษา ${year} จากระบบช่วยจัดสอนแทน โรงเรียนกระดุมทองวิทยา เสร็จสิ้นเรียบร้อยแล้ว 
+                            รายละเอียดดังที่แนบมาพร้อมนี้
+                        </div>
+                        
+                        <div class="memo-content" style="text-indent: 3cm;">
+                            จึงเรียนมาเพื่อโปรดทราบ
+                        </div>
+                        
+                        <div class="signature-section">
+                            <div class="signature-line">
+                                (${author})<br>
+                                งานการพัฒนากระบวนการเรียนรู้
+                            </div>
+                            
+                            <div class="signature-box">
+                                <strong>ความเห็นหัวหน้ากลุ่มบริหารงานวิชาการ</strong><br>
+                                ………………………………………………………………………<br>
+                                <div class="signature-line">
+                                    (นางสาวสุพัฒตา ศรีเมือง)<br>
+                                    หัวหน้าฝ่ายวิชาการ
+                                </div>
+                            </div>
+                            
+                            <div class="signature-box">
+                                <strong>ความเห็นรองผู้อำนวยการโรงเรียน</strong><br>
+                                ………………………………………………………………………<br>
+                                <div class="signature-line">
+                                    (นางสุคันทร บาอินทร์)<br>
+                                    รองผู้อำนวยการโรงเรียนกระดุมทองวิทยา
+                                </div>
+                            </div>
+                            
+                            <div class="signature-box">
+                                <strong>ความเห็นผู้อำนวยการโรงเรียน</strong><br>
+                                ………………………………………………………………………………………………<br>
+                                <div class="signature-line">
+                                    (นางสุนิสา ใจใหญ่)<br>
+                                    ผู้อำนวยการโรงเรียนกระดุมทองวิทยา
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function generateStatsPage() {
+            const { month, semester, year, stats, dateGroups } = reportData;
+            
+            // Sort teachers by count
+            const topSubTeachers = Object.entries(stats.subTeacherCount)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 10);
+            
+            const topAbsentTeachers = Object.entries(stats.absentTeacherCount)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 10);
+
+            // Generate daily summary table
+            const sortedDates = Object.keys(dateGroups).sort();
+            let dailyRows = '';
+            let rowNum = 1;
+            
+            sortedDates.forEach(date => {
+                const records = dateGroups[date];
+                const thaiDate = formatThaiDate(date);
+                
+                records.forEach((r, idx) => {
+                    dailyRows += `
+                        <tr>
+                            ${idx === 0 ? `<td rowspan="${records.length}">${rowNum++}</td>` : ''}
+                            ${idx === 0 ? `<td rowspan="${records.length}">${thaiDate}</td>` : ''}
+                            <td class="text-left">${r.sub}</td>
+                            <td class="text-left">${r.absent}</td>
+                            <td>${r.period}</td>
+                            <td>${r.subject}/${r.grade}</td>
+                            <td>${r.reason}</td>
+                        </tr>
+                    `;
+                });
+            });
+
+            return `
+                <div class="a4-paper">
+                    <div class="stats-page">
+                        <div class="stats-title">
+                            ตารางสรุปข้อมูลสถิติจากระบบสรุปสถิติการจัดสอนแทน<br>
+                            โรงเรียนกระดุมทองวิทยา<br>
+                            ประจำเดือน${month} ภาคเรียนที่ ${semester} ปีการศึกษา ${year}
+                        </div>
+                        
+                        <div class="stats-summary">
+                            <div class="stat-card">
+                                <h3>📊 จำนวนครั้งทั้งหมด</h3>
+                                <div class="stat-value">${stats.totalRecords}</div>
+                                <div>ครั้ง</div>
+                            </div>
+                            
+                            <div class="stat-card">
+                                <h3>📅 จำนวนวันที่จัดสอนแทน</h3>
+                                <div class="stat-value">${stats.totalDays}</div>
+                                <div>วัน</div>
+                            </div>
+                            
+                            <div class="stat-card">
+                                <h3>👥 จำนวนครูที่สอนแทน</h3>
+                                <div class="stat-value">${Object.keys(stats.subTeacherCount).length}</div>
+                                <div>คน</div>
+                            </div>
+                            
+                            <div class="stat-card">
+                                <h3>📋 จำนวนครูที่ได้รับการแทน</h3>
+                                <div class="stat-value">${Object.keys(stats.absentTeacherCount).length}</div>
+                                <div>คน</div>
+                            </div>
+                        </div>
+
+                        <div class="top-teachers">
+                            <h3>🏆 ครูที่ปฏิบัติหน้าที่สอนแทนมากที่สุด 10 อันดับแรก</h3>
+                            <div class="top-list">
+                                ${topSubTeachers.map(([name, count], idx) => `
+                                    <div class="top-item">
+                                        <span><strong>${idx + 1}.</strong> ${name}</span>
+                                        <span><strong>${count}</strong> ครั้ง</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+
+                        <div class="footer-note">
+                            สร้างจากระบบจัดสอนแทนออนไลน์ โดย ครูนนทพัทธ์ หิรัญเรือง
+                        </div>
+                    </div>
+                </div>
+
+                <div class="a4-paper">
+                    <div class="stats-page">
+                        <h3 style="text-align: center; margin-bottom: 20px;">📋 ตารางรายละเอียดการจัดสอนแทนประจำเดือน${month}</h3>
+                        
+                        <table class="stats-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 5%;">ที่</th>
+                                    <th style="width: 15%;">วันที่</th>
+                                    <th style="width: 20%;">ครูผู้สอนแทน</th>
+                                    <th style="width: 20%;">ครูที่ลา/ไปราชการ</th>
+                                    <th style="width: 8%;">คาบ</th>
+                                    <th style="width: 15%;">วิชา/ชั้น</th>
+                                    <th style="width: 17%;">สาเหตุ</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${dailyRows}
+                            </tbody>
+                        </table>
+
+                        <div class="top-teachers" style="margin-top: 30px;">
+                            <h3>📊 ครูที่ได้รับการสอนแทนมากที่สุด 10 อันดับแรก</h3>
+                            <div class="top-list">
+                                ${topAbsentTeachers.map(([name, count], idx) => `
+                                    <div class="top-item">
+                                        <span><strong>${idx + 1}.</strong> ${name}</span>
+                                        <span><strong>${count}</strong> ครั้ง</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+
+                        <div class="footer-note">
+                            สร้างจากระบบจัดสอนแทนออนไลน์ โดย ครูนนทพัทธ์ หิรัญเรือง
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function formatThaiDate(dateStr) {
+            const dateParts = dateStr.split('-');
+            const thaiMonths = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.',
+                              'ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+            const dayNum = parseInt(dateParts[2]);
+            const monthName = thaiMonths[parseInt(dateParts[1]) - 1];
+            const yearBE = parseInt(dateParts[0]) + 543;
+            return `${dayNum} ${monthName} ${yearBE}`;
+        }
+
+        function backToForm() {
+            document.getElementById('controlPanel').style.display = 'block';
+            document.getElementById('reportContainer').style.display = 'none';
+            document.getElementById('printButtons').style.display = 'none';
+            window.scrollTo(0, 0);
+        }
+    </script>
+</body>
+</html>
