@@ -1224,26 +1224,24 @@
 
                     const [prefix, name, department, mon, tue, wed, thu, fri] = parts;
                     
-                    const schedule = {
-                        "จันทร์": mon ? mon.split(';').map(n => parseInt(n)).filter(n => !isNaN(n)) : [],
-                        "อังคาร": tue ? tue.split(';').map(n => parseInt(n)).filter(n => !isNaN(n)) : [],
-                        "พุธ": wed ? wed.split(';').map(n => parseInt(n)).filter(n => !isNaN(n)) : [],
-                        "พฤหัสบดี": thu ? thu.split(';').map(n => parseInt(n)).filter(n => !isNaN(n)) : [],
-                        "ศุกร์": fri ? fri.split(';').map(n => parseInt(n)).filter(n => !isNaN(n)) : []
+                    const parseSch = (str) => {
+                        if(!str) return [];
+                        return str.split(';').map(n => parseInt(n)).filter(n => !isNaN(n));
                     };
 
+                    const sch = {
+                        "จันทร์": parseSch(mon), "อังคาร": parseSch(tue), "พุธ": parseSch(wed),
+                        "พฤหัสบดี": parseSch(thu), "ศุกร์": parseSch(fri)
+                    };
+                    
                     try {
                         await db.collection("teachers").add({
-                            name: prefix + name,
-                            department: department,
-                            schedule: schedule,
-                            semester: semester,
-                            active: true,
+                            name: prefix+name, department: department, schedule: sch, semester: semester, active: true,
                             created_at: firebase.firestore.FieldValue.serverTimestamp()
                         });
                         imported++;
-                    } catch(e) {
-                        console.error("Import error:", e);
+                    } catch(err) { 
+                        console.error(err); 
                         errors++;
                     }
                 }
@@ -1338,7 +1336,7 @@
             updateFilterUI();
         };
         // ============================================
-        // ALLOCATION FUNCTIONS
+        // ALLOCATION FUNCTIONS - UPDATED WITH AUTO-FILL
         // ============================================
         function toggleSelect(name, cb) {
             if(cb.checked) {
@@ -1403,6 +1401,9 @@
                 const periods = teacherObj.schedule[daySchedule] || [];
                 if(periods.length === 0) return;
 
+                // ✨ NEW: Get teachingDetails for auto-fill
+                const teachingDetails = teacherObj.teachingDetails || {};
+
                 let html = `<div class="card" data-absent="${absentName}">
                     <div class="card-header">
                         <span>${absentName} (ลา)</span>
@@ -1416,18 +1417,25 @@
 
                 periods.sort((a,b)=>a-b).forEach(period => {
                     const candidates = findCandidates(daySchedule, period, selectedTeachers);
+                    
+                    // ✨ NEW: Get subject code and grade from teachingDetails
+                    const detailKey = `${daySchedule}_${period}`;
+                    const detail = teachingDetails[detailKey] || {};
+                    const subjectCode = detail.code || '';
+                    const gradeLevel = detail.grade || '';
+                    
                     html += `<div class="period-block">
                         <div class="period-title">
                             <span class="badge-p">คาบ ${period}</span>
-                            <input type="text" id="subj_${absentName}_${period}" placeholder="รหัสวิชา" style="width:100px; padding:5px;">
+                            <input type="text" id="subj_${absentName}_${period}" placeholder="รหัสวิชา" value="${subjectCode}" style="width:100px; padding:5px;">
                             <select id="grade_${absentName}_${period}" style="width:80px; padding:5px;">
                                 <option value="">ชั้น</option>
-                                <option value="ม.1">ม.1</option>
-                                <option value="ม.2">ม.2</option>
-                                <option value="ม.3">ม.3</option>
-                                <option value="ม.4">ม.4</option>
-                                <option value="ม.5">ม.5</option>
-                                <option value="ม.6">ม.6</option>
+                                <option value="ม.1" ${gradeLevel === 'ม.1' ? 'selected' : ''}>ม.1</option>
+                                <option value="ม.2" ${gradeLevel === 'ม.2' ? 'selected' : ''}>ม.2</option>
+                                <option value="ม.3" ${gradeLevel === 'ม.3' ? 'selected' : ''}>ม.3</option>
+                                <option value="ม.4" ${gradeLevel === 'ม.4' ? 'selected' : ''}>ม.4</option>
+                                <option value="ม.5" ${gradeLevel === 'ม.5' ? 'selected' : ''}>ม.5</option>
+                                <option value="ม.6" ${gradeLevel === 'ม.6' ? 'selected' : ''}>ม.6</option>
                             </select>
                         </div>`;
                     
