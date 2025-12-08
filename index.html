@@ -119,7 +119,7 @@
 
         .input-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-weight: 500; font-size: 0.9rem; }
-        select, input[type="text"], input[type="date"] { 
+        select, input[type="text"], input[type="date"], input[type="month"] { 
             width: 100%; 
             padding: 10px; 
             border-radius: 8px; 
@@ -127,7 +127,7 @@
             font-family: 'Sarabun'; 
             transition: all 0.3s ease;
         }
-        select:focus, input[type="text"]:focus, input[type="date"]:focus {
+        select:focus, input[type="text"]:focus, input[type="date"]:focus, input[type="month"]:focus {
             border-color: var(--primary-light);
             box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
             outline: none;
@@ -304,7 +304,6 @@
         .rank-2 { background: #c0c0c0; color: #1e293b; }
         .rank-3 { background: #cd7f32; color: white; }
 
-        /* Teacher Management Styles */
         .teacher-list { display: grid; gap: 10px; margin: 15px 0; }
         .teacher-item { 
             background: white; 
@@ -446,6 +445,10 @@
             @page { size: A4; margin: 0mm; }
             body { background: white; padding: 0; margin: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             .app-container, .modal-tools { display: none !important; }
+            
+            /* ซ่อน Modals ทั้งหมดเมื่อพิมพ์ */
+            #teacherFormModal, #copyModal { display: none !important; }
+            
             .modal { position: static; background: white; width: 100%; height: auto; display: block !important; }
             .modal-content { margin: 0; width: 100%; height: auto; background: white; box-shadow: none; overflow: visible; }
             .modal-view { padding: 0; display: block; background: white; }
@@ -477,7 +480,6 @@
                 line-height: 1.2;
                 padding: 1px 3px;
             }
-            #copyModal { display: none !important; }
         }
 
         @media (max-width: 768px) {
@@ -614,7 +616,7 @@
             <div id="historyList"></div>
         </div>
 
-        <!-- Teachers Management Tab (NEW) -->
+        <!-- Teachers Management Tab -->
         <div id="teachers" class="page-section">
             <h3 style="color: var(--primary); margin-bottom: 20px;">👥 จัดการข้อมูลครูและตารางสอน</h3>
             
@@ -675,9 +677,6 @@
                 <button class="nav-btn" onclick="loadStatistics()" style="background: var(--primary); color: white;">
                     🔄 โหลดข้อมูล
                 </button>
-                   <button onclick="window.open('monthly-report.html', '_blank')" class="btn-primary">
-    📊 สร้างรายงานประจำเดือน
-</button>
             </div>
 
             <div class="stats-container">
@@ -754,7 +753,7 @@
             <div class="modal-tools">
                 <span>ตัวอย่างรายงาน (A4)</span>
                 <button onclick="window.print()" class="nav-btn" style="background:#059669; color:white; border:none;">🖨️ พิมพ์</button>
-                <button onclick="document.getElementById('previewModal').style.display='none'" class="nav-btn" style="background:#64748b; color:white; border:none;">ปิด</button>
+                <button onclick="closeAllModals()" class="nav-btn" style="background:#64748b; color:white; border:none;">ปิด</button>
             </div>
             <div class="modal-view" id="paperContainer"></div>
         </div>
@@ -767,7 +766,7 @@
             <textarea id="copyTextBox" class="copy-box"></textarea>
             <div style="display:flex; justify-content:flex-end; gap:10px;">
                 <button onclick="copyToClipboard()" class="nav-btn" style="background:var(--primary); color:white; border:none;">📋 คัดลอกข้อความ</button>
-                <button onclick="document.getElementById('copyModal').style.display='none'" class="nav-btn" style="background:#64748b; color:white; border:none;">ปิด</button>
+                <button onclick="closeAllModals()" class="nav-btn" style="background:#64748b; color:white; border:none;">ปิด</button>
             </div>
         </div>
     </div>
@@ -863,7 +862,6 @@
             </div>
         </div>
     </div>
-
     <script>
         // ============================================
         // CONFIG & INIT
@@ -880,7 +878,7 @@
         const db = firebase.firestore();
 
         let historyDataCache = [];
-        let teachersData = [];  // Will be loaded from Firebase
+        let teachersData = [];
         let isSaved = false;
         let selectedTeachers = [];
         let daySchedule = "";
@@ -891,16 +889,14 @@
         let teacherChartInstance = null;
 
         // ============================================
-        // URL ROUTING (NEW FEATURE #1)
+        // URL ROUTING
         // ============================================
         function initializeRouting() {
-            // Read hash from URL on page load
             const hash = window.location.hash.substring(1);
             if(hash) {
                 switchTab(hash);
             }
 
-            // Handle browser back/forward buttons
             window.addEventListener('hashchange', function() {
                 const newHash = window.location.hash.substring(1);
                 if(newHash) {
@@ -910,7 +906,6 @@
         }
 
         function switchTab(id) {
-            // Update UI
             document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
             const targetSection = document.getElementById(id);
             if(targetSection) {
@@ -925,17 +920,28 @@
                 targetBtn.classList.add('active');
             }
 
-            // Update URL hash
             window.location.hash = id;
 
-            // Load data for specific tabs
             if(id === 'history') loadHistory();
             if(id === 'dashboard') loadStatistics();
             if(id === 'teachers') loadTeachers();
         }
 
         // ============================================
-        // TEACHER MANAGEMENT (NEW FEATURE #2)
+        // MODAL MANAGEMENT
+        // ============================================
+        function closeAllModals() {
+            document.getElementById('teacherFormModal').style.display = 'none';
+            document.getElementById('copyModal').style.display = 'none';
+            document.getElementById('previewModal').style.display = 'none';
+        }
+
+        window.onbeforeprint = function() {
+            closeAllModals();
+        };
+
+        // ============================================
+        // TEACHER MANAGEMENT
         // ============================================
         async function loadTeachers() {
             const semester = document.getElementById('currentSemester').value;
@@ -992,7 +998,6 @@
                     list.appendChild(item);
                 });
 
-                // Update allocation page teacher checkboxes
                 updateTeacherCheckboxes();
 
             } catch(e) {
@@ -1018,7 +1023,6 @@
             document.getElementById('teacherName').value = '';
             document.getElementById('teacherDepartment').value = '';
             
-            // Clear all checkboxes
             document.querySelectorAll('.schedule-grid input[type="checkbox"]').forEach(cb => cb.checked = false);
             
             document.getElementById('teacherFormModal').style.display = 'block';
@@ -1031,7 +1035,6 @@
             document.getElementById('teacherFormTitle').innerText = 'แก้ไขข้อมูลครู';
             document.getElementById('editTeacherId').value = id;
             
-            // Parse name to get prefix and name
             const prefixes = ['นาย', 'นาง', 'นางสาว'];
             let prefix = 'นาย';
             let name = teacher.name;
@@ -1048,10 +1051,8 @@
             document.getElementById('teacherName').value = name;
             document.getElementById('teacherDepartment').value = teacher.department;
             
-            // Clear all checkboxes first
             document.querySelectorAll('.schedule-grid input[type="checkbox"]').forEach(cb => cb.checked = false);
             
-            // Set schedule checkboxes
             Object.entries(teacher.schedule || {}).forEach(([day, periods]) => {
                 periods.forEach(period => {
                     const cb = document.querySelector(`.schedule-grid input[data-day="${day}"][data-period="${period}"]`);
@@ -1073,7 +1074,6 @@
                 return Swal.fire('ข้อมูลไม่ครบ', 'กรุณากรอกชื่อและกลุ่มสาระ', 'warning');
             }
 
-            // Build schedule object from checkboxes
             const schedule = {
                 "จันทร์": [],
                 "อังคาร": [],
@@ -1088,7 +1088,6 @@
                 schedule[day].push(period);
             });
 
-            // Sort periods
             Object.keys(schedule).forEach(day => {
                 schedule[day].sort((a, b) => a - b);
             });
@@ -1121,6 +1120,11 @@
 
         function closeTeacherForm() {
             document.getElementById('teacherFormModal').style.display = 'none';
+            document.getElementById('editTeacherId').value = '';
+            document.getElementById('teacherPrefix').value = 'นาย';
+            document.getElementById('teacherName').value = '';
+            document.getElementById('teacherDepartment').value = '';
+            document.querySelectorAll('.schedule-grid input[type="checkbox"]').forEach(cb => cb.checked = false);
         }
 
         async function deleteTeacher(id, name) {
@@ -1275,10 +1279,8 @@
         // INIT ON PAGE LOAD
         // ============================================
         window.onload = async () => {
-            // Initialize URL routing
             initializeRouting();
             
-            // Load teachers from Firebase
             const semester = document.getElementById('currentSemester').value;
             try {
                 const snap = await db.collection("teachers")
@@ -1293,7 +1295,6 @@
                     teachersData.push(teacher);
                 });
 
-                // If no teachers in Firebase, use fallback data
                 if(teachersData.length === 0) {
                     console.log("No teachers in Firebase, using fallback data");
                     teachersData = [
@@ -1329,7 +1330,9 @@
             
             updateFilterUI();
         };
-
+        // ============================================
+        // ALLOCATION FUNCTIONS
+        // ============================================
         function toggleSelect(name, cb) {
             if(cb.checked) {
                 if(selectedTeachers.length >= 6) {
@@ -1569,7 +1572,7 @@
                     Swal.fire('บันทึกการแก้ไขแล้ว', '', 'success');
                     cancelEdit();
                 } else {
-                    const docRef = await db.collection("substitutions").add(payload);
+                    await db.collection("substitutions").add(payload);
                     Swal.fire('บันทึกข้อมูลแล้ว', '', 'success');
                 }
                 
@@ -1627,6 +1630,8 @@
             if(!isSaved) {
                 return Swal.fire('เตือน', 'กรุณาบันทึกข้อมูลก่อนพิมพ์เอกสาร', 'warning');
             }
+            
+            closeAllModals();
             renderMemoPaper();
             document.getElementById('previewModal').style.display = 'block';
         }
@@ -1635,6 +1640,8 @@
             if(!isSaved && !window.lastPreviewData) {
                 return Swal.fire('เตือน', 'กรุณาบันทึกข้อมูลก่อนพิมพ์เอกสาร', 'warning');
             }
+            
+            closeAllModals();
             renderSummaryPaper();
             document.getElementById('previewModal').style.display = 'block';
         }
@@ -1651,6 +1658,22 @@
                 const subObj = teachersData.find(t => t.name === subName);
                 const subDept = subObj ? subObj.department : "";
                 items.sort((a,b) => a.period - b.period);
+                
+                const mainReason = items[0].reason || "ไปราชการ";
+                
+                let reasonText = "";
+                let actionText = "";
+                
+                if(mainReason === "ไปราชการ") {
+                    reasonText = "ได้รับมอบหมายให้ปฏิบัติราชการแทน";
+                    actionText = "ได้ดำเนินการสอนแทนดังกล่าว";
+                } else if(mainReason === "ลากิจ") {
+                    reasonText = "ครูผู้สอนลากิจ ได้รับมอบหมายให้สอนแทน";
+                    actionText = "ได้ดำเนินการสอนแทนดังกล่าว";
+                } else if(mainReason === "ลาป่วย") {
+                    reasonText = "ครูผู้สอนลาป่วย ได้รับมอบหมายให้สอนแทน";
+                    actionText = "ได้ดำเนินการสอนแทนดังกล่าว";
+                }
                 
                 let rows = items.map((it, idx) => `
                     <tr>
@@ -1679,8 +1702,8 @@
                     <div class="doc-meta"><b>เรื่อง</b>&nbsp;&nbsp;รายงานผลการสอนแทน</div>
                     <hr class="doc-line">
                     <div class="doc-to">เรียน&nbsp;&nbsp;ผู้อำนวยการโรงเรียนกระดุมทองวิทยา</div>
-                    <div class="doc-content">ตามที่ข้าพเจ้า ${subName} ตำแหน่ง ครู กลุ่มสาระการเรียนรู้${subDept} ได้รับมอบหมายให้ปฏิบัติราชการแทน เมื่อวันที่ ${thaiDateStr} ตามความทราบแล้วนั้น</div>
-                    <div class="doc-content">บัดนี้ ข้าพเจ้าได้ดำเนินการสอนแทนดังกล่าวเสร็จสิ้นเรียบร้อยแล้ว จึงขอรายงานผลการสอนแทนดังต่อไปนี้</div>
+                    <div class="doc-content">ตามที่ข้าพเจ้า ${subName} ตำแหน่ง ครู กลุ่มสาระการเรียนรู้${subDept} ${reasonText} เมื่อวันที่ ${thaiDateStr} ตามความทราบแล้วนั้น</div>
+                    <div class="doc-content">บัดนี้ ข้าพเจ้า${actionText}เสร็จสิ้นเรียบร้อยแล้ว จึงขอรายงานผลการสอนแทนดังต่อไปนี้</div>
                     <table class="doc-table">
                         <colgroup>
                             <col style="width:4%">
@@ -1800,19 +1823,19 @@
 
                 <div class="sum-footer">
                     <div class="sign-box">
-                        <br>  <div>(${scheduler})</div>
+                        <br><div>(${scheduler})</div>
                         <div>ผู้จัดตารางสอนแทน</div>
                     </div>
                     <div class="sign-box">
-                        <br>  <div>(${academicHead})</div>
+                        <br><div>(${academicHead})</div>
                         <div>หัวหน้ากลุ่มบริหารงานวิชาการ</div>
                     </div>
                     <div class="sign-box">
-                        <br>  <div>(${deputyDirector})</div>
+                        <br><div>(${deputyDirector})</div>
                         <div>รองผู้อำนวยการโรงเรียน</div>
                     </div>
                     <div class="sign-box">
-                        <br>  <div>(${director})</div>
+                        <br><div>(${director})</div>
                         <div>ผู้อำนวยการโรงเรียน</div>
                     </div>
                 </div>
@@ -1908,7 +1931,7 @@
                             </div>
                         </div>
                         <ul style="margin-top:10px; padding-left:20px; font-size:0.9rem;">
-                            ${d.records.map(r => `<li>คาบ ${r.period}: <strong>${formatTeacherNameShort(r.sub)}</strong> แทน ${formatTeacherNameShort(r.absent)}</li>`).join('')}
+                            ${d.records.map(r => `<li>คาบ ${r.period}: <strong>${formatTeacherNameShort(r.sub)}</strong> แทน ${formatTeacherNameShort(r.absent)} (${r.reason})</li>`).join('')}
                         </ul>
                     `;
                     list.appendChild(item);
@@ -1927,6 +1950,8 @@
                     director: data.director, 
                     docDate: data.docDate 
                 };
+                
+                closeAllModals();
                 
                 if(type === 'summary') {
                     renderSummaryPaper();
@@ -1956,6 +1981,8 @@
             text += `------------------------------\n🔗 คลิกลิงก์ระบบ:\n${currentUrl}`;
 
             document.getElementById('copyTextBox').value = text;
+            
+            closeAllModals();
             document.getElementById('copyModal').style.display = 'block';
         }
 
