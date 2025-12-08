@@ -304,55 +304,7 @@
         .rank-2 { background: #c0c0c0; color: #1e293b; }
         .rank-3 { background: #cd7f32; color: white; }
 
-        .teacher-list { display: grid; gap: 10px; margin: 15px 0; }
-        .teacher-item { 
-            background: white; 
-            border: 1px solid #e2e8f0; 
-            border-radius: 8px; 
-            padding: 15px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center;
-            transition: all 0.2s ease;
-        }
-        .teacher-item:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); transform: translateX(5px); }
-        .teacher-info { flex: 1; }
-        .teacher-info h4 { margin-bottom: 5px; color: var(--primary); }
-        .teacher-info p { font-size: 0.85rem; color: #64748b; }
-        .schedule-grid { 
-            display: grid; 
-            grid-template-columns: auto repeat(7, 1fr); 
-            gap: 5px; 
-            margin: 15px 0;
-            background: #f8fafc;
-            padding: 15px;
-            border-radius: 8px;
-        }
-        .schedule-cell { 
-            padding: 8px; 
-            text-align: center; 
-            font-size: 0.85rem; 
-            border: 1px solid #e2e8f0;
-            background: white;
-            border-radius: 4px;
-        }
-        .schedule-cell.header { 
-            background: var(--primary); 
-            color: white; 
-            font-weight: 600; 
-        }
-        .schedule-cell input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-        }
-        .semester-selector { 
-            background: #eff6ff; 
-            padding: 15px; 
-            border-radius: 8px; 
-            margin-bottom: 20px;
-            border: 1px solid #93c5fd;
-        }
+        /* Teacher Management CSS - Removed (Use teacher-manager.html) */
 
         .a4-paper {
             width: 210mm; 
@@ -529,6 +481,25 @@
                 <div class="edit-badge" id="editBadge">✏️ กำลังแก้ไขข้อมูล</div>
                 <input type="hidden" id="currentEditId" value="">
 
+                <div class="input-row" style="background: #eff6ff; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 2px solid #3b82f6;">
+                    <div style="flex: 1;">
+                        <label style="color: var(--primary); font-weight: 700; font-size: 1rem;">
+                            <i class="fas fa-calendar-check"></i> เลือกภาคเรียน (สำคัญ!)
+                        </label>
+                        <select id="semesterSelect" onchange="reloadTeachersData()" style="font-size: 1.1rem; font-weight: 600; color: var(--primary-dark); padding: 12px;">
+                            <option value="1/2567">1/2567</option>
+                            <option value="2/2567">2/2567</option>
+                            <option value="1/2568">1/2568</option>
+                            <option value="2/2568" selected>2/2568</option>
+                            <option value="1/2569">1/2569</option>
+                            <option value="2/2569">2/2569</option>
+                        </select>
+                        <p style="font-size: 0.85rem; color: #64748b; margin-top: 5px;">
+                            ⚠️ ต้องตรงกับภาคเรียนที่บันทึกใน "จัดการครู/ตาราง"
+                        </p>
+                    </div>
+                </div>
+
                 <div class="input-row">
                     <div>
                         <label>1. เลือกวันในตารางสอน (Logic)</label>
@@ -626,29 +597,17 @@
             
             <div class="semester-selector">
                 <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
-                    <div>
-                        <label>ภาคเรียนปัจจุบัน:</label>
-                        <select id="currentSemester" onchange="loadTeachers()">
-                            <option value="1/2567">1/2567</option>
-                            <option value="2/2567">2/2567</option>
-                            <option value="1/2568">1/2568</option>
-                            <option value="2/2568">2/2568</option>
-                        </select>
-                    </div>
-                    <button onclick="showAddTeacherForm()" class="btn-primary">
-                        <i class="fas fa-plus"></i> เพิ่มครูใหม่
-                    </button>
-                    <button onclick="exportTeachers()" class="btn-sm" style="background: #059669; color: white;">
-                        <i class="fas fa-download"></i> Export CSV
-                    </button>
-                    <button onclick="document.getElementById('importFile').click()" class="btn-sm" style="background: #8b5cf6; color: white;">
-                        <i class="fas fa-upload"></i> Import CSV
-                    </button>
-                    <input type="file" id="importFile" accept=".csv" style="display: none;" onchange="importTeachers(event)">
+                    <p style="color: #64748b; flex: 1;">
+                        ⚠️ หน้านี้ถูกย้ายไปยัง "จัดการครู/ตาราง (ระบบใหม่)" แล้ว<br>
+                        กรุณาใช้ปุ่มด้านบนเพื่อเข้าสู่ระบบจัดการครู
+                    </p>
                 </div>
             </div>
 
-            <div id="teachersList" class="teacher-list"></div>
+            <div style="text-align: center; padding: 50px;">
+                <i class="fas fa-arrow-up" style="font-size: 3rem; color: var(--primary);"></i>
+                <p style="margin-top: 20px; font-size: 1.1rem;">คลิกปุ่ม "จัดการครู/ตาราง (ระบบใหม่)" ด้านบน</p>
+            </div>
         </div>
 
         <!-- Dashboard Tab -->
@@ -778,97 +737,8 @@
         </div>
     </div>
 
-    <!-- Teacher Form Modal -->
-    <div id="teacherFormModal" class="modal" style="z-index: 2000;">
-        <div class="modal-content-sm" style="max-width: 800px; max-height: 90vh; overflow-y: auto;">
-            <h3 style="color:var(--primary); margin-bottom: 20px;" id="teacherFormTitle">เพิ่มครูใหม่</h3>
-            <input type="hidden" id="editTeacherId">
-            
-            <div class="input-row">
-                <div>
-                    <label>คำนำหน้า</label>
-                    <select id="teacherPrefix">
-                        <option value="นาย">นาย</option>
-                        <option value="นาง">นาง</option>
-                        <option value="นางสาว">นางสาว</option>
-                    </select>
-                </div>
-                <div>
-                    <label>ชื่อ-นามสกุล</label>
-                    <input type="text" id="teacherName" placeholder="เช่น วิทยา ใหม่คามิ">
-                </div>
-            </div>
+    <!-- Teacher Form Modal - REMOVED (Use teacher-manager.html) -->
 
-            <div class="input-row">
-                <div>
-                    <label>กลุ่มสาระการเรียนรู้</label>
-                    <input type="text" id="teacherDepartment" placeholder="เช่น สังคมศึกษาฯ">
-                </div>
-            </div>
-
-            <h4 style="margin: 20px 0 10px 0; color: var(--primary);">ตารางสอน (เลือกคาบที่สอนในแต่ละวัน)</h4>
-            <div class="schedule-grid">
-                <div class="schedule-cell header">วัน/คาบ</div>
-                <div class="schedule-cell header">1</div>
-                <div class="schedule-cell header">2</div>
-                <div class="schedule-cell header">3</div>
-                <div class="schedule-cell header">4</div>
-                <div class="schedule-cell header">5</div>
-                <div class="schedule-cell header">6</div>
-                <div class="schedule-cell header">7</div>
-                
-                <div class="schedule-cell header">จันทร์</div>
-                <div class="schedule-cell"><input type="checkbox" data-day="จันทร์" data-period="1"></div>
-                <div class="schedule-cell"><input type="checkbox" data-day="จันทร์" data-period="2"></div>
-                <div class="schedule-cell"><input type="checkbox" data-day="จันทร์" data-period="3"></div>
-                <div class="schedule-cell"><input type="checkbox" data-day="จันทร์" data-period="4"></div>
-                <div class="schedule-cell"><input type="checkbox" data-day="จันทร์" data-period="5"></div>
-                <div class="schedule-cell"><input type="checkbox" data-day="จันทร์" data-period="6"></div>
-                <div class="schedule-cell"><input type="checkbox" data-day="จันทร์" data-period="7"></div>
-
-                <div class="schedule-cell header">อังคาร</div>
-                <div class="schedule-cell"><input type="checkbox" data-day="อังคาร" data-period="1"></div>
-                <div class="schedule-cell"><input type="checkbox" data-day="อังคาร" data-period="2"></div>
-                <div class="schedule-cell"><input type="checkbox" data-day="อังคาร" data-period="3"></div>
-                <div class="schedule-cell"><input type="checkbox" data-day="อังคาร" data-period="4"></div>
-                <div class="schedule-cell"><input type="checkbox" data-day="อังคาร" data-period="5"></div>
-                <div class="schedule-cell"><input type="checkbox" data-day="อังคาร" data-period="6"></div>
-                <div class="schedule-cell"><input type="checkbox" data-day="อังคาร" data-period="7"></div>
-
-                <div class="schedule-cell header">พุธ</div>
-                <div class="schedule-cell"><input type="checkbox" data-day="พุธ" data-period="1"></div>
-                <div class="schedule-cell"><input type="checkbox" data-day="พุธ" data-period="2"></div>
-                <div class="schedule-cell"><input type="checkbox" data-day="พุธ" data-period="3"></div>
-                <div class="schedule-cell"><input type="checkbox" data-day="พุธ" data-period="4"></div>
-                <div class="schedule-cell"><input type="checkbox" data-day="พุธ" data-period="5"></div>
-                <div class="schedule-cell"><input type="checkbox" data-day="พุธ" data-period="6"></div>
-                <div class="schedule-cell"><input type="checkbox" data-day="พุธ" data-period="7"></div>
-
-                <div class="schedule-cell header">พฤหัสบดี</div>
-                <div class="schedule-cell"><input type="checkbox" data-day="พฤหัสบดี" data-period="1"></div>
-                <div class="schedule-cell"><input type="checkbox" data-day="พฤหัสบดี" data-period="2"></div>
-                <div class="schedule-cell"><input type="checkbox" data-day="พฤหัสบดี" data-period="3"></div>
-                <div class="schedule-cell"><input type="checkbox" data-day="พฤหัสบดี" data-period="4"></div>
-                <div class="schedule-cell"><input type="checkbox" data-day="พฤหัสบดี" data-period="5"></div>
-                <div class="schedule-cell"><input type="checkbox" data-day="พฤหัสบดี" data-period="6"></div>
-                <div class="schedule-cell"><input type="checkbox" data-day="พฤหัสบดี" data-period="7"></div>
-
-                <div class="schedule-cell header">ศุกร์</div>
-                <div class="schedule-cell"><input type="checkbox" data-day="ศุกร์" data-period="1"></div>
-                <div class="schedule-cell"><input type="checkbox" data-day="ศุกร์" data-period="2"></div>
-                <div class="schedule-cell"><input type="checkbox" data-day="ศุกร์" data-period="3"></div>
-                <div class="schedule-cell"><input type="checkbox" data-day="ศุกร์" data-period="4"></div>
-                <div class="schedule-cell"><input type="checkbox" data-day="ศุกร์" data-period="5"></div>
-                <div class="schedule-cell"><input type="checkbox" data-day="ศุกร์" data-period="6"></div>
-                <div class="schedule-cell"><input type="checkbox" data-day="ศุกร์" data-period="7"></div>
-            </div>
-
-            <div style="display:flex; justify-content:flex-end; gap:10px; margin-top: 20px;">
-                <button onclick="saveTeacher()" class="btn-save">💾 บันทึก</button>
-                <button onclick="closeTeacherForm()" class="nav-btn" style="background:#64748b; color:white; border:none;">ยกเลิก</button>
-            </div>
-        </div>
-    </div>
     <script>
         // ============================================
         // CONFIG & INIT
@@ -948,70 +818,11 @@
         };
 
         // ============================================
-        // TEACHER MANAGEMENT
+        // TEACHER MANAGEMENT (Moved to teacher-manager.html)
         // ============================================
-        async function loadTeachers() {
-            const semester = document.getElementById('currentSemester').value;
-            const list = document.getElementById('teachersList');
-            list.innerHTML = '<div style="text-align:center; padding:20px;">🔄 กำลังโหลด...</div>';
-
-            try {
-                const snap = await db.collection("teachers")
-                    .where("semester", "==", semester)
-                    .where("active", "==", true)
-                    .orderBy("name")
-                    .get();
-
-                teachersData = [];
-                list.innerHTML = '';
-
-                if(snap.empty) {
-                    list.innerHTML = `
-                        <div style="text-align:center; padding:40px; color:#64748b;">
-                            <i class="fas fa-users" style="font-size:3rem; margin-bottom:15px;"></i>
-                            <p>ยังไม่มีข้อมูลครูในภาคเรียนนี้</p>
-                            <p style="font-size:0.9rem;">คลิก "เพิ่มครูใหม่" เพื่อเริ่มต้น</p>
-                        </div>
-                    `;
-                    return;
-                }
-
-                snap.forEach(doc => {
-                    const teacher = doc.data();
-                    teacher.id = doc.id;
-                    teachersData.push(teacher);
-
-                    const scheduleText = Object.entries(teacher.schedule || {})
-                        .map(([day, periods]) => `${day}: ${periods.length > 0 ? periods.join(',') : 'ว่าง'}`)
-                        .join(' | ');
-
-                    const item = document.createElement('div');
-                    item.className = 'teacher-item';
-                    item.innerHTML = `
-                        <div class="teacher-info">
-                            <h4>${teacher.name}</h4>
-                            <p>กลุ่มสาระ: ${teacher.department}</p>
-                            <p style="font-size:0.8rem; color:#94a3b8;">📅 ${scheduleText}</p>
-                        </div>
-                        <div class="btn-action-group">
-                            <button onclick="editTeacher('${doc.id}')" class="btn-sm" style="background:#8b5cf6; color:white;">
-                                <i class="fas fa-edit"></i> แก้ไข
-                            </button>
-                            <button onclick="deleteTeacher('${doc.id}', '${teacher.name}')" class="btn-sm" style="background:#fee2e2; color:red;">
-                                <i class="fas fa-trash"></i> ลบ
-                            </button>
-                        </div>
-                    `;
-                    list.appendChild(item);
-                });
-
-                updateTeacherCheckboxes();
-
-            } catch(e) {
-                console.error("Load teachers error:", e);
-                list.innerHTML = '<div style="color:red; padding:20px;">เกิดข้อผิดพลาดในการโหลดข้อมูล</div>';
-            }
-        }
+        // Functions removed: loadTeachers, showAddTeacherForm, editTeacher, 
+        // saveTeacher, deleteTeacher, exportTeachers, importTeachers
+        // Please use teacher-manager.html for teacher management
 
         function updateTeacherCheckboxes() {
             const container = document.getElementById('teacherCheckboxes');
@@ -1021,243 +832,6 @@
                     <label for="t${i}" style="cursor:pointer; font-size:0.9rem;">${t.name}</label>
                 </div>
             `).join('');
-        }
-
-        function showAddTeacherForm() {
-            document.getElementById('teacherFormTitle').innerText = 'เพิ่มครูใหม่';
-            document.getElementById('editTeacherId').value = '';
-            document.getElementById('teacherPrefix').value = 'นาย';
-            document.getElementById('teacherName').value = '';
-            document.getElementById('teacherDepartment').value = '';
-            
-            document.querySelectorAll('.schedule-grid input[type="checkbox"]').forEach(cb => cb.checked = false);
-            
-            document.getElementById('teacherFormModal').style.display = 'block';
-        }
-
-        async function editTeacher(id) {
-            const teacher = teachersData.find(t => t.id === id);
-            if(!teacher) return;
-
-            document.getElementById('teacherFormTitle').innerText = 'แก้ไขข้อมูลครู';
-            document.getElementById('editTeacherId').value = id;
-            
-            const prefixes = ['นาย', 'นาง', 'นางสาว'];
-            let prefix = 'นาย';
-            let name = teacher.name;
-            
-            for(const p of prefixes) {
-                if(teacher.name.startsWith(p)) {
-                    prefix = p;
-                    name = teacher.name.substring(p.length).trim();
-                    break;
-                }
-            }
-            
-            document.getElementById('teacherPrefix').value = prefix;
-            document.getElementById('teacherName').value = name;
-            document.getElementById('teacherDepartment').value = teacher.department;
-            
-            document.querySelectorAll('.schedule-grid input[type="checkbox"]').forEach(cb => cb.checked = false);
-            
-            Object.entries(teacher.schedule || {}).forEach(([day, periods]) => {
-                periods.forEach(period => {
-                    const cb = document.querySelector(`.schedule-grid input[data-day="${day}"][data-period="${period}"]`);
-                    if(cb) cb.checked = true;
-                });
-            });
-            
-            document.getElementById('teacherFormModal').style.display = 'block';
-        }
-
-        async function saveTeacher() {
-            const prefix = document.getElementById('teacherPrefix').value;
-            const name = document.getElementById('teacherName').value.trim();
-            const department = document.getElementById('teacherDepartment').value.trim();
-            const semester = document.getElementById('currentSemester').value;
-            const editId = document.getElementById('editTeacherId').value;
-
-            if(!name || !department) {
-                return Swal.fire('ข้อมูลไม่ครบ', 'กรุณากรอกชื่อและกลุ่มสาระ', 'warning');
-            }
-
-            const schedule = {
-                "จันทร์": [],
-                "อังคาร": [],
-                "พุธ": [],
-                "พฤหัสบดี": [],
-                "ศุกร์": []
-            };
-
-            document.querySelectorAll('.schedule-grid input[type="checkbox"]:checked').forEach(cb => {
-                const day = cb.dataset.day;
-                const period = parseInt(cb.dataset.period);
-                schedule[day].push(period);
-            });
-
-            Object.keys(schedule).forEach(day => {
-                schedule[day].sort((a, b) => a - b);
-            });
-
-            const teacherData = {
-                name: prefix + name,
-                department: department,
-                schedule: schedule,
-                semester: semester,
-                active: true,
-                updated_at: firebase.firestore.FieldValue.serverTimestamp()
-            };
-
-            try {
-                if(editId) {
-                    await db.collection("teachers").doc(editId).update(teacherData);
-                    Swal.fire('สำเร็จ', 'แก้ไขข้อมูลครูเรียบร้อย', 'success');
-                } else {
-                    teacherData.created_at = firebase.firestore.FieldValue.serverTimestamp();
-                    await db.collection("teachers").add(teacherData);
-                    Swal.fire('สำเร็จ', 'เพิ่มครูใหม่เรียบร้อย', 'success');
-                }
-                closeTeacherForm();
-                loadTeachers();
-            } catch(e) {
-                console.error("Save teacher error:", e);
-                Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถบันทึกข้อมูลได้', 'error');
-            }
-        }
-
-        function closeTeacherForm() {
-            document.getElementById('teacherFormModal').style.display = 'none';
-            document.getElementById('editTeacherId').value = '';
-            document.getElementById('teacherPrefix').value = 'นาย';
-            document.getElementById('teacherName').value = '';
-            document.getElementById('teacherDepartment').value = '';
-            document.querySelectorAll('.schedule-grid input[type="checkbox"]').forEach(cb => cb.checked = false);
-        }
-
-        async function deleteTeacher(id, name) {
-            const result = await Swal.fire({
-                title: 'ยืนยันการลบ?',
-                text: `ต้องการลบ ${name} ใช่หรือไม่?`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#ef4444',
-                confirmButtonText: 'ลบ',
-                cancelButtonText: 'ยกเลิก'
-            });
-
-            if(result.isConfirmed) {
-                try {
-                    await db.collection("teachers").doc(id).update({ active: false });
-                    Swal.fire('สำเร็จ', 'ลบข้อมูลครูเรียบร้อย', 'success');
-                    loadTeachers();
-                } catch(e) {
-                    console.error("Delete teacher error:", e);
-                    Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถลบข้อมูลได้', 'error');
-                }
-            }
-        }
-
-        function exportTeachers() {
-            if(teachersData.length === 0) {
-                return Swal.fire('ไม่มีข้อมูล', 'ไม่มีข้อมูลครูให้ Export', 'info');
-            }
-
-            let csv = 'คำนำหน้า,ชื่อ-นามสกุล,กลุ่มสาระ,จันทร์,อังคาร,พุธ,พฤหัสบดี,ศุกร์\n';
-            
-            teachersData.forEach(t => {
-                const prefixes = ['นาย', 'นาง', 'นางสาว'];
-                let prefix = '';
-                let name = t.name;
-                
-                for(const p of prefixes) {
-                    if(t.name.startsWith(p)) {
-                        prefix = p;
-                        name = t.name.substring(p.length).trim();
-                        break;
-                    }
-                }
-                
-                const mon = (t.schedule['จันทร์'] || []).join(';');
-                const tue = (t.schedule['อังคาร'] || []).join(';');
-                const wed = (t.schedule['พุธ'] || []).join(';');
-                const thu = (t.schedule['พฤหัสบดี'] || []).join(';');
-                const fri = (t.schedule['ศุกร์'] || []).join(';');
-                
-                csv += `${prefix},"${name}","${t.department}","${mon}","${tue}","${wed}","${thu}","${fri}"\n`;
-            });
-
-            const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            link.setAttribute('href', url);
-            link.setAttribute('download', `teachers_${document.getElementById('currentSemester').value}.csv`);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-
-            Swal.fire('สำเร็จ', 'Export ข้อมูลเรียบร้อย', 'success');
-        }
-
-        function importTeachers(event) {
-            const file = event.target.files[0];
-            if(!file) return;
-
-            const reader = new FileReader();
-            reader.onload = async function(e) {
-                const text = e.target.result;
-                const lines = text.split('\n').filter(line => line.trim());
-                
-                if(lines.length < 2) {
-                    return Swal.fire('ข้อมูลไม่ถูกต้อง', 'ไฟล์ CSV ต้องมีข้อมูลอย่างน้อย 1 แถว', 'error');
-                }
-
-                const semester = document.getElementById('currentSemester').value;
-                let imported = 0;
-                let errors = 0;
-
-                for(let i = 1; i < lines.length; i++) {
-                    const line = lines[i];
-                    const parts = line.split(',').map(p => p.replace(/^"|"$/g, '').trim());
-                    
-                    if(parts.length < 3) continue;
-
-                    const [prefix, name, department, mon, tue, wed, thu, fri] = parts;
-                    
-                    const schedule = {
-                        "จันทร์": mon ? mon.split(';').map(n => parseInt(n)).filter(n => !isNaN(n)) : [],
-                        "อังคาร": tue ? tue.split(';').map(n => parseInt(n)).filter(n => !isNaN(n)) : [],
-                        "พุธ": wed ? wed.split(';').map(n => parseInt(n)).filter(n => !isNaN(n)) : [],
-                        "พฤหัสบดี": thu ? thu.split(';').map(n => parseInt(n)).filter(n => !isNaN(n)) : [],
-                        "ศุกร์": fri ? fri.split(';').map(n => parseInt(n)).filter(n => !isNaN(n)) : []
-                    };
-
-                    try {
-                        await db.collection("teachers").add({
-                            name: prefix + name,
-                            department: department,
-                            schedule: schedule,
-                            semester: semester,
-                            active: true,
-                            created_at: firebase.firestore.FieldValue.serverTimestamp()
-                        });
-                        imported++;
-                    } catch(e) {
-                        console.error("Import error:", e);
-                        errors++;
-                    }
-                }
-
-                event.target.value = '';
-                
-                if(imported > 0) {
-                    Swal.fire('สำเร็จ', `Import ข้อมูล ${imported} รายการ${errors > 0 ? ` (ผิดพลาด ${errors} รายการ)` : ''}`, 'success');
-                    loadTeachers();
-                } else {
-                    Swal.fire('ล้มเหลว', 'ไม่สามารถ Import ข้อมูลได้', 'error');
-                }
-            };
-            reader.readAsText(file, 'UTF-8');
         }
 
         // ============================================
@@ -1289,9 +863,44 @@
             console.log('🚀 ===== SYSTEM INITIALIZATION =====');
             initializeRouting();
             
-            const semester = document.getElementById('currentSemester').value;
-            console.log('📚 Loading teachers for semester:', semester);
+            // Load saved semester from localStorage or default to current semester
+            const savedSemester = localStorage.getItem('selectedSemester') || '2/2568';
+            document.getElementById('semesterSelect').value = savedSemester;
+            console.log('📚 Initial Semester:', savedSemester);
             
+            // Load teachers data for selected semester
+            await reloadTeachersData();
+
+            document.getElementById('docDate').valueAsDate = new Date();
+            
+            const today = new Date();
+            document.getElementById('filterDate').valueAsDate = today;
+            document.getElementById('filterMonth').value = today.toISOString().slice(0, 7);
+            document.getElementById('filterSemesterStart').value = today.toISOString().slice(0, 7);
+            document.getElementById('filterSemesterEnd').value = today.toISOString().slice(0, 7);
+            
+            updateFilterUI();
+            
+            console.log('✅ System initialization complete');
+        };
+        // ============================================
+        // SEMESTER & TEACHER DATA RELOAD
+        // ============================================
+        async function reloadTeachersData() {
+            const semester = document.getElementById('semesterSelect').value;
+            console.log('🔄 ===== RELOADING TEACHERS DATA =====');
+            console.log('📚 Selected Semester:', semester);
+            
+            // Save to localStorage
+            localStorage.setItem('selectedSemester', semester);
+            
+            Swal.fire({
+                title: 'กำลังโหลดข้อมูล...',
+                html: `โหลดข้อมูลครูภาคเรียน <b>${semester}</b>`,
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); }
+            });
+
             try {
                 const snap = await db.collection("teachers")
                     .where("semester", "==", semester)
@@ -1307,7 +916,7 @@
 
                 console.log('✅ Loaded', teachersData.length, 'teachers from Firebase');
                 
-                // DEBUG: ตรวจสอบว่าข้อมูล teachingDetails ถูกโหลดมาหรือไม่
+                // DEBUG
                 teachersData.forEach(t => {
                     console.log(`   👨‍🏫 ${t.name}:`, {
                         hasSchedule: !!t.schedule,
@@ -1316,43 +925,43 @@
                     });
                 });
 
+                updateTeacherCheckboxes();
+                
+                // Reset selection
+                selectedTeachers = [];
+                document.getElementById('selectedTags').innerHTML = '';
+                document.querySelectorAll('.teacher-grid input[type="checkbox"]').forEach(cb => cb.checked = false);
+                document.getElementById('resultArea').style.display = 'none';
+                
+                Swal.close();
+                
                 if(teachersData.length === 0) {
-                    console.warn("⚠️ No teachers in Firebase, using fallback data");
-                    teachersData = [
-                        { name: "นายวิทยา ใหม่คามิ", department: "สังคมศึกษาฯ", schedule: { "จันทร์": [1, 5, 6, 7], "อังคาร": [3, 5, 6], "พุธ": [1, 2, 3, 5, 6], "พฤหัสบดี": [1, 3, 4, 5, 6], "ศุกร์": [2, 4, 7] } },
-                        { name: "นางสาวณิชารีย์ คำศรีทา", department: "วิทยาศาสตร์ฯ", schedule: { "จันทร์": [2, 4], "อังคาร": [3, 4, 6], "พุธ": [3, 4, 5, 6], "พฤหัสบดี": [5, 6], "ศุกร์": [4, 5, 6] } },
-                        { name: "นางสาวกานต์มณี แก้วพวง", department: "วิทยาศาสตร์ฯ", schedule: { "จันทร์": [1, 2, 3, 4, 6], "อังคาร": [1, 2, 4], "พุธ": [], "พฤหัสบดี": [5], "ศุกร์": [1, 2] } },
-                        { name: "นางสาวยุพา ทองคำ", department: "วิทยาศาสตร์ฯ", schedule: { "จันทร์": [3, 4, 5, 7], "อังคาร": [5], "พุธ": [1, 2], "พฤหัสบดี": [1, 2, 3, 4], "ศุกร์": [2, 3, 5, 6, 7] } },
-                        { name: "นางสาวรัตนา สีฟ้า", department: "คณิตศาสตร์", schedule: { "จันทร์": [2, 5], "อังคาร": [2, 3, 4, 5], "พุธ": [2, 4, 5], "พฤหัสบดี": [1, 2, 3], "ศุกร์": [1, 2, 4, 5] } },
-                        { name: "นายธนะสิทธิ์ พรหมทอง", department: "สังคมศึกษาฯ", schedule: { "จันทร์": [3, 6, 7], "อังคาร": [4, 6], "พุธ": [2, 3, 4, 5, 6], "พฤหัสบดี": [4, 6], "ศุกร์": [4, 5, 6, 7] } },
-                        { name: "นางสาววิไลจิตร จันทร์แจ้ง", department: "ภาษาต่างประเทศ", schedule: { "จันทร์": [1, 5, 7], "อังคาร": [1, 4, 5], "พุธ": [1, 3, 4, 5, 6], "พฤหัสบดี": [1, 5, 6], "ศุกร์": [3, 6, 7] } },
-                        { name: "นางสาวสุพัฒตา ศรีเมือง", department: "คณิตศาสตร์", schedule: { "จันทร์": [1, 4, 6], "อังคาร": [2, 3, 4], "พุธ": [1, 3, 4, 5, 6], "พฤหัสบดี": [3, 4], "ศุกร์": [1, 2, 3, 4] } },
-                        { name: "นายเดชา วงศ์เจริญ", department: "วิทยาศาสตร์ฯ", schedule: { "จันทร์": [3, 4], "อังคาร": [2, 3, 4, 5], "พุธ": [1, 2, 3, 4], "พฤหัสบดี": [1, 2, 3, 4], "ศุกร์": [1] } },
-                        { name: "นายอาจหาญ วิริยโกศล", department: "สุขศึกษา พลศึกษา", schedule: { "จันทร์": [3, 4, 5, 6, 7], "อังคาร": [2, 3, 4, 5, 6], "พุธ": [4], "พฤหัสบดี": [2, 5, 6], "ศุกร์": [4] } },
-                        { name: "นางสาวปริมปภาพร บาอินทร์", department: "ภาษาต่างประเทศ", schedule: { "จันทร์": [1], "อังคาร": [3, 4, 5, 6], "พุธ": [1, 6], "พฤหัสบดี": [1, 4, 5, 6], "ศุกร์": [3] } },
-                        { name: "นายไกรสร จันทวี", department: "ศิลปศึกษา", schedule: { "จันทร์": [1, 2, 4], "อังคาร": [2, 3, 4, 6], "พุธ": [3, 4, 5, 6], "พฤหัสบดี": [2, 3, 5], "ศุกร์": [1, 2, 4, 5, 6, 7] } },
-                        { name: "นายต้นกล้า เพชรเลื่อน", department: "การงานอาชีพ", schedule: { "จันทร์": [2, 3, 4], "อังคาร": [3, 4], "พุธ": [3, 4, 5, 6], "พฤหัสบดี": [], "ศุกร์": [4] } },
-                        { name: "นายนนทพัทธ์ หิรัญเรือง", department: "ภาษาไทย", schedule: { "จันทร์": [2, 4, 5, 6], "อังคาร": [2, 3], "พุธ": [2, 3, 5, 6], "พฤหัสบดี": [2, 6], "ศุกร์": [1, 3, 4] } }
-                    ];
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'ไม่พบข้อมูล',
+                        html: `ไม่พบข้อมูลครูในภาคเรียน <b>${semester}</b><br><small>กรุณาเพิ่มข้อมูลครูในระบบ "จัดการครู/ตาราง" ก่อน</small>`,
+                        confirmButtonText: 'เข้าใจแล้ว'
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'โหลดสำเร็จ',
+                        html: `พบข้อมูล <b>${teachersData.length} คน</b> ในภาคเรียน ${semester}`,
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
                 }
 
-                updateTeacherCheckboxes();
             } catch(e) {
-                console.error("❌ Load teachers error:", e);
+                console.error("❌ Reload Error:", e);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'เกิดข้อผิดพลาด',
+                    text: 'ไม่สามารถโหลดข้อมูลได้: ' + e.message
+                });
             }
+        }
 
-            document.getElementById('docDate').valueAsDate = new Date();
-            
-            const today = new Date();
-            document.getElementById('filterDate').valueAsDate = today;
-            document.getElementById('filterMonth').value = today.toISOString().slice(0, 7);
-            document.getElementById('filterSemesterStart').value = today.toISOString().slice(0, 7);
-            document.getElementById('filterSemesterEnd').value = today.toISOString().slice(0, 7);
-            
-            updateFilterUI();
-            
-            console.log('✅ System initialization complete');
-        };
         // ============================================
         // ALLOCATION FUNCTIONS
         // ============================================
