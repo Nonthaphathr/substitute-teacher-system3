@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบจัดสอนแทน V.8.4 (Auto-fill รหัสวิชา/ชั้นเรียน)</title>
+    <title>ระบบจัดสอนแทน V.8.5 (Fix: ประวัติ/พิมพ์/คัดลอก)</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -459,8 +459,8 @@
         <div class="header">
             <img src="https://nonthaphathr.github.io/uploadimg/logosonthan.png" alt="Logo" class="header-logo">
             <div class="header-text">
-                <h1>ระบบจัดสอนแทน V.8.4</h1>
-                <p>✨ Auto-fill รหัสวิชา/ชั้นเรียนอัตโนมัติ</p>
+                <h1>ระบบจัดสอนแทน V.8.5</h1>
+                <p>✨ Auto-fill + แก้ไขหน้าประวัติ</p>
             </div>
         </div>
 
@@ -586,8 +586,12 @@
 
         <!-- History Tab -->
         <div id="history" class="page-section">
-            <h3 style="color: var(--primary);">📂 ประวัติการจัดสอนแทน</h3>
-            <button onclick="loadHistory()" class="nav-btn" style="margin:10px 0;">🔄 รีเฟรช</button>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+                <h3 style="color: var(--primary); margin: 0;">📂 ประวัติการจัดสอนแทน</h3>
+                <button onclick="loadHistory()" class="btn-primary" style="display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-sync-alt"></i> รีเฟรชข้อมูล
+                </button>
+            </div>
             <div id="historyList"></div>
         </div>
 
@@ -1560,22 +1564,32 @@
         }
 
         function loadHistory() {
+            console.log('📂 ===== LOADING HISTORY =====');
             const list = document.getElementById('historyList');
             list.innerHTML = '<div style="text-align:center; padding:20px;">🔄 กำลังโหลด...</div>';
             historyDataCache = []; 
             
             db.collection("substitutions").orderBy("created_at", "desc").limit(15).get()
             .then(snap => {
+                console.log('✅ Loaded', snap.size, 'records from Firebase');
+                
                 list.innerHTML = '';
                 if(snap.empty) {
                     list.innerHTML = '<div style="text-align:center; padding:20px; color:#64748b;">ไม่มีข้อมูล</div>';
                     return;
                 }
                 
-                snap.forEach(doc => {
+                snap.forEach((doc, index) => {
                     const d = doc.data();
                     d.id = doc.id;
                     historyDataCache.push(d);
+
+                    console.log(`   📄 Record ${index + 1}:`, {
+                        id: doc.id,
+                        date: d.docDate,
+                        day: d.daySchedule,
+                        recordsCount: d.records?.length || 0
+                    });
 
                     const item = document.createElement('div');
                     item.className = 'card';
@@ -1588,11 +1602,21 @@
                                 <span style="font-size:0.8rem; color:#64748b; margin-left:10px;">วัน${d.daySchedule || ''}</span>
                             </div>
                             <div class="btn-action-group">
-                                <button onclick="showHistoryPDF('${doc.id}', 'memo')" class="btn-sm" style="background:#3b82f6; color:white;">🖨️ พิมพ์บันทึกข้อความ</button>
-                                <button onclick="showHistoryPDF('${doc.id}', 'summary')" class="btn-sm" style="background:#d97706; color:white;">📄 พิมพ์ใบสรุป</button>
-                                <button onclick="showCopyModal('${doc.id}')" class="btn-sm" style="background:#059669; color:white;">📋 คัดลอกรายการแจ้งลง Line</button>
-                                <button onclick="editLog('${doc.id}')" class="btn-sm" style="background:#8b5cf6; color:white;">✏️ แก้ไข</button>
-                                <button onclick="deleteLog('${doc.id}')" class="btn-sm" style="background:#fee2e2; color:red;">🗑️ ลบ</button>
+                                <button onclick="showHistoryPDF('${doc.id}', 'memo')" class="btn-sm" style="background:#3b82f6; color:white;">
+                                    🖨️ พิมพ์บันทึกข้อความ
+                                </button>
+                                <button onclick="showHistoryPDF('${doc.id}', 'summary')" class="btn-sm" style="background:#d97706; color:white;">
+                                    📄 พิมพ์ใบสรุป
+                                </button>
+                                <button onclick="showCopyModal('${doc.id}')" class="btn-sm" style="background:#059669; color:white;">
+                                    📋 คัดลอก Line
+                                </button>
+                                <button onclick="editLog('${doc.id}')" class="btn-sm" style="background:#8b5cf6; color:white;">
+                                    ✏️ แก้ไข
+                                </button>
+                                <button onclick="deleteLog('${doc.id}')" class="btn-sm" style="background:#fee2e2; color:red;">
+                                    🗑️ ลบ
+                                </button>
                             </div>
                         </div>
                         <ul style="margin-top:10px; padding-left:20px; font-size:0.9rem;">
@@ -1601,49 +1625,73 @@
                     `;
                     list.appendChild(item);
                 });
+                
+                console.log('✅ History loaded successfully. Cache contains', historyDataCache.length, 'records');
+            })
+            .catch(error => {
+                console.error('❌ Load history error:', error);
+                list.innerHTML = '<div style="color:red; padding:20px;">เกิดข้อผิดพลาดในการโหลดข้อมูล</div>';
             });
         }
 
         function showHistoryPDF(id, type) {
-            const data = historyDataCache.find(x => x.id === id);
-            if(data) {
-                window.lastPreviewData = { 
-                    data: data.records, 
-                    scheduler: data.scheduler, 
-                    academicHead: data.academicHead, 
-                    deputyDirector: data.deputyDirector, 
-                    director: data.director, 
-                    docDate: data.docDate 
-                };
-                
-                closeAllModals();
-                
-                if(type === 'summary') {
-                    renderSummaryPaper();
-                } else {
-                    renderMemoPaper();
-                }
-                document.getElementById('previewModal').style.display = 'block';
+            const record = historyDataCache.find(x => x.id === id);
+            if(!record) {
+                console.error('❌ Record not found:', id);
+                return Swal.fire('ข้อผิดพลาด', 'ไม่พบข้อมูลที่ต้องการพิมพ์', 'error');
             }
+            
+            console.log('📄 Showing PDF for record:', id);
+            console.log('   Type:', type);
+            console.log('   Data:', record);
+            
+            // สร้าง lastPreviewData จากข้อมูลที่ดึงมา
+            window.lastPreviewData = { 
+                data: record.records, 
+                scheduler: record.scheduler || 'นายนนทพัทธ์ หิรัญเรือง', 
+                academicHead: record.academicHead || 'นางสาวสุพัฒตา ศรีเมือง', 
+                deputyDirector: record.deputyDirector || 'นางสุคันทร บาอินทร์', 
+                director: record.director || 'นางสุนิสา ใจใหญ่', 
+                docDate: record.docDate 
+            };
+            
+            console.log('✅ Preview data prepared');
+            
+            closeAllModals();
+            
+            if(type === 'summary') {
+                renderSummaryPaper();
+            } else {
+                renderMemoPaper();
+            }
+            document.getElementById('previewModal').style.display = 'block';
         }
 
         function showCopyModal(id) {
-            const data = historyDataCache.find(x => x.id === id);
-            if(!data) return;
+            const record = historyDataCache.find(x => x.id === id);
+            if(!record) {
+                console.error('❌ Record not found for copy:', id);
+                return Swal.fire('ข้อผิดพลาด', 'ไม่พบข้อมูลที่ต้องการคัดลอก', 'error');
+            }
 
-            const dateStr = formatThaiDate(data.docDate);
+            console.log('📋 Preparing copy text for record:', id);
+            console.log('   Records count:', record.records.length);
+
+            const dateStr = formatThaiDate(record.docDate);
             const currentUrl = window.location.href.split('#')[0] + '#history';
             
             let text = `📢 **ขอแจ้งข้อมูลสรุปการจัดสอนแทน**\n📅 วันที่: ${dateStr}\n------------------------------\n`;
-            const sortedRecords = [...data.records].sort((a,b) => a.period - b.period);
+            const sortedRecords = [...record.records].sort((a,b) => a.period - b.period);
             
             sortedRecords.forEach((r, index) => {
                 const subName = formatTeacherNameShort(r.sub);
                 const absentName = formatTeacherNameShort(r.absent);
-                text += `${index+1}. คาบ ${r.period}: ${subName} (แทน ${absentName})\n   - วิชา: ${r.subject} ชั้น: ${r.grade} (${r.reason})\n`;
+                text += `${index+1}. คาบ ${r.period}: ${subName} (แทน ${absentName})\n   - วิชา: ${r.subject || '-'} ชั้น: ${r.grade || '-'} (${r.reason || 'ไปราชการ'})\n`;
             });
             
             text += `------------------------------\n🔗 คลิกลิงก์ระบบ:\n${currentUrl}`;
+
+            console.log('✅ Copy text prepared:', text.length, 'characters');
 
             document.getElementById('copyTextBox').value = text;
             
@@ -1653,17 +1701,65 @@
 
         function copyToClipboard() {
             const copyText = document.getElementById("copyTextBox");
+            if(!copyText || !copyText.value) {
+                console.error('❌ No text to copy');
+                return Swal.fire('ข้อผิดพลาด', 'ไม่มีข้อความให้คัดลอก', 'error');
+            }
+
+            console.log('📋 Copying text to clipboard:', copyText.value.length, 'characters');
+
             copyText.select();
-            copyText.setSelectionRange(0, 99999);
-            navigator.clipboard.writeText(copyText.value).then(() => {
-                Swal.fire({ 
-                    icon: 'success', 
-                    title: 'คัดลอกแล้ว!', 
-                    timer: 1500, 
-                    showConfirmButton: false, 
-                    target: document.getElementById('copyModal') 
-                });
-            });
+            copyText.setSelectionRange(0, 99999); // For mobile devices
+
+            // Try modern clipboard API first
+            if(navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(copyText.value)
+                    .then(() => {
+                        console.log('✅ Copied using modern API');
+                        Swal.fire({ 
+                            icon: 'success', 
+                            title: 'คัดลอกแล้ว!', 
+                            text: 'คัดลอกข้อความเรียบร้อยแล้ว สามารถนำไปวางใน Line ได้เลย',
+                            timer: 2000, 
+                            showConfirmButton: false, 
+                            target: document.getElementById('copyModal') 
+                        });
+                    })
+                    .catch(err => {
+                        console.error('❌ Clipboard API failed:', err);
+                        fallbackCopy();
+                    });
+            } else {
+                // Fallback for older browsers
+                fallbackCopy();
+            }
+
+            function fallbackCopy() {
+                try {
+                    const successful = document.execCommand('copy');
+                    if(successful) {
+                        console.log('✅ Copied using fallback method');
+                        Swal.fire({ 
+                            icon: 'success', 
+                            title: 'คัดลอกแล้ว!', 
+                            text: 'คัดลอกข้อความเรียบร้อยแล้ว',
+                            timer: 2000, 
+                            showConfirmButton: false, 
+                            target: document.getElementById('copyModal') 
+                        });
+                    } else {
+                        throw new Error('Copy command failed');
+                    }
+                } catch(err) {
+                    console.error('❌ Fallback copy failed:', err);
+                    Swal.fire({ 
+                        icon: 'error', 
+                        title: 'ไม่สามารถคัดลอกได้', 
+                        text: 'กรุณาเลือกข้อความและกด Ctrl+C (หรือ Cmd+C) เอง',
+                        target: document.getElementById('copyModal') 
+                    });
+                }
+            }
         }
 
         function deleteLog(id) {
