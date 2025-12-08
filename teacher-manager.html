@@ -85,17 +85,59 @@
         .btn-edit { background: #f3f4f6; color: var(--primary); padding: 8px; border-radius: 50%; width: 35px; height: 35px; }
         .btn-del { background: #fef2f2; color: #ef4444; padding: 8px; border-radius: 50%; width: 35px; height: 35px; }
 
-        .schedule-mini { display: flex; gap: 3px; margin-top: 15px; border-top: 1px dashed #e2e8f0; padding-top: 15px; }
-        .day-col { flex: 1; text-align: center; }
-        .day-label { font-size: 0.7rem; color: #94a3b8; margin-bottom: 4px; }
-        .dot-container { display: flex; flex-direction: column; gap: 2px; align-items: center; height: 60px; justify-content: flex-end;}
-        .dot { width: 6px; height: 6px; border-radius: 50%; background: #e2e8f0; }
-        .dot.active { background: var(--success); }
+        /* Schedule Display - Improved */
+        .schedule-mini { 
+            display: grid; 
+            grid-template-columns: repeat(5, 1fr); 
+            gap: 8px; 
+            margin-top: 15px; 
+            border-top: 1px dashed #e2e8f0; 
+            padding-top: 15px; 
+        }
+        .day-col { 
+            flex: 1; 
+            text-align: center; 
+            background: #f8fafc;
+            padding: 8px 4px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s;
+        }
+        .day-col:hover {
+            background: #eff6ff;
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+        .day-label { 
+            font-size: 0.75rem; 
+            color: #64748b; 
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+        .period-count {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+        }
+        .period-count.empty {
+            color: #cbd5e1;
+        }
+        .period-count i {
+            font-size: 0.8rem;
+        }
+        
+        /* Old dot style - removed */
+        .dot-container { display: none; }
+        .dot { display: none; }
 
         /* --- Modal --- */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 1000; display: none; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s; }
         .modal-overlay.show { display: flex; opacity: 1; }
-        .modal-box { background: white; width: 950px; max-width: 98%; max-height: 95vh; border-radius: 20px; padding: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.2); transform: scale(0.8); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); overflow-y: auto; display: flex; flex-direction: column; }
+        .modal-box { background: white; width: 1200px; max-width: 98%; max-height: 95vh; border-radius: 20px; padding: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.2); transform: scale(0.8); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); overflow-y: auto; display: flex; flex-direction: column; }
         .modal-overlay.show .modal-box { transform: scale(1); }
 
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 15px; }
@@ -108,26 +150,89 @@
         .form-control { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: 'Sarabun'; }
         .form-control:focus { border-color: var(--primary); outline: 3px solid rgba(37, 99, 235, 0.1); }
 
-        .schedule-editor { background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; overflow-x: auto; }
-        .sch-table { width: 100%; border-collapse: separate; border-spacing: 0; }
-        .sch-table th { padding: 8px; color: #64748b; font-weight: 600; font-size: 0.9rem; border-bottom: 2px solid #e2e8f0; background: white; position: sticky; top: 0; z-index: 10;}
-        .sch-table td { padding: 8px; text-align: center; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+        .schedule-editor { background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; overflow-x: auto; }
+        .sch-table { width: 100%; border-collapse: separate; border-spacing: 8px; }
+        .sch-table th { padding: 10px 8px; color: #64748b; font-weight: 600; font-size: 0.95rem; border-bottom: none; background: white; position: sticky; top: 0; z-index: 10; border-radius: 8px; text-align: center;}
+        .sch-table td { padding: 5px; text-align: center; border-bottom: none; vertical-align: top; }
         .sch-table tr:last-child td { border-bottom: none; }
         
-        /* Cell Design */
-        .sch-cell { min-width: 90px; height: 100px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 5px; transition: all 0.2s; position: relative; }
-        .sch-cell:hover { border-color: #cbd5e1; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .sch-cell.active { border-color: var(--primary); background: #eff6ff; }
+        /* Cell Design - Improved */
+        .sch-cell { 
+            min-width: 110px; 
+            height: 110px; 
+            background: white; 
+            border: 2px solid #e2e8f0; 
+            border-radius: 10px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: flex-start; 
+            padding: 8px; 
+            transition: all 0.2s; 
+            position: relative;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .sch-cell:hover { 
+            border-color: #cbd5e1; 
+            box-shadow: 0 3px 8px rgba(0,0,0,0.1); 
+            transform: translateY(-2px);
+        }
+        .sch-cell.active { 
+            border-color: var(--primary); 
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); 
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        }
 
-        .lunch-col { background: #f1f5f9; writing-mode: vertical-rl; text-orientation: mixed; font-size: 0.85rem; color: #94a3b8; font-weight: 600; border-radius: 4px; padding: 0 10px; height: 100%; display: flex; align-items: center; justify-content: center; }
+        .lunch-col { 
+            background: linear-gradient(135deg, #fef3c7, #fde68a); 
+            writing-mode: vertical-rl; 
+            text-orientation: mixed; 
+            font-size: 0.9rem; 
+            color: #92400e; 
+            font-weight: 700; 
+            border-radius: 8px; 
+            padding: 0 12px; 
+            height: 100%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
 
-        /* Checkbox & Inputs */
-        .cb-input { width: 20px; height: 20px; margin-bottom: 5px; cursor: pointer; accent-color: var(--primary); }
-        .details-inputs { display: none; flex-direction: column; gap: 4px; width: 100%; animation: slideDown 0.2s; }
+        /* Checkbox & Inputs - Improved */
+        .cb-input { width: 22px; height: 22px; margin-bottom: 6px; cursor: pointer; accent-color: var(--primary); }
+        .details-inputs { display: none; flex-direction: column; gap: 5px; width: 100%; animation: slideDown 0.2s; }
         .sch-cell.active .details-inputs { display: flex; }
         
-        .mini-input { width: 100%; padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.8rem; text-align: center; }
-        .mini-select { width: 100%; padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.8rem; background: white; }
+        .mini-input { 
+            width: 100%; 
+            padding: 6px; 
+            border: 1px solid #cbd5e1; 
+            border-radius: 6px; 
+            font-size: 0.85rem; 
+            text-align: center;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .mini-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+        }
+        .mini-select { 
+            width: 100%; 
+            padding: 6px; 
+            border: 1px solid #cbd5e1; 
+            border-radius: 6px; 
+            font-size: 0.85rem; 
+            background: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .mini-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+        }
 
         .modal-footer { margin-top: 20px; display: flex; justify-content: flex-end; gap: 15px; }
         .btn-save { background: var(--success); color: white; padding: 10px 30px; font-size: 1.1rem; }
@@ -139,6 +244,16 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         @keyframes slideDown { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .modal-box { width: 95%; padding: 20px; }
+            .sch-table { border-spacing: 4px; }
+            .sch-cell { min-width: 85px; height: 95px; padding: 5px; }
+            .schedule-mini { grid-template-columns: repeat(5, 1fr); gap: 5px; }
+            .day-col { padding: 6px 2px; }
+            .period-count { font-size: 1rem; }
+        }
 
     </style>
 </head>
@@ -340,22 +455,21 @@
                 const card = document.createElement('div');
                 card.className = 't-card';
                 
-                // Visual Schedule Dots
+                // Visual Schedule - Improved: Show period count instead of dots
                 let scheduleHTML = '';
-                days.forEach(day => {
-                    const periods = t.schedule[day] || []; // Array of periods e.g. [1, 2]
-                    let dotHtml = '';
-                    // Create 7 dots placeholder
-                    // Simple logic: if array includes period, show active dot
-                    const activeCount = periods.length;
+                const dayShortNames = ['จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.'];
+                days.forEach((day, index) => {
+                    const periods = t.schedule[day] || [];
+                    const count = periods.length;
+                    const isEmpty = count === 0;
                     
                     scheduleHTML += `
-                        <div class="day-col">
-                            <div class="dot-container">
-                                ${Array.from({length: activeCount}).map(() => `<div class="dot active"></div>`).join('')}
-                                ${Array.from({length: Math.max(0, 5-activeCount)}).map(() => `<div class="dot"></div>`).join('')}
+                        <div class="day-col" title="${day}: ${isEmpty ? 'ว่าง' : 'สอน ' + count + ' คาบ (คาบ ' + periods.join(', ') + ')'}">
+                            <div class="day-label">${dayShortNames[index]}</div>
+                            <div class="period-count ${isEmpty ? 'empty' : ''}">
+                                ${isEmpty ? '<i class="fas fa-minus"></i>' : '<i class="fas fa-chalkboard-teacher"></i>'}
+                                ${isEmpty ? '0' : count}
                             </div>
-                            <div class="day-label">${day}</div>
                         </div>
                     `;
                 });
@@ -531,30 +645,17 @@
         }
 
         async function saveTeacher() {
-            console.log('🚀 ===== SAVE TEACHER FUNCTION CALLED =====');
-            console.log('📅 Timestamp:', new Date().toLocaleString('th-TH'));
-            
             const id = document.getElementById('editId').value;
             const prefix = document.getElementById('tPrefix').value;
             const nameRaw = document.getElementById('tName').value.trim();
             const dept = document.getElementById('tDept').value.trim();
             const semester = document.getElementById('semesterInput').value.trim();
 
-            console.log('📝 Form Data:');
-            console.log('   ID:', id || '(New Teacher)');
-            console.log('   Prefix:', prefix);
-            console.log('   Name:', nameRaw);
-            console.log('   Department:', dept);
-            console.log('   Semester:', semester);
-
             if(!nameRaw || !dept || !semester) {
-                console.error('❌ Validation Failed: Missing required fields');
                 return Swal.fire('ข้อมูลไม่ครบ', 'กรุณากรอกชื่อ, กลุ่มสาระ และภาคเรียน', 'warning');
             }
 
             const fullName = prefix + nameRaw;
-            
-            console.log('📚 Starting to collect schedule data...');
             
             // Prepare Data Structure
             // 1. schedule: For existing system compatibility (Array of periods)
@@ -574,8 +675,6 @@
                 const code = cell.querySelector('.code-input').value.trim();
                 const grade = cell.querySelector('.grade-input').value;
 
-                console.log(`   📝 Collecting ${day} Period ${p}:`, {code, grade});
-
                 // Add to details object
                 teachingDetails[`${day}_${p}`] = {
                     code: code,
@@ -585,19 +684,6 @@
 
             // Sort schedule arrays
             Object.keys(schedule).forEach(k => schedule[k].sort((a,b)=>a-b));
-
-            console.log('✅ Data Collection Complete!');
-            console.log('📊 Summary:');
-            console.log('   Schedule:', schedule);
-            console.log('   Teaching Details:', teachingDetails);
-            console.log('   Teaching Details Keys:', Object.keys(teachingDetails));
-            console.log('   Total Periods:', Object.keys(teachingDetails).length);
-
-            // Debug: ตรวจสอบข้อมูลก่อนบันทึก
-            console.log('💾 Preparing to Save to Firebase...');
-            console.log('   Full Name:', fullName);
-            console.log('   Department:', dept);
-            console.log('   Semester:', semester);
 
             const payload = {
                 name: fullName,
@@ -609,27 +695,19 @@
                 updated_at: firebase.firestore.FieldValue.serverTimestamp()
             };
 
-            console.log('📤 Final Payload to Firebase:', payload);
-
             try {
                 if(id) {
                     await db.collection("teachers").doc(id).update(payload);
-                    console.log('✅ Successfully UPDATED teacher in Firebase');
-                    console.log('   Document ID:', id);
                     Swal.fire('เรียบร้อย', 'แก้ไขข้อมูลสำเร็จ', 'success');
                 } else {
                     payload.created_at = firebase.firestore.FieldValue.serverTimestamp();
-                    const docRef = await db.collection("teachers").add(payload);
-                    console.log('✅ Successfully CREATED teacher in Firebase');
-                    console.log('   New Document ID:', docRef.id);
+                    await db.collection("teachers").add(payload);
                     Swal.fire('เรียบร้อย', 'เพิ่มข้อมูลสำเร็จ', 'success');
                 }
                 closeModal();
                 loadTeachers();
             } catch(e) {
-                console.error('❌ Firebase Error:', e);
-                console.error('   Error Code:', e.code);
-                console.error('   Error Message:', e.message);
+                console.error(e);
                 Swal.fire('Error', 'บันทึกข้อมูลไม่สำเร็จ: ' + e.message, 'error');
             }
         }
