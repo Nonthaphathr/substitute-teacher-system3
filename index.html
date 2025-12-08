@@ -1391,12 +1391,12 @@
             const container = document.getElementById('matchCards');
             container.innerHTML = '';
             
-            selectedTeachers.forEach(absentName => {
+           selectedTeachers.forEach(absentName => {
                 const teacherObj = teachersData.find(t => t.name === absentName);
                 const periods = teacherObj.schedule[daySchedule] || [];
                 if(periods.length === 0) return;
 
-                let html = `<div class="card">
+                let html = `<div class="card" data-absent="${absentName}">
                     <div class="card-header">
                         <span>${absentName} (ลา)</span>
                         <select id="reason_${absentName}" class="reason-select">
@@ -1587,44 +1587,44 @@
             }
         }
 
-        function collectFormData() {
-            const data = [];
-            const cards = document.querySelectorAll('.card');
-            let isValid = false;
+       function collectFormData() {
+    const data = [];
+    const cards = document.querySelectorAll('.card');
+    let isValid = false;
 
-            cards.forEach(card => {
-                const headerSpan = card.querySelector('.card-header span');
-                if(!headerSpan) return;
-                const absent = headerSpan.innerText.replace(' (ลา)', '');
-                const reasonSelect = card.querySelector(`#reason_${absent}`);
-                const reason = reasonSelect ? reasonSelect.value : 'ไปราชการ';
-                
-                card.querySelectorAll('.period-block').forEach(block => {
-                    const period = block.querySelector('.badge-p').innerText.replace('คาบ ', '');
-                    const radio = block.querySelector('input[type="radio"]:checked');
-                    if(radio) {
-                        isValid = true;
-                        const subj = document.getElementById(`subj_${absent}_${period}`).value || "-";
-                        const grade = document.getElementById(`grade_${absent}_${period}`).value || "-";
-                        data.push({
-                            absent: absent,
-                            period: parseInt(period),
-                            sub: radio.value,
-                            dept: radio.dataset.dept,
-                            subject: subj,
-                            grade: grade,
-                            reason: reason
-                        });
-                    }
+    cards.forEach(card => {
+        const absent = card.dataset.absent;
+        if(!absent) return;
+        
+        const reasonSelect = document.getElementById(`reason_${absent}`);
+        const reason = reasonSelect ? reasonSelect.value : 'ไปราชการ';
+        
+        card.querySelectorAll('.period-block').forEach(block => {
+            const period = block.querySelector('.badge-p').innerText.replace('คาบ ', '');
+            const radio = block.querySelector('input[type="radio"]:checked');
+            if(radio) {
+                isValid = true;
+                const subj = document.getElementById(`subj_${absent}_${period}`).value || "-";
+                const grade = document.getElementById(`grade_${absent}_${period}`).value || "-";
+                data.push({
+                    absent: absent,
+                    period: parseInt(period),
+                    sub: radio.value,
+                    dept: radio.dataset.dept,
+                    subject: subj,
+                    grade: grade,
+                    reason: reason
                 });
-            });
-
-            if(!isValid) {
-                Swal.fire('เตือน', 'กรุณาเลือกผู้สอนแทนอย่างน้อย 1 รายการ', 'warning');
-                return null;
             }
-            return data;
-        }
+        });
+    });
+
+    if(!isValid) {
+        Swal.fire('เตือน', 'กรุณาเลือกผู้สอนแทนอย่างน้อย 1 รายการ', 'warning');
+        return null;
+    }
+    return data;
+    }
 
         async function preparePreview() {
             if(!isSaved) {
