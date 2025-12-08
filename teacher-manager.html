@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบจัดการข้อมูลครู - Teacher Management System</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
+
+        :root { 
+            --primary: #2563eb; 
+            --primary-dark: #1e40af;
+            --secondary: #64748b;
+            --success: #059669;
+            --bg: #f1f5f9; 
+            --card-bg: #ffffff;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; }
+        body { font-family: 'Sarabun', sans-serif; background: var(--bg); color: #1e293b; padding-bottom: 50px; }
+
+        /* --- Header --- */
+        .navbar {
+            background: white;
+            padding: 15px 30px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .brand h1 { font-size: 1.5rem; color: var(--primary-dark); font-weight: 700; }
+        .brand span { font-size: 0.9rem; color: var(--secondary); }
+        
+        .back-btn {
+            text-decoration: none;
+            color: var(--secondary);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 15px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .back-btn:hover { background: #e2e8f0; color: var(--primary); }
+
+        /* --- Container --- */
+        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+
+        /* --- Toolbar --- */
+        .toolbar {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: center;
+            animation: slideDown 0.5s ease;
+        }
+        
+        .search-box {
+            flex-grow: 1;
+            position: relative;
+        }
+        .search-box i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
+        .search-input {
+            width: 100%;
+            padding: 12px 15px 12px 45px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-family: 'Sarabun';
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        .search-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+
+        .action-group { display: flex; gap: 10px; }
+        
+        button {
+            border: none;
+            cursor: pointer;
+            font-family: 'Sarabun';
+            border-radius: 8px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        button:active { transform: scale(0.95); }
+
+        .btn-add {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: white;
+            padding: 12px 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+        }
+        .btn-add:hover { box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4); transform: translateY(-2px); }
+
+        .btn-icon { padding: 12px; background: #f1f5f9; color: #475569; }
+        .btn-icon:hover { background: #e2e8f0; color: var(--primary); }
+
+        select.semester-select {
+            padding: 12px 15px;
+            border-radius: 8px;
+            border: 2px solid #e2e8f0;
+            font-family: 'Sarabun';
+            background: white;
+            cursor: pointer;
+        }
+
+        /* --- Grid Layout --- */
+        .teacher-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .t-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+            border: 1px solid #f1f5f9;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            animation: fadeIn 0.5s ease forwards;
+        }
+        .t-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            border-color: var(--primary);
+        }
+        .t-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 6px; height: 100%;
+            background: var(--primary);
+            opacity: 0.5;
+        }
+        
+        .t-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
+        .t-info h3 { font-size: 1.2rem; color: #1e293b; margin-bottom: 5px; }
+        .t-info p { color: #64748b; font-size: 0.9rem; }
+        .t-dept-badge { 
+            background: #eff6ff; color: var(--primary); 
+            padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; 
+            display: inline-block; margin-top: 5px;
+        }
+
+        .t-actions { display: flex; gap: 8px; }
+        .btn-edit { background: #f3f4f6; color: var(--primary); padding: 8px; border-radius: 50%; width: 35px; height: 35px; }
+        .btn-edit:hover { background: var(--primary); color: white; }
+        .btn-del { background: #fef2f2; color: #ef4444; padding: 8px; border-radius: 50%; width: 35px; height: 35px; }
+        .btn-del:hover { background: #ef4444; color: white; }
+
+        .schedule-mini {
+            display: flex;
+            gap: 3px;
+            margin-top: 15px;
+        }
+        .day-col { flex: 1; text-align: center; }
+        .day-label { font-size: 0.7rem; color: #94a3b8; margin-bottom: 4px; }
+        .dot-container { display: flex; flex-direction: column; gap: 2px; align-items: center; height: 60px; justify-content: flex-end;}
+        .dot { width: 6px; height: 6px; border-radius: 50%; background: #e2e8f0; }
+        .dot.active { background: var(--success); }
+
+        /* --- Modal --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .modal-overlay.show { display: flex; opacity: 1; }
+
+        .modal-box {
+            background: white;
+            width: 900px;
+            max-width: 95%;
+            max-height: 90vh;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            transform: scale(0.8);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            overflow-y: auto;
+        }
+        .modal-overlay.show .modal-box { transform: scale(1); }
+
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid #e2e8f0; padding-bottom: 15px; }
+        .modal-title { font-size: 1.5rem; color: var(--primary-dark); font-weight: 700; }
+        .btn-close { background: none; font-size: 1.5rem; color: #94a3b8; padding: 0; }
+        .btn-close:hover { color: #ef4444; transform: rotate(90deg); }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 2fr 2fr; gap: 20px; margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 500; color: #475569; }
+        .form-control {
+            width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px;
+            font-family: 'Sarabun'; transition: all 0.2s;
+        }
+        .form-control:focus { border-color: var(--primary); outline: 3px solid rgba(37, 99, 235, 0.1); }
+
+        .schedule-editor {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+        .sch-table { width: 100%; border-collapse: collapse; }
+        .sch-table th { padding: 10px; color: #64748b; font-weight: 600; font-size: 0.9rem; }
+        .sch-table td { padding: 5px; text-align: center; }
+        
+        /* Checkbox Design */
+        .cb-wrapper { position: relative; display: inline-block; width: 30px; height: 30px; }
+        .cb-wrapper input { opacity: 0; width: 0; height: 0; }
+        .checkmark {
+            position: absolute; top: 0; left: 0; height: 30px; width: 30px;
+            background-color: white; border: 2px solid #cbd5e1; border-radius: 6px;
+            cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center;
+            font-weight: bold; color: white;
+        }
+        .cb-wrapper input:checked + .checkmark { background-color: var(--primary); border-color: var(--primary); }
+        .cb-wrapper input:checked + .checkmark::after { content: '✓'; }
+        .cb-wrapper:hover .checkmark { border-color: var(--primary); }
+
+        .modal-footer { margin-top: 30px; display: flex; justify-content: flex-end; gap: 15px; }
+        .btn-save { background: var(--success); color: white; padding: 10px 30px; font-size: 1.1rem; }
+        .btn-save:hover { background: #047857; box-shadow: 0 4px 15px rgba(5, 150, 105, 0.3); }
+
+        @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Loading Spinner */
+        .loading-state { text-align: center; padding: 50px; color: #94a3b8; }
+        .spinner { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 15px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="brand">
+            <img src="https://nonthaphathr.github.io/uploadimg/logosonthan.png" alt="Logo" width="45" style="border-radius: 8px;">
+            <div>
+                <h1>จัดการข้อมูลครู</h1>
+                <span>ระบบบริหารจัดการข้อมูลครูและตารางสอน</span>
+            </div>
+        </div>
+        <a href="index.html" class="back-btn">
+            <i class="fas fa-home"></i> กลับหน้าหลัก
+        </a>
+    </nav>
+
+    <div class="container">
+        <div class="toolbar">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" class="search-input" placeholder="ค้นหาชื่อครู, กลุ่มสาระ..." onkeyup="filterTeachers()">
+            </div>
+            
+            <div class="action-group">
+                <select id="semesterSelect" class="semester-select" onchange="loadTeachers()">
+                    <option value="1/2567">ภาคเรียน 1/2567</option>
+                    <option value="2/2567">ภาคเรียน 2/2567</option>
+                    <option value="1/2568">ภาคเรียน 1/2568</option>
+                    <option value="2/2568">ภาคเรียน 2/2568</option>
+                </select>
+
+                <button class="btn-icon" onclick="document.getElementById('importFile').click()" title="นำเข้า CSV">
+                    <i class="fas fa-file-import"></i>
+                </button>
+                <input type="file" id="importFile" accept=".csv" style="display: none;" onchange="importTeachers(event)">
+
+                <button class="btn-icon" onclick="exportTeachers()" title="ส่งออก CSV">
+                    <i class="fas fa-file-export"></i>
+                </button>
+
+                <button class="btn-add" onclick="openModal()">
+                    <i class="fas fa-plus-circle"></i> เพิ่มครูใหม่
+                </button>
+            </div>
+        </div>
+
+        <div id="teacherGrid" class="teacher-grid">
+            </div>
+        
+        <div id="loadingState" class="loading-state">
+            <div class="spinner"></div>
+            <p>กำลังโหลดข้อมูล...</p>
+        </div>
+    </div>
+
+    <div id="teacherModal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div class="modal-title" id="modalTitle">เพิ่มครูใหม่</div>
+                <button class="btn-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <input type="hidden" id="editId">
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>คำนำหน้า</label>
+                    <select id="tPrefix" class="form-control">
+                        <option value="นาย">นาย</option>
+                        <option value="นาง">นาง</option>
+                        <option value="นางสาว">นางสาว</option>
+                        <option value="ว่าที่ร้อยตรี">ว่าที่ร้อยตรี</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>ชื่อ-นามสกุล</label>
+                    <input type="text" id="tName" class="form-control" placeholder="ไม่ต้องใส่คำนำหน้า">
+                </div>
+                <div class="form-group">
+                    <label>กลุ่มสาระการเรียนรู้</label>
+                    <input type="text" id="tDept" class="form-control" list="deptList" placeholder="ระบุกลุ่มสาระ">
+                    <datalist id="deptList">
+                        <option value="ภาษาไทย">
+                        <option value="คณิตศาสตร์">
+                        <option value="วิทยาศาสตร์ฯ">
+                        <option value="สังคมศึกษาฯ">
+                        <option value="สุขศึกษา พลศึกษา">
+                        <option value="ศิลปศึกษา">
+                        <option value="การงานอาชีพ">
+                        <option value="ภาษาต่างประเทศ">
+                    </datalist>
+                </div>
+            </div>
+
+            <div class="schedule-editor">
+                <h4 style="margin-bottom: 15px; color: var(--primary);"><i class="fas fa-calendar-alt"></i> ลงตารางสอน (ติ๊กเลือกคาบที่สอน)</h4>
+                <table class="sch-table">
+                    <thead>
+                        <tr>
+                            <th>วัน / คาบ</th>
+                            <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th>
+                        </tr>
+                    </thead>
+                    <tbody id="scheduleBody">
+                        </tbody>
+                </table>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-icon" style="background: #f1f5f9;" onclick="closeModal()">ยกเลิก</button>
+                <button class="btn-save" onclick="saveTeacher()"><i class="fas fa-save"></i> บันทึกข้อมูล</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. CONFIG & INIT ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyCF7qDDxp6NXk3y7wLiySasqoviGyCKNNw",
+            authDomain: "sornthan-fc0f1.firebaseapp.com",
+            projectId: "sornthan-fc0f1",
+            storageBucket: "sornthan-fc0f1.firebasestorage.app",
+            messagingSenderId: "915683105444",
+            appId: "1:915683105444:web:c1add040ea1afb344ae431"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        let teachersData = [];
+        const days = ['จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์'];
+
+        // --- 2. MAIN FUNCTIONS ---
+        
+        window.onload = function() {
+            renderScheduleTable();
+            loadTeachers();
+        }
+
+        async function loadTeachers() {
+            const semester = document.getElementById('semesterSelect').value;
+            const grid = document.getElementById('teacherGrid');
+            const loader = document.getElementById('loadingState');
+            
+            grid.innerHTML = '';
+            loader.style.display = 'block';
+
+            try {
+                const snap = await db.collection("teachers")
+                    .where("semester", "==", semester)
+                    .where("active", "==", true)
+                    .orderBy("name")
+                    .get();
+
+                teachersData = [];
+                snap.forEach(doc => {
+                    const data = doc.data();
+                    data.id = doc.id;
+                    teachersData.push(data);
+                });
+
+                loader.style.display = 'none';
+                renderGrid(teachersData);
+
+            } catch (error) {
+                console.error("Error:", error);
+                loader.innerHTML = `<p style="color:red">เกิดข้อผิดพลาดในการโหลดข้อมูล</p>`;
+            }
+        }
+
+        function renderGrid(data) {
+            const grid = document.getElementById('teacherGrid');
+            grid.innerHTML = '';
+
+            if(data.length === 0) {
+                grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 50px; color: #94a3b8;">
+                    <i class="fas fa-user-slash" style="font-size: 3rem; margin-bottom: 10px;"></i>
+                    <p>ไม่พบข้อมูลครูในภาคเรียนนี้</p>
+                </div>`;
+                return;
+            }
+
+            data.forEach(t => {
+                const card = document.createElement('div');
+                card.className = 't-card';
+                
+                // Calculate workload dots
+                let scheduleHTML = '';
+                days.forEach(day => {
+                    const periods = t.schedule[day] || [];
+                    let dots = '';
+                    // Simple visual representation: active dot if has class
+                    for(let i=1; i<=7; i++) {
+                        // Just show a count visual, logic simplified for UI
+                    }
+                    scheduleHTML += `
+                        <div class="day-col">
+                            <div class="dot-container">
+                                ${periods.map(() => `<div class="dot active"></div>`).join('')}
+                            </div>
+                            <div class="day-label">${day}</div>
+                        </div>
+                    `;
+                });
+
+                const totalLoad = Object.values(t.schedule).flat().length;
+
+                card.innerHTML = `
+                    <div class="t-header">
+                        <div class="t-info">
+                            <h3>${t.name}</h3>
+                            <span class="t-dept-badge">${t.department}</span>
+                            <p style="margin-top: 5px; font-size: 0.85rem;">
+                                <i class="fas fa-clock"></i> ภาระงาน: ${totalLoad} คาบ/สัปดาห์
+                            </p>
+                        </div>
+                        <div class="t-actions">
+                            <button class="btn-edit" onclick="editTeacher('${t.id}')"><i class="fas fa-pencil-alt"></i></button>
+                            <button class="btn-del" onclick="deleteTeacher('${t.id}', '${t.name}')"><i class="fas fa-trash-alt"></i></button>
+                        </div>
+                    </div>
+                    <div style="border-top: 1px dashed #e2e8f0; margin-top: 10px;"></div>
+                    <div class="schedule-mini">
+                        ${scheduleHTML}
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function filterTeachers() {
+            const text = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = teachersData.filter(t => 
+                t.name.toLowerCase().includes(text) || 
+                t.department.toLowerCase().includes(text)
+            );
+            renderGrid(filtered);
+        }
+
+        // --- 3. MODAL & FORM LOGIC ---
+
+        function renderScheduleTable() {
+            const tbody = document.getElementById('scheduleBody');
+            tbody.innerHTML = days.map(day => `
+                <tr>
+                    <td style="text-align:left; font-weight:600; color:var(--primary);">${day}</td>
+                    ${[1,2,3,4,5,6,7].map(p => `
+                        <td>
+                            <label class="cb-wrapper">
+                                <input type="checkbox" data-day="${day}" data-period="${p}">
+                                <span class="checkmark"></span>
+                            </label>
+                        </td>
+                    `).join('')}
+                </tr>
+            `).join('');
+        }
+
+        function openModal() {
+            document.getElementById('modalTitle').innerText = 'เพิ่มครูใหม่';
+            document.getElementById('editId').value = '';
+            document.getElementById('tName').value = '';
+            document.getElementById('tDept').value = '';
+            document.getElementById('tPrefix').value = 'นาย';
+            
+            // Clear checkboxes
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+            
+            const modal = document.getElementById('teacherModal');
+            modal.classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('teacherModal').classList.remove('show');
+        }
+
+        function editTeacher(id) {
+            const t = teachersData.find(x => x.id === id);
+            if(!t) return;
+
+            document.getElementById('modalTitle').innerText = 'แก้ไขข้อมูลครู';
+            document.getElementById('editId').value = id;
+            
+            // Parse Name
+            const prefixes = ['นาย', 'นางสาว', 'นาง', 'ว่าที่ร้อยตรี'];
+            let prefix = 'นาย';
+            let name = t.name;
+            for(let p of prefixes) {
+                if(t.name.startsWith(p)) {
+                    prefix = p;
+                    name = t.name.substring(p.length).trim();
+                    break;
+                }
+            }
+            document.getElementById('tPrefix').value = prefix;
+            document.getElementById('tName').value = name;
+            document.getElementById('tDept').value = t.department;
+
+            // Set checkboxes
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+            Object.entries(t.schedule || {}).forEach(([day, periods]) => {
+                periods.forEach(p => {
+                    const cb = document.querySelector(`input[data-day="${day}"][data-period="${p}"]`);
+                    if(cb) cb.checked = true;
+                });
+            });
+
+            document.getElementById('teacherModal').classList.add('show');
+        }
+
+        async function saveTeacher() {
+            const id = document.getElementById('editId').value;
+            const prefix = document.getElementById('tPrefix').value;
+            const nameRaw = document.getElementById('tName').value.trim();
+            const dept = document.getElementById('tDept').value.trim();
+            const semester = document.getElementById('semesterSelect').value;
+
+            if(!nameRaw || !dept) {
+                return Swal.fire('ข้อมูลไม่ครบ', 'กรุณากรอกชื่อและกลุ่มสาระ', 'warning');
+            }
+
+            const fullName = prefix + nameRaw;
+            const schedule = { "จันทร์": [], "อังคาร": [], "พุธ": [], "พฤหัสบดี": [], "ศุกร์": [] };
+
+            document.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => {
+                schedule[cb.dataset.day].push(parseInt(cb.dataset.period));
+            });
+            // Sort schedule
+            Object.keys(schedule).forEach(k => schedule[k].sort((a,b)=>a-b));
+
+            const payload = {
+                name: fullName,
+                department: dept,
+                schedule: schedule,
+                semester: semester,
+                active: true,
+                updated_at: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            try {
+                if(id) {
+                    await db.collection("teachers").doc(id).update(payload);
+                    Swal.fire('เรียบร้อย', 'แก้ไขข้อมูลสำเร็จ', 'success');
+                } else {
+                    payload.created_at = firebase.firestore.FieldValue.serverTimestamp();
+                    await db.collection("teachers").add(payload);
+                    Swal.fire('เรียบร้อย', 'เพิ่มข้อมูลสำเร็จ', 'success');
+                }
+                closeModal();
+                loadTeachers();
+            } catch(e) {
+                Swal.fire('Error', 'บันทึกข้อมูลไม่สำเร็จ', 'error');
+            }
+        }
+
+        async function deleteTeacher(id, name) {
+            const result = await Swal.fire({
+                title: 'ยืนยันการลบ?',
+                text: `ต้องการลบข้อมูล ${name} ใช่หรือไม่?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                confirmButtonText: 'ใช่, ลบเลย',
+                cancelButtonText: 'ยกเลิก'
+            });
+
+            if(result.isConfirmed) {
+                try {
+                    await db.collection("teachers").doc(id).update({ active: false });
+                    Swal.fire('ลบแล้ว', 'ข้อมูลถูกลบเรียบร้อย', 'success');
+                    loadTeachers();
+                } catch(e) {
+                    Swal.fire('Error', 'ลบข้อมูลไม่สำเร็จ', 'error');
+                }
+            }
+        }
+
+        // --- 4. IMPORT / EXPORT ---
+        // (Logic เหมือนไฟล์เดิมแต่ปรับให้สะอาดขึ้น)
+        function exportTeachers() {
+            if(teachersData.length === 0) return Swal.fire('ว่างเปล่า', 'ไม่มีข้อมูลให้ Export', 'info');
+            
+            let csv = '\uFEFFคำนำหน้า,ชื่อ-นามสกุล,กลุ่มสาระ,จันทร์,อังคาร,พุธ,พฤหัสบดี,ศุกร์\n';
+            teachersData.forEach(t => {
+                const prefixes = ['นาย', 'นางสาว', 'นาง', 'ว่าที่ร้อยตรี'];
+                let p = '', n = t.name;
+                for(let pf of prefixes) if(t.name.startsWith(pf)) { p = pf; n = t.name.substring(pf.length).trim(); break; }
+                
+                const s = t.schedule;
+                csv += `${p},"${n}","${t.department}","${(s.จันทร์||[]).join(';')}","${(s.อังคาร||[]).join(';')}","${(s.พุธ||[]).join(';')}","${(s.พฤหัสบดี||[]).join(';')}","${(s.ศุกร์||[]).join(';')}"\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `teachers_${document.getElementById('semesterSelect').value}.csv`;
+            link.click();
+        }
+
+        function importTeachers(event) {
+            const file = event.target.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const lines = e.target.result.split('\n').filter(l => l.trim());
+                if(lines.length < 2) return Swal.fire('Error', 'ไฟล์ไม่ถูกต้อง', 'error');
+
+                const semester = document.getElementById('semesterSelect').value;
+                let count = 0;
+
+                // Process lines (Skip header)
+                for(let i=1; i<lines.length; i++) {
+                    const cols = lines[i].split(',').map(c => c.replace(/^"|"$/g, '').trim());
+                    if(cols.length < 3) continue;
+                    
+                    const [pf, nm, dp, d1, d2, d3, d4, d5] = cols;
+                    const sch = {
+                        "จันทร์": parseSch(d1), "อังคาร": parseSch(d2), "พุธ": parseSch(d3),
+                        "พฤหัสบดี": parseSch(d4), "ศุกร์": parseSch(d5)
+                    };
+                    
+                    try {
+                        await db.collection("teachers").add({
+                            name: pf+nm, department: dp, schedule: sch, semester: semester, active: true,
+                            created_at: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                        count++;
+                    } catch(err) { console.error(err); }
+                }
+                Swal.fire('สำเร็จ', `นำเข้าข้อมูล ${count} รายการ`, 'success');
+                loadTeachers();
+            };
+            reader.readAsText(file);
+            event.target.value = ''; // Reset file input
+        }
+
+        function parseSch(str) {
+            if(!str) return [];
+            return str.split(';').map(x=>parseInt(x)).filter(x=>!isNaN(x));
+        }
+
+    </script>
+</body>
+</html>
