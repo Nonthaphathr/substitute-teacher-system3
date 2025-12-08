@@ -515,7 +515,11 @@
         <div class="nav-bar">
             <button class="nav-btn active" onclick="switchTab('allocation')">📝 จัดสอนแทน</button>
             <button class="nav-btn" onclick="switchTab('history')">📂 ประวัติ/แก้ไข</button>
-            <button class="nav-btn" onclick="switchTab('teachers')">👥 จัดการครู/ตาราง</button>
+            <a href="teacher-manager.html" target="_blank" style="text-decoration: none;">
+    <button class="nav-btn" onclick="event.stopPropagation()">
+        👥 จัดการครู/ตาราง (ระบบใหม่) <i class="fas fa-external-link-alt" style="font-size: 0.8rem; margin-left: 5px;"></i>
+    </button>
+</a>
             <button class="nav-btn" onclick="switchTab('dashboard')">📊 ดูสถิติ</button>
         </div>
 
