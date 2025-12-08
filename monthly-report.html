@@ -302,59 +302,76 @@
             margin: 12px 0; /* เพิ่มระยะห่างบนล่างให้เขียนง่ายขึ้น */
         }
 
-        /* Stats Page */
+        /* =========================================
+           Stats Page (แก้ไขใหม่ตามคำแนะนำ)
+           ========================================= */
         .stats-page {
-            font-size: 14pt;
+            font-size: 12pt; /* ลดจาก 14pt */
+            line-height: 1.4;
         }
         .stats-title {
             text-align: center;
-            font-size: 18pt;
+            font-size: 16pt; /* ลดจาก 18pt */
             font-weight: bold;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
+            margin-bottom: 12px; /* ลดจาก 20px */
+            padding-bottom: 5px; /* ลดจาก 10px */
             border-bottom: 2px solid #333;
         }
         .stats-summary {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin-bottom: 30px;
+            grid-template-columns: repeat(4, 1fr); /* เปลี่ยนเป็น 4 คอลัมน์แถวเดียว */
+            gap: 10px; /* ลด gap */
+            margin-bottom: 15px; /* ลด margin-bottom */
         }
         .stat-card {
             background: #f8fafc;
-            padding: 15px;
+            padding: 10px; /* ลด padding */
             border-radius: 8px;
             border: 1px solid #e2e8f0;
+            text-align: center;
         }
         .stat-card h3 {
-            font-size: 14pt;
+            font-size: 12pt;
             color: #1e3a8a;
-            margin-bottom: 8px;
+            margin-bottom: 5px;
+            white-space: nowrap;
         }
         .stat-card .stat-value {
-            font-size: 24pt;
+            font-size: 20pt; /* ลดจาก 24pt */
             font-weight: bold;
             color: #2563eb;
+            line-height: 1.2;
         }
-        .top-teachers { margin-top: 30px; }
+        .top-teachers { 
+            margin-top: 15px; /* ลดจาก 30px */
+            page-break-inside: avoid;
+        }
         .top-teachers h3 {
-            font-size: 16pt;
+            font-size: 14pt; /* ลดจาก 16pt */
             font-weight: bold;
-            margin-bottom: 15px;
+            margin-bottom: 8px; /* ลดจาก 15px */
             color: #1e3a8a;
+            border-left: 4px solid #1e3a8a;
+            padding-left: 10px;
         }
         .top-list {
-            background: #f8fafc;
-            padding: 15px;
-            border-radius: 8px;
+            background: #fff;
+            padding: 0;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            /* เพิ่ม max-height เพื่อป้องกันการล้น */
+            max-height: 300px; 
+            overflow: hidden;
         }
         .top-item {
-            padding: 8px;
-            border-bottom: 1px dashed #cbd5e1;
+            padding: 6px 10px; /* ลด padding */
+            border-bottom: 1px solid #e2e8f0;
             display: flex;
             justify-content: space-between;
+            font-size: 12pt; /* ลด font-size */
         }
         .top-item:last-child { border-bottom: none; }
+        .top-item:nth-child(even) { background-color: #f8fafc; }
 
         /* Print Styles */
         @media print {
@@ -388,6 +405,13 @@
             }
             .a4-paper:last-child {
                 page-break-after: auto;
+            }
+            /* บังคับ CSS สำหรับหน้าสถิติเวลาพิมพ์ */
+            .stats-page {
+                font-size: 12pt !important;
+            }
+            .top-list {
+                border: 1px solid #999;
             }
         }
 
@@ -717,10 +741,11 @@
         function generateStatsPage() {
             const { month, semester, year, stats } = reportData;
             
+            // Limit to Top 8 to fit in page
             const topSubTeachers = Object.entries(stats.subTeacherCount)
-                .sort((a, b) => b[1] - a[1]).slice(0, 10);
+                .sort((a, b) => b[1] - a[1]).slice(0, 8);
             const topAbsentTeachers = Object.entries(stats.absentTeacherCount)
-                .sort((a, b) => b[1] - a[1]).slice(0, 10);
+                .sort((a, b) => b[1] - a[1]).slice(0, 8);
 
             return `
                 <div class="a4-paper">
@@ -737,23 +762,24 @@
                                 <div>ครั้ง</div>
                             </div>
                             <div class="stat-card">
-                                <h3>📅 จำนวนวันที่จัดสอนแทน</h3>
+                                <h3>📅 วันที่จัดสอนแทน</h3>
                                 <div class="stat-value">${stats.totalDays}</div>
                                 <div>วัน</div>
                             </div>
                             <div class="stat-card">
-                                <h3>👥 จำนวนครูที่สอนแทน</h3>
+                                <h3>👥 ครูสอนแทน</h3>
                                 <div class="stat-value">${Object.keys(stats.subTeacherCount).length}</div>
                                 <div>คน</div>
                             </div>
                             <div class="stat-card">
-                                <h3>📋 จำนวนครูที่ได้รับการแทน</h3>
+                                <h3>📋 ครูรับการแทน</h3>
                                 <div class="stat-value">${Object.keys(stats.absentTeacherCount).length}</div>
                                 <div>คน</div>
                             </div>
                         </div>
+                        
                         <div class="top-teachers">
-                            <h3>🏆 ครูที่ปฏิบัติหน้าที่สอนแทนมากที่สุด 10 อันดับแรก</h3>
+                            <h3>🏆 ครูที่ปฏิบัติหน้าที่สอนแทนมากที่สุด (8 อันดับแรก)</h3>
                             <div class="top-list">
                                 ${topSubTeachers.map(([name, count], idx) => `
                                     <div class="top-item">
@@ -763,8 +789,9 @@
                                 `).join('')}
                             </div>
                         </div>
-                        <div class="top-teachers" style="margin-top: 30px;">
-                            <h3>📊 ครูที่ได้รับการสอนแทนมากที่สุด 10 อันดับแรก</h3>
+
+                        <div class="top-teachers">
+                            <h3>📊 ครูที่ได้รับการสอนแทนมากที่สุด (8 อันดับแรก)</h3>
                             <div class="top-list">
                                 ${topAbsentTeachers.map(([name, count], idx) => `
                                     <div class="top-item">
