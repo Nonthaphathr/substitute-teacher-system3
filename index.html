@@ -1372,24 +1372,20 @@
             }
         }
 
-      async function processAllocation() {
-            // 1. เก็บค่าจาก Input
+        async function processAllocation() {
             daySchedule = document.getElementById('daySchedule').value;
             docDate = document.getElementById('docDate').value;
             const isEditMode = document.getElementById('currentEditId').value !== "";
 
-            // 2. ตรวจสอบความครบถ้วน
             if(!daySchedule || !docDate || selectedTeachers.length === 0) 
                 return Swal.fire('ข้อมูลไม่ครบ', 'กรุณาเลือกวันในตาราง, วันที่เอกสาร และครูที่ลา', 'warning');
 
-            // 3. รีเซ็ตค่าตัวแปร
             workloadMap = {};
             realtimeWorkload = {};
             window.selectionTracker = {};
             isSaved = false;
             updatePrintButtons();
             
-            // 4. โหลดข้อมูลภาระงานเดิมจาก Database
             try {
                 const snap = await db.collection("substitutions").where("docDate", "==", docDate).get();
                 snap.forEach(doc => {
@@ -1399,14 +1395,11 @@
                 });
             } catch(e) { console.error("Workload Error:", e); }
 
-            // 5. เริ่มสร้างการ์ดแสดงผล
             const container = document.getElementById('matchCards');
             container.innerHTML = '';
             
            selectedTeachers.forEach(absentName => {
                 const teacherObj = teachersData.find(t => t.name === absentName);
-                if (!teacherObj) return; // ป้องกัน error ถ้าไม่เจอครู
-
                 const periods = teacherObj.schedule[daySchedule] || [];
                 if(periods.length === 0) return;
 
@@ -1421,40 +1414,20 @@
                     </div>
                     <div style="padding:15px;">`;
 
-                // วนลูปสร้างคาบเรียน
                 periods.sort((a,b)=>a-b).forEach(period => {
-                    // --- ส่วนสำคัญ: ดึงข้อมูล รหัสวิชา/ระดับชั้น มาแสดงอัตโนมัติ ---
-                    let defaultSubject = "";
-                    let defaultGrade = "";
-                    
-                    // เช็คว่ามีข้อมูล teachingDetails จากระบบใหม่หรือไม่
-                    if(teacherObj.teachingDetails) {
-                        const detailKey = `${daySchedule}_${period}`;
-                        const detail = teacherObj.teachingDetails[detailKey];
-                        if(detail) {
-                            defaultSubject = detail.code || "";
-                            defaultGrade = detail.grade || "";
-                        }
-                    }
-                    // -----------------------------------------------------
-
                     const candidates = findCandidates(daySchedule, period, selectedTeachers);
-                    
                     html += `<div class="period-block">
                         <div class="period-title">
                             <span class="badge-p">คาบ ${period}</span>
-                            
-                            <input type="text" id="subj_${absentName}_${period}" value="${defaultSubject}" placeholder="รหัสวิชา" style="width:100px; padding:5px;">
-                            
+                            <input type="text" id="subj_${absentName}_${period}" placeholder="รหัสวิชา" style="width:100px; padding:5px;">
                             <select id="grade_${absentName}_${period}" style="width:80px; padding:5px;">
                                 <option value="">ชั้น</option>
-                                <option value="ม.1" ${defaultGrade === 'ม.1' ? 'selected' : ''}>ม.1</option>
-                                <option value="ม.2" ${defaultGrade === 'ม.2' ? 'selected' : ''}>ม.2</option>
-                                <option value="ม.3" ${defaultGrade === 'ม.3' ? 'selected' : ''}>ม.3</option>
-                                <option value="ม.4" ${defaultGrade === 'ม.4' ? 'selected' : ''}>ม.4</option>
-                                <option value="ม.5" ${defaultGrade === 'ม.5' ? 'selected' : ''}>ม.5</option>
-                                <option value="ม.6" ${defaultGrade === 'ม.6' ? 'selected' : ''}>ม.6</option>
-                                <option value="ม.1-6" ${defaultGrade === 'ม.1-6' ? 'selected' : ''}>ม.1-6</option>
+                                <option value="ม.1">ม.1</option>
+                                <option value="ม.2">ม.2</option>
+                                <option value="ม.3">ม.3</option>
+                                <option value="ม.4">ม.4</option>
+                                <option value="ม.5">ม.5</option>
+                                <option value="ม.6">ม.6</option>
                             </select>
                         </div>`;
                     
@@ -1480,41 +1453,6 @@
                             `;
                         });
                     }
-                    html += `</div>`;
-                });
-                html += `</div></div>`;
-                container.innerHTML += html;
-            });
-            
-            document.getElementById('resultArea').style.display = 'block';
-            
-            // 6. กรณี Edit Mode: คืนค่าเดิมที่เคยบันทึกไว้ (ทับค่า Default)
-            if(isEditMode) {
-                const editId = document.getElementById('currentEditId').value;
-                const record = historyDataCache.find(x => x.id === editId);
-                if(record) {
-                    record.records.forEach(r => {
-                        const subjInput = document.getElementById(`subj_${r.absent}_${r.period}`);
-                        const gradeInput = document.getElementById(`grade_${r.absent}_${r.period}`);
-                        const reasonSelect = document.getElementById(`reason_${r.absent}`);
-                        
-                        if(subjInput) subjInput.value = r.subject;
-                        if(gradeInput) gradeInput.value = r.grade;
-                        if(reasonSelect) reasonSelect.value = r.reason;
-
-                        const radios = document.getElementsByName(`rad_${r.absent}_${r.period}`);
-                        radios.forEach(rad => {
-                            if(rad.value === r.sub) {
-                                rad.click();
-                            }
-                        });
-                    });
-                }
-            }
-            
-            updateRealtimeSummary();
-            setTimeout(() => document.getElementById('resultArea').scrollIntoView({behavior:'smooth'}), 100);
-        }
                     html += `</div>`;
                 });
                 html += `</div></div>`;
