@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบจัดสอนแทน V.8.5 (Fix: ประวัติ/พิมพ์/คัดลอก)</title>
+    <title>ระบบจัดสอนแทน V.8.5.1 (Hotfix: Modal Error)</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -399,7 +399,7 @@
             .app-container, .modal-tools { display: none !important; }
             
             /* ซ่อน Modals ทั้งหมดเมื่อพิมพ์ */
-            #teacherFormModal, #copyModal { display: none !important; }
+            #copyModal { display: none !important; }
             
             .modal { position: static; background: white; width: 100%; height: auto; display: block !important; }
             .modal-content { margin: 0; width: 100%; height: auto; background: white; box-shadow: none; overflow: visible; }
@@ -812,9 +812,14 @@
         // MODAL MANAGEMENT
         // ============================================
         function closeAllModals() {
-            document.getElementById('teacherFormModal').style.display = 'none';
-            document.getElementById('copyModal').style.display = 'none';
-            document.getElementById('previewModal').style.display = 'none';
+            // Close only existing modals
+            const copyModal = document.getElementById('copyModal');
+            const previewModal = document.getElementById('previewModal');
+            
+            if(copyModal) copyModal.style.display = 'none';
+            if(previewModal) previewModal.style.display = 'none';
+            
+            console.log('✅ All modals closed');
         }
 
         window.onbeforeprint = function() {
