@@ -531,17 +531,30 @@
         }
 
         async function saveTeacher() {
+            console.log('🚀 ===== SAVE TEACHER FUNCTION CALLED =====');
+            console.log('📅 Timestamp:', new Date().toLocaleString('th-TH'));
+            
             const id = document.getElementById('editId').value;
             const prefix = document.getElementById('tPrefix').value;
             const nameRaw = document.getElementById('tName').value.trim();
             const dept = document.getElementById('tDept').value.trim();
             const semester = document.getElementById('semesterInput').value.trim();
 
+            console.log('📝 Form Data:');
+            console.log('   ID:', id || '(New Teacher)');
+            console.log('   Prefix:', prefix);
+            console.log('   Name:', nameRaw);
+            console.log('   Department:', dept);
+            console.log('   Semester:', semester);
+
             if(!nameRaw || !dept || !semester) {
+                console.error('❌ Validation Failed: Missing required fields');
                 return Swal.fire('ข้อมูลไม่ครบ', 'กรุณากรอกชื่อ, กลุ่มสาระ และภาคเรียน', 'warning');
             }
 
             const fullName = prefix + nameRaw;
+            
+            console.log('📚 Starting to collect schedule data...');
             
             // Prepare Data Structure
             // 1. schedule: For existing system compatibility (Array of periods)
@@ -561,6 +574,8 @@
                 const code = cell.querySelector('.code-input').value.trim();
                 const grade = cell.querySelector('.grade-input').value;
 
+                console.log(`   📝 Collecting ${day} Period ${p}:`, {code, grade});
+
                 // Add to details object
                 teachingDetails[`${day}_${p}`] = {
                     code: code,
@@ -570,6 +585,19 @@
 
             // Sort schedule arrays
             Object.keys(schedule).forEach(k => schedule[k].sort((a,b)=>a-b));
+
+            console.log('✅ Data Collection Complete!');
+            console.log('📊 Summary:');
+            console.log('   Schedule:', schedule);
+            console.log('   Teaching Details:', teachingDetails);
+            console.log('   Teaching Details Keys:', Object.keys(teachingDetails));
+            console.log('   Total Periods:', Object.keys(teachingDetails).length);
+
+            // Debug: ตรวจสอบข้อมูลก่อนบันทึก
+            console.log('💾 Preparing to Save to Firebase...');
+            console.log('   Full Name:', fullName);
+            console.log('   Department:', dept);
+            console.log('   Semester:', semester);
 
             const payload = {
                 name: fullName,
@@ -581,19 +609,27 @@
                 updated_at: firebase.firestore.FieldValue.serverTimestamp()
             };
 
+            console.log('📤 Final Payload to Firebase:', payload);
+
             try {
                 if(id) {
                     await db.collection("teachers").doc(id).update(payload);
+                    console.log('✅ Successfully UPDATED teacher in Firebase');
+                    console.log('   Document ID:', id);
                     Swal.fire('เรียบร้อย', 'แก้ไขข้อมูลสำเร็จ', 'success');
                 } else {
                     payload.created_at = firebase.firestore.FieldValue.serverTimestamp();
-                    await db.collection("teachers").add(payload);
+                    const docRef = await db.collection("teachers").add(payload);
+                    console.log('✅ Successfully CREATED teacher in Firebase');
+                    console.log('   New Document ID:', docRef.id);
                     Swal.fire('เรียบร้อย', 'เพิ่มข้อมูลสำเร็จ', 'success');
                 }
                 closeModal();
                 loadTeachers();
             } catch(e) {
-                console.error(e);
+                console.error('❌ Firebase Error:', e);
+                console.error('   Error Code:', e.code);
+                console.error('   Error Message:', e.message);
                 Swal.fire('Error', 'บันทึกข้อมูลไม่สำเร็จ: ' + e.message, 'error');
             }
         }
