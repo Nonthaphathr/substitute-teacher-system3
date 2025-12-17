@@ -308,7 +308,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: #cbd5e1;
+            background-color: #ef4444; /* แดง = ปิด (unchecked) */
             transition: .4s;
             border-radius: 30px;
         }
@@ -324,7 +324,7 @@
             border-radius: 50%;
         }
         input:checked + .toggle-slider {
-            background-color: var(--danger);
+            background-color: #10b981; /* เขียว = เปิด (checked) */
         }
         input:checked + .toggle-slider:before {
             transform: translateX(30px);
@@ -810,9 +810,9 @@
                     <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
                         <label class="toggle-switch">
                             <input type="checkbox" id="announcementToggle" onchange="updateAnnouncementStatus()">
-                            <span class="toggle-slider" style="background-color: #059669;"></span>
+                            <span class="toggle-slider"></span>
                         </label>
-                        <span class="status-badge unlocked" id="announcementStatus" style="background: #d1fae5; color: #059669;">
+                        <span class="status-badge unlocked" id="announcementStatus" style="background: #fee2e2; color: #dc2626;">
                             <i class="fas fa-bell-slash"></i> ปิดการแสดง
                         </span>
                     </div>
@@ -977,8 +977,8 @@
                 badge.style.color = '#2563eb';
                 badge.innerHTML = '<i class="fas fa-bell"></i> เปิดการแสดง';
             } else {
-                badge.style.background = '#d1fae5';
-                badge.style.color = '#059669';
+                badge.style.background = '#fee2e2'; /* แดง = ปิด */
+                badge.style.color = '#dc2626';
                 badge.innerHTML = '<i class="fas fa-bell-slash"></i> ปิดการแสดง';
             }
         }
@@ -1027,9 +1027,16 @@
             document.getElementById('announcementModal').classList.add('show');
         }
 
-        window.onload = function() {
-            loadAdminSettings();
+        window.onload = async function() {
+            console.log('🚀 Starting application...');
+            
             renderScheduleTable();
+            
+            // Load admin settings first (sets semester)
+            await loadAdminSettings();
+            
+            // Then load teachers with the correct semester
+            console.log('📚 Loading teachers with semester:', document.getElementById('semesterInput').value);
             loadTeachers();
         }
 
@@ -1037,23 +1044,31 @@
 
         async function loadAdminSettings() {
             try {
+                console.log('🔄 Loading admin settings...');
+                
                 // Load from Firebase
                 const settingsDoc = await db.collection("system_settings").doc("config").get();
                 
                 if(settingsDoc.exists) {
                     const settings = settingsDoc.data();
+                    console.log('✅ Settings loaded:', settings);
+                    
                     isSystemLocked = settings.isLocked || false;
                     const defaultSemester = settings.defaultSemester || '2/2568';
                     
+                    console.log('📅 Setting semester to:', defaultSemester);
                     document.getElementById('semesterInput').value = defaultSemester;
                     updateUILockState();
 
                     // Check and show announcement
                     checkAndShowAnnouncement(settings);
                 } else {
+                    console.log('⚠️ No settings found, creating defaults...');
+                    
                     // Initialize with defaults
                     const defaultSemester = '2/2568';
                     document.getElementById('semesterInput').value = defaultSemester;
+                    
                     await db.collection("system_settings").doc("config").set({
                         isLocked: false,
                         defaultSemester: defaultSemester,
@@ -1062,11 +1077,15 @@
                         announcementContent: '',
                         updated_at: firebase.firestore.FieldValue.serverTimestamp()
                     });
+                    
+                    console.log('✅ Default settings created');
                 }
             } catch(e) {
-                console.error("Error loading admin settings:", e);
+                console.error("❌ Error loading admin settings:", e);
                 // Fallback to default
-                document.getElementById('semesterInput').value = '2/2568';
+                const fallbackSemester = '2/2568';
+                console.log('⚠️ Using fallback semester:', fallbackSemester);
+                document.getElementById('semesterInput').value = fallbackSemester;
             }
         }
 
