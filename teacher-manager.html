@@ -674,7 +674,7 @@
             <div class="action-group">
                 <label style="font-size:0.9rem; font-weight:600; margin-right:5px;">ภาคเรียน:</label>
                 <div class="semester-wrapper">
-                    <input type="text" id="semesterInput" class="semester-input" placeholder="ระบุภาคเรียน" readonly>
+                    <input type="text" id="semesterInput" class="semester-input" placeholder="ระบุภาคเรียน" onchange="loadTeachers()">
                     <div class="semester-badge">ปัจจุบัน</div>
                 </div>
 
@@ -924,6 +924,109 @@
         const ADMIN_PIN = '0000';
         let isSystemLocked = false;
 
+        // --- ANNOUNCEMENT FUNCTIONS (Need to be defined before loadAdminSettings) ---
+        
+        function checkAndShowAnnouncement(settings) {
+            const announcementEnabled = settings.announcementEnabled || false;
+            const announcementTitle = settings.announcementTitle || '';
+            const announcementContent = settings.announcementContent || '';
+
+            console.log('Checking announcement:', { announcementEnabled, announcementTitle, announcementContent });
+
+            if(!announcementEnabled || !announcementContent.trim()) {
+                console.log('Announcement disabled or empty');
+                return; // Don't show if disabled or empty
+            }
+
+            // Check if user clicked "don't show today"
+            const today = new Date().toDateString();
+            const dontShowDate = localStorage.getItem('announcement_hidden_date');
+            
+            if(dontShowDate === today) {
+                console.log('User opted out today');
+                return; // Don't show if user opted out today
+            }
+
+            // Show announcement
+            console.log('Showing announcement');
+            document.getElementById('announcementModalTitle').textContent = announcementTitle || 'ประกาศสำคัญ';
+            document.getElementById('announcementModalContent').textContent = announcementContent;
+            
+            setTimeout(() => {
+                document.getElementById('announcementModal').classList.add('show');
+            }, 500); // Delay 0.5s after page load
+        }
+
+        function closeAnnouncement() {
+            const dontShow = document.getElementById('dontShowToday').checked;
+            
+            if(dontShow) {
+                const today = new Date().toDateString();
+                localStorage.setItem('announcement_hidden_date', today);
+            }
+
+            document.getElementById('announcementModal').classList.remove('show');
+        }
+
+        function updateAnnouncementStatus() {
+            const isEnabled = document.getElementById('announcementToggle').checked;
+            const badge = document.getElementById('announcementStatus');
+            
+            if(isEnabled) {
+                badge.style.background = '#dbeafe';
+                badge.style.color = '#2563eb';
+                badge.innerHTML = '<i class="fas fa-bell"></i> เปิดการแสดง';
+            } else {
+                badge.style.background = '#d1fae5';
+                badge.style.color = '#059669';
+                badge.innerHTML = '<i class="fas fa-bell-slash"></i> ปิดการแสดง';
+            }
+        }
+
+        async function saveAnnouncement() {
+            const enabled = document.getElementById('announcementToggle').checked;
+            const title = document.getElementById('announcementTitle').value.trim();
+            const content = document.getElementById('announcementContent').value.trim();
+
+            if(enabled && !content) {
+                return Swal.fire('ข้อมูลไม่ครบ', 'กรุณากรอกเนื้อหาประกาศ', 'warning');
+            }
+
+            try {
+                await db.collection("system_settings").doc("config").update({
+                    announcementEnabled: enabled,
+                    announcementTitle: title,
+                    announcementContent: content,
+                    updated_at: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'บันทึกสำเร็จ',
+                    text: enabled ? 'ประกาศจะแสดงเมื่อครูเข้าสู่ระบบ' : 'ปิดการแสดงประกาศแล้ว',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+
+                // Clear the "don't show today" flag so admin can test immediately
+                localStorage.removeItem('announcement_hidden_date');
+            } catch(e) {
+                console.error("Error saving announcement:", e);
+                Swal.fire('Error', 'ไม่สามารถบันทึกประกาศได้', 'error');
+            }
+        }
+
+        function previewAnnouncement() {
+            const title = document.getElementById('announcementTitle').value.trim() || 'ประกาศสำคัญ';
+            const content = document.getElementById('announcementContent').value.trim() || 'ไม่มีเนื้อหาประกาศ';
+
+            document.getElementById('announcementModalTitle').textContent = title;
+            document.getElementById('announcementModalContent').textContent = content;
+            document.getElementById('dontShowToday').checked = false;
+            
+            document.getElementById('announcementModal').classList.add('show');
+        }
+
         window.onload = function() {
             loadAdminSettings();
             renderScheduleTable();
@@ -1128,132 +1231,6 @@
                 badge.className = 'status-badge unlocked';
                 badge.innerHTML = '<i class="fas fa-unlock"></i> ปลดล็อก';
             }
-        }
-
-        async function updateDefaultSemester() {
-            const semester = document.getElementById('defaultSemesterInput').value.trim();
-            
-            if(!semester) {
-                return Swal.fire('ข้อมูลไม่ครบ', 'กรุณาระบุภาคเรียน', 'warning');
-            }
-
-            try {
-                await db.collection("system_settings").doc("config").update({
-                    defaultSemester: semester,
-                    updated_at: firebase.firestore.FieldValue.serverTimestamp()
-                });
-
-                document.getElementById('semesterInput').value = semester;
-
-                Swal.fire({
-                    icon: 'success',
-                    title: 'บันทึกสำเร็จ',
-                    text: `ตั้งค่าภาคเรียนเริ่มต้นเป็น ${semester} แล้ว`,
-                    timer: 2000,
-                    showConfirmButton: false
-                });
-
-                // Reload teachers with new semester
-                loadTeachers();
-            } catch(e) {
-                console.error("Error updating default semester:", e);
-                Swal.fire('Error', 'ไม่สามารถบันทึกการตั้งค่าได้', 'error');
-            }
-        }
-
-        // --- ANNOUNCEMENT FUNCTIONS ---
-
-        function checkAndShowAnnouncement(settings) {
-            const announcementEnabled = settings.announcementEnabled || false;
-            const announcementTitle = settings.announcementTitle || '';
-            const announcementContent = settings.announcementContent || '';
-
-            if(!announcementEnabled || !announcementContent.trim()) {
-                return; // Don't show if disabled or empty
-            }
-
-            // Check if user clicked "don't show today"
-            const today = new Date().toDateString();
-            const dontShowDate = localStorage.getItem('announcement_hidden_date');
-            
-            if(dontShowDate === today) {
-                return; // Don't show if user opted out today
-            }
-
-            // Show announcement
-            document.getElementById('announcementModalTitle').textContent = announcementTitle || 'ประกาศสำคัญ';
-            document.getElementById('announcementModalContent').textContent = announcementContent;
-            
-            setTimeout(() => {
-                document.getElementById('announcementModal').classList.add('show');
-            }, 500); // Delay 0.5s after page load
-        }
-
-        function closeAnnouncement() {
-            const dontShow = document.getElementById('dontShowToday').checked;
-            
-            if(dontShow) {
-                const today = new Date().toDateString();
-                localStorage.setItem('announcement_hidden_date', today);
-            }
-
-            document.getElementById('announcementModal').classList.remove('show');
-        }
-
-        function updateAnnouncementStatus() {
-            const isEnabled = document.getElementById('announcementToggle').checked;
-            const badge = document.getElementById('announcementStatus');
-            
-            if(isEnabled) {
-                badge.style.background = '#dbeafe';
-                badge.style.color = '#2563eb';
-                badge.innerHTML = '<i class="fas fa-bell"></i> เปิดการแสดง';
-            } else {
-                badge.style.background = '#d1fae5';
-                badge.style.color = '#059669';
-                badge.innerHTML = '<i class="fas fa-bell-slash"></i> ปิดการแสดง';
-            }
-        }
-
-        async function saveAnnouncement() {
-            const enabled = document.getElementById('announcementToggle').checked;
-            const title = document.getElementById('announcementTitle').value.trim();
-            const content = document.getElementById('announcementContent').value.trim();
-
-            if(enabled && !content) {
-                return Swal.fire('ข้อมูลไม่ครบ', 'กรุณากรอกเนื้อหาประกาศ', 'warning');
-            }
-
-            try {
-                await db.collection("system_settings").doc("config").update({
-                    announcementEnabled: enabled,
-                    announcementTitle: title,
-                    announcementContent: content,
-                    updated_at: firebase.firestore.FieldValue.serverTimestamp()
-                });
-
-                Swal.fire({
-                    icon: 'success',
-                    title: 'บันทึกสำเร็จ',
-                    text: enabled ? 'ประกาศจะแสดงเมื่อครูเข้าสู่ระบบ' : 'ปิดการแสดงประกาศแล้ว',
-                    timer: 2000,
-                    showConfirmButton: false
-                });
-            } catch(e) {
-                console.error("Error saving announcement:", e);
-                Swal.fire('Error', 'ไม่สามารถบันทึกประกาศได้', 'error');
-            }
-        }
-
-        function previewAnnouncement() {
-            const title = document.getElementById('announcementTitle').value.trim() || 'ประกาศสำคัญ';
-            const content = document.getElementById('announcementContent').value.trim() || 'ไม่มีเนื้อหาประกาศ';
-
-            document.getElementById('announcementModalTitle').textContent = title;
-            document.getElementById('announcementModalContent').textContent = content;
-            document.getElementById('dontShowToday').checked = false;
-            
-            document.getElementById('announcementModal').classList.add('show');
         }
 
         async function updateDefaultSemester() {
