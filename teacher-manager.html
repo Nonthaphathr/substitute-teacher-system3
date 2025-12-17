@@ -19,6 +19,8 @@
             --primary-dark: #1e40af;
             --secondary: #64748b;
             --success: #059669;
+            --warning: #f59e0b;
+            --danger: #ef4444;
             --bg: #f8fafc; 
         }
 
@@ -40,11 +42,54 @@
         .brand { display: flex; align-items: center; gap: 15px; }
         .brand h1 { font-size: 1.5rem; color: var(--primary-dark); font-weight: 700; }
         .brand span { font-size: 0.9rem; color: var(--secondary); }
+        
+        .nav-actions { display: flex; gap: 10px; align-items: center; }
         .back-btn { text-decoration: none; color: var(--secondary); font-weight: 600; display: flex; align-items: center; gap: 8px; padding: 8px 15px; border-radius: 8px; transition: all 0.2s; }
         .back-btn:hover { background: #e2e8f0; color: var(--primary); }
+        
+        .admin-btn {
+            background: linear-gradient(135deg, #7c3aed, #6d28d9);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
+        }
+        .admin-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4);
+        }
 
         /* --- Container --- */
         .container { max-width: 1300px; margin: 30px auto; padding: 0 20px; }
+
+        /* --- Lock Banner --- */
+        .lock-banner {
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            border: 2px solid var(--danger);
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            display: none;
+            align-items: center;
+            gap: 15px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        .lock-banner.active { display: flex; }
+        .lock-banner i { font-size: 1.5rem; color: var(--danger); }
+        .lock-banner .text h4 { color: var(--danger); font-weight: 700; margin-bottom: 3px; }
+        .lock-banner .text p { color: #991b1b; font-size: 0.9rem; }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
 
         /* --- Toolbar --- */
         .toolbar {
@@ -61,14 +106,69 @@
         
         button { border: none; cursor: pointer; font-family: 'Sarabun'; border-radius: 8px; transition: transform 0.2s, box-shadow 0.2s; }
         button:active { transform: scale(0.95); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
 
         .btn-add { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; padding: 10px 20px; font-size: 1rem; font-weight: 600; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3); }
-        .btn-add:hover { box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4); transform: translateY(-2px); }
+        .btn-add:hover:not(:disabled) { box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4); transform: translateY(-2px); }
         .btn-icon { padding: 10px; background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
-        .btn-icon:hover { background: #e2e8f0; color: var(--primary); }
+        .btn-icon:hover:not(:disabled) { background: #e2e8f0; color: var(--primary); }
 
-        .semester-input { padding: 10px 15px; border-radius: 8px; border: 2px solid #e2e8f0; font-family: 'Sarabun'; width: 180px; text-align: center; font-weight: bold; color: var(--primary-dark); }
-        .semester-input:focus { border-color: var(--primary); }
+        /* Animated Semester Input */
+        .semester-wrapper { position: relative; display: inline-block; }
+        .semester-input { 
+            padding: 10px 15px; 
+            border-radius: 8px; 
+            border: 3px solid transparent;
+            font-family: 'Sarabun'; 
+            width: 180px; 
+            text-align: center; 
+            font-weight: bold; 
+            color: var(--primary-dark);
+            background: linear-gradient(white, white) padding-box,
+                        linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899) border-box;
+            animation: borderGlow 3s ease-in-out infinite;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+            font-size: 1.1rem;
+        }
+        .semester-input:focus { 
+            outline: none;
+            animation: borderGlow 1s ease-in-out infinite;
+            box-shadow: 0 6px 25px rgba(59, 130, 246, 0.5);
+        }
+        
+        @keyframes borderGlow {
+            0%, 100% { 
+                border-color: #3b82f6;
+                box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3), 0 0 20px rgba(59, 130, 246, 0.2);
+            }
+            33% { 
+                border-color: #8b5cf6;
+                box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3), 0 0 20px rgba(139, 92, 246, 0.2);
+            }
+            66% { 
+                border-color: #ec4899;
+                box-shadow: 0 4px 15px rgba(236, 72, 153, 0.3), 0 0 20px rgba(236, 72, 153, 0.2);
+            }
+        }
+        
+        .semester-badge {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
+            animation: bounce 2s ease-in-out infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
 
         /* --- Grid Layout --- */
         .teacher-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
@@ -85,7 +185,7 @@
         .btn-edit { background: #f3f4f6; color: var(--primary); padding: 8px; border-radius: 50%; width: 35px; height: 35px; }
         .btn-del { background: #fef2f2; color: #ef4444; padding: 8px; border-radius: 50%; width: 35px; height: 35px; }
 
-        /* Schedule Display - Improved */
+        /* Schedule Display */
         .schedule-mini { 
             display: grid; 
             grid-template-columns: repeat(5, 1fr); 
@@ -129,10 +229,6 @@
         .period-count i {
             font-size: 0.8rem;
         }
-        
-        /* Old dot style - removed */
-        .dot-container { display: none; }
-        .dot { display: none; }
 
         /* --- Modal --- */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 1000; display: none; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s; }
@@ -140,10 +236,117 @@
         .modal-box { background: white; width: 1200px; max-width: 98%; max-height: 95vh; border-radius: 20px; padding: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.2); transform: scale(0.8); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); overflow-y: auto; display: flex; flex-direction: column; }
         .modal-overlay.show .modal-box { transform: scale(1); }
 
+        /* Admin Modal */
+        .modal-box.admin-modal { width: 500px; }
+        .modal-box.admin-panel { width: 600px; }
+
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 15px; }
         .modal-title { font-size: 1.4rem; color: var(--primary-dark); font-weight: 700; }
         .btn-close { background: none; font-size: 1.5rem; color: #94a3b8; padding: 0; }
         .btn-close:hover { color: #ef4444; transform: rotate(90deg); }
+
+        /* Admin Login */
+        .pin-input-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        .pin-digit {
+            width: 60px;
+            height: 70px;
+            font-size: 2rem;
+            text-align: center;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        .pin-digit:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        /* Admin Panel Settings */
+        .admin-settings { display: flex; flex-direction: column; gap: 25px; }
+        .setting-item {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+        .setting-item h4 {
+            color: var(--primary-dark);
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .setting-item p {
+            color: var(--secondary);
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #cbd5e1;
+            transition: .4s;
+            border-radius: 30px;
+        }
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .toggle-slider {
+            background-color: var(--danger);
+        }
+        input:checked + .toggle-slider:before {
+            transform: translateX(30px);
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .status-badge.locked {
+            background: #fee2e2;
+            color: var(--danger);
+        }
+        .status-badge.unlocked {
+            background: #d1fae5;
+            color: var(--success);
+        }
 
         .form-grid { display: grid; grid-template-columns: 1fr 2fr 2fr; gap: 15px; margin-bottom: 20px; }
         .form-group label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 0.9rem; color: #475569; }
@@ -154,9 +357,7 @@
         .sch-table { width: 100%; border-collapse: separate; border-spacing: 8px; }
         .sch-table th { padding: 10px 8px; color: #64748b; font-weight: 600; font-size: 0.95rem; border-bottom: none; background: white; position: sticky; top: 0; z-index: 10; border-radius: 8px; text-align: center;}
         .sch-table td { padding: 5px; text-align: center; border-bottom: none; vertical-align: top; }
-        .sch-table tr:last-child td { border-bottom: none; }
         
-        /* Cell Design - Improved */
         .sch-cell { 
             min-width: 110px; 
             height: 110px; 
@@ -199,7 +400,6 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
 
-        /* Checkbox & Inputs - Improved */
         .cb-input { width: 22px; height: 22px; margin-bottom: 6px; cursor: pointer; accent-color: var(--primary); }
         .details-inputs { display: none; flex-direction: column; gap: 5px; width: 100%; animation: slideDown 0.2s; }
         .sch-cell.active .details-inputs { display: flex; }
@@ -238,12 +438,185 @@
         .btn-save { background: var(--success); color: white; padding: 10px 30px; font-size: 1.1rem; }
         .btn-save:hover { background: #047857; box-shadow: 0 4px 15px rgba(5, 150, 105, 0.3); }
 
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            padding: 10px 30px;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+        }
+
         /* Loading */
         .loading-state { text-align: center; padding: 50px; color: #94a3b8; display: none; }
         .spinner { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 15px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         @keyframes slideDown { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Announcement Textarea */
+        .announcement-textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-family: 'Sarabun';
+            font-size: 0.95rem;
+            resize: vertical;
+            transition: all 0.2s;
+        }
+        .announcement-textarea:focus {
+            border-color: var(--primary);
+            outline: 3px solid rgba(37, 99, 235, 0.1);
+        }
+
+        /* Announcement Modal */
+        .announcement-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .announcement-modal.show {
+            display: flex;
+            opacity: 1;
+        }
+        
+        .announcement-box {
+            background: white;
+            width: 600px;
+            max-width: 90%;
+            border-radius: 20px;
+            padding: 0;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+            transform: scale(0.7) translateY(-50px);
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            overflow: hidden;
+            animation: shake 0.5s ease-in-out;
+        }
+        .announcement-modal.show .announcement-box {
+            transform: scale(1) translateY(0);
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: scale(0.7) translateY(-50px) rotate(0deg); }
+            25% { transform: scale(0.75) translateY(-40px) rotate(-2deg); }
+            50% { transform: scale(0.8) translateY(-30px) rotate(2deg); }
+            75% { transform: scale(0.9) translateY(-20px) rotate(-1deg); }
+        }
+
+        .announcement-header {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            padding: 25px 30px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        .announcement-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: pulse-bg 3s ease-in-out infinite;
+        }
+        @keyframes pulse-bg {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+        
+        .announcement-icon {
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 10px;
+            animation: bell-ring 1s ease-in-out infinite;
+            position: relative;
+            z-index: 1;
+        }
+        @keyframes bell-ring {
+            0%, 100% { transform: rotate(0deg); }
+            10%, 30% { transform: rotate(-10deg); }
+            20%, 40% { transform: rotate(10deg); }
+        }
+        
+        .announcement-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-align: center;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 1;
+        }
+
+        .announcement-body {
+            padding: 30px;
+            background: white;
+        }
+        .announcement-content {
+            font-size: 1.05rem;
+            line-height: 1.8;
+            color: #1e293b;
+            text-align: center;
+            white-space: pre-wrap;
+            margin-bottom: 25px;
+        }
+        
+        .announcement-footer {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        .btn-understand {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: white;
+            padding: 12px 40px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+        }
+        .btn-understand:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+        }
+
+        /* Checkbox styling */
+        .dont-show-again {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #64748b;
+            font-size: 0.9rem;
+            cursor: pointer;
+            user-select: none;
+        }
+        .dont-show-again input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--primary);
+        }
 
         /* Responsive Design */
         @media (max-width: 768px) {
@@ -253,6 +626,11 @@
             .schedule-mini { grid-template-columns: repeat(5, 1fr); gap: 5px; }
             .day-col { padding: 6px 2px; }
             .period-count { font-size: 1rem; }
+            .semester-input { width: 150px; font-size: 1rem; }
+            .announcement-box { width: 95%; }
+            .announcement-header { padding: 20px; }
+            .announcement-title { font-size: 1.2rem; }
+            .announcement-body { padding: 20px; }
         }
 
     </style>
@@ -267,12 +645,26 @@
                 <span>ระบบบริหารจัดการข้อมูลครูและตารางสอน</span>
             </div>
         </div>
-        <a href="index.html" class="back-btn">
-            <i class="fas fa-home"></i> กลับหน้าหลัก
-        </a>
+        <div class="nav-actions">
+            <button class="admin-btn" onclick="showAdminLogin()">
+                <i class="fas fa-shield-alt"></i> Admin
+            </button>
+            <a href="index.html" class="back-btn">
+                <i class="fas fa-home"></i> กลับหน้าหลัก
+            </a>
+        </div>
     </nav>
 
     <div class="container">
+        <!-- Lock Banner -->
+        <div class="lock-banner" id="lockBanner">
+            <i class="fas fa-lock"></i>
+            <div class="text">
+                <h4>🔒 ระบบถูกล็อก - ไม่สามารถแก้ไขข้อมูลได้</h4>
+                <p>ติดต่อผู้ดูแลระบบเพื่อปลดล็อกการแก้ไข</p>
+            </div>
+        </div>
+
         <div class="toolbar">
             <div class="search-box">
                 <i class="fas fa-search"></i>
@@ -281,18 +673,21 @@
             
             <div class="action-group">
                 <label style="font-size:0.9rem; font-weight:600; margin-right:5px;">ภาคเรียน:</label>
-                <input type="text" id="semesterInput" class="semester-input" placeholder="ระบุภาคเรียน" onchange="saveSemesterPreference(); loadTeachers();">
+                <div class="semester-wrapper">
+                    <input type="text" id="semesterInput" class="semester-input" placeholder="ระบุภาคเรียน" readonly>
+                    <div class="semester-badge">ปัจจุบัน</div>
+                </div>
 
-                <button class="btn-icon" onclick="document.getElementById('importFile').click()" title="นำเข้า CSV">
+                <button class="btn-icon" id="btnImport" onclick="document.getElementById('importFile').click()" title="นำเข้า CSV">
                     <i class="fas fa-file-import"></i>
                 </button>
                 <input type="file" id="importFile" accept=".csv" style="display: none;" onchange="importTeachers(event)">
 
-                <button class="btn-icon" onclick="exportTeachers()" title="ส่งออก CSV">
+                <button class="btn-icon" id="btnExport" onclick="exportTeachers()" title="ส่งออก CSV">
                     <i class="fas fa-file-export"></i>
                 </button>
 
-                <button class="btn-add" onclick="openModal()">
+                <button class="btn-add" id="btnAddTeacher" onclick="openModal()">
                     <i class="fas fa-plus-circle"></i> เพิ่มครูใหม่
                 </button>
             </div>
@@ -303,10 +698,153 @@
             <p>กำลังโหลดข้อมูล...</p>
         </div>
 
-        <div id="teacherGrid" class="teacher-grid">
-            </div>
+        <div id="teacherGrid" class="teacher-grid"></div>
     </div>
 
+    <!-- Announcement Modal -->
+    <div id="announcementModal" class="announcement-modal">
+        <div class="announcement-box">
+            <div class="announcement-header">
+                <div class="announcement-icon">🔔</div>
+                <div class="announcement-title" id="announcementModalTitle">ประกาศสำคัญ</div>
+            </div>
+            <div class="announcement-body">
+                <div class="announcement-content" id="announcementModalContent">
+                    กรุณารอสักครู่...
+                </div>
+                <div class="announcement-footer">
+                    <label class="dont-show-again">
+                        <input type="checkbox" id="dontShowToday">
+                        <span>ไม่แสดงข้อความนี้อีกในวันนี้</span>
+                    </label>
+                </div>
+                <div class="announcement-footer">
+                    <button class="btn-understand" onclick="closeAnnouncement()">
+                        <i class="fas fa-check-circle"></i> เข้าใจแล้ว
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Login Modal -->
+    <div id="adminLoginModal" class="modal-overlay">
+        <div class="modal-box admin-modal">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <i class="fas fa-shield-alt"></i> เข้าสู่ระบบ Admin
+                </div>
+                <button class="btn-close" onclick="closeAdminLogin()"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <div style="text-align: center; margin-bottom: 20px;">
+                <p style="color: var(--secondary);">กรุณาใส่รหัส PIN 4 หลัก</p>
+            </div>
+
+            <div class="pin-input-group">
+                <input type="password" maxlength="1" class="pin-digit" id="pin1" onkeyup="moveToNext(this, 'pin2')" onpaste="handlePaste(event)">
+                <input type="password" maxlength="1" class="pin-digit" id="pin2" onkeyup="moveToNext(this, 'pin3')">
+                <input type="password" maxlength="1" class="pin-digit" id="pin3" onkeyup="moveToNext(this, 'pin4')">
+                <input type="password" maxlength="1" class="pin-digit" id="pin4" onkeyup="checkPin()">
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-icon" style="background: #f1f5f9;" onclick="closeAdminLogin()">ยกเลิก</button>
+                <button class="btn-primary" onclick="verifyPin()">
+                    <i class="fas fa-sign-in-alt"></i> เข้าสู่ระบบ
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Panel Modal -->
+    <div id="adminPanelModal" class="modal-overlay">
+        <div class="modal-box admin-panel">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <i class="fas fa-cog"></i> ตั้งค่าระบบ (Admin)
+                </div>
+                <button class="btn-close" onclick="closeAdminPanel()"><i class="fas fa-times"></i></button>
+            </div>
+
+            <div class="admin-settings">
+                <!-- Lock/Unlock System -->
+                <div class="setting-item">
+                    <h4>
+                        <i class="fas fa-lock"></i> ล็อกระบบ
+                    </h4>
+                    <p>เมื่อเปิดใช้งาน ครูจะไม่สามารถเพิ่ม แก้ไข หรือลบข้อมูลได้</p>
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="systemLockToggle" onchange="updateSystemLock()">
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <span class="status-badge unlocked" id="lockStatus">
+                            <i class="fas fa-unlock"></i> ปลดล็อก
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Default Semester -->
+                <div class="setting-item">
+                    <h4>
+                        <i class="fas fa-calendar-check"></i> ภาคเรียนที่แสดงผล
+                    </h4>
+                    <p>กำหนดภาคเรียนและปีการศึกษาที่จะแสดงเมื่อครูเข้าสู่ระบบ</p>
+                    <div class="form-group">
+                        <label>ภาคเรียน/ปีการศึกษา</label>
+                        <input type="text" id="defaultSemesterInput" class="form-control" placeholder="เช่น 2/2568" value="">
+                    </div>
+                    <button class="btn-primary" style="margin-top: 10px;" onclick="updateDefaultSemester()">
+                        <i class="fas fa-save"></i> บันทึกการตั้งค่า
+                    </button>
+                </div>
+
+                <!-- Announcement System -->
+                <div class="setting-item">
+                    <h4>
+                        <i class="fas fa-bullhorn"></i> ระบบประกาศสำคัญ
+                    </h4>
+                    <p>สร้างข้อความประกาศที่จะแสดงเมื่อครูเข้าสู่ระบบ</p>
+                    
+                    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="announcementToggle" onchange="updateAnnouncementStatus()">
+                            <span class="toggle-slider" style="background-color: #059669;"></span>
+                        </label>
+                        <span class="status-badge unlocked" id="announcementStatus" style="background: #d1fae5; color: #059669;">
+                            <i class="fas fa-bell-slash"></i> ปิดการแสดง
+                        </span>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label>หัวข้อประกาศ</label>
+                        <input type="text" id="announcementTitle" class="form-control" placeholder="เช่น แจ้งเตือน: เปลี่ยนแปลงตารางสอน">
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label>เนื้อหาประกาศ</label>
+                        <textarea id="announcementContent" class="announcement-textarea" placeholder="พิมพ์ข้อความประกาศที่ต้องการแจ้งเตือนครู...&#10;&#10;สามารถขึ้นบรรทัดใหม่ได้ตามต้องการ"></textarea>
+                    </div>
+
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn-primary" onclick="saveAnnouncement()">
+                            <i class="fas fa-save"></i> บันทึกประกาศ
+                        </button>
+                        <button class="btn-icon" onclick="previewAnnouncement()" style="background: #f59e0b; color: white; padding: 10px 20px;">
+                            <i class="fas fa-eye"></i> ดูตัวอย่าง
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-icon" style="background: #f1f5f9;" onclick="closeAdminPanel()">ปิด</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Teacher Form Modal -->
     <div id="teacherModal" class="modal-overlay">
         <div class="modal-box">
             <div class="modal-header">
@@ -357,8 +895,7 @@
                             <th>5</th><th>6</th><th>7</th>
                         </tr>
                     </thead>
-                    <tbody id="scheduleBody">
-                        </tbody>
+                    <tbody id="scheduleBody"></tbody>
                 </table>
             </div>
 
@@ -384,22 +921,373 @@
 
         let teachersData = [];
         const days = ['จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์'];
+        const ADMIN_PIN = '0000';
+        let isSystemLocked = false;
 
         window.onload = function() {
-            // Load saved semester or default
-            const savedSemester = localStorage.getItem('currentSemester') || '1/2567';
-            document.getElementById('semesterInput').value = savedSemester;
-
+            loadAdminSettings();
             renderScheduleTable();
             loadTeachers();
         }
 
-        function saveSemesterPreference() {
-            const val = document.getElementById('semesterInput').value;
-            localStorage.setItem('currentSemester', val);
+        // --- 2. ADMIN FUNCTIONS ---
+
+        async function loadAdminSettings() {
+            try {
+                // Load from Firebase
+                const settingsDoc = await db.collection("system_settings").doc("config").get();
+                
+                if(settingsDoc.exists) {
+                    const settings = settingsDoc.data();
+                    isSystemLocked = settings.isLocked || false;
+                    const defaultSemester = settings.defaultSemester || '2/2568';
+                    
+                    document.getElementById('semesterInput').value = defaultSemester;
+                    updateUILockState();
+
+                    // Check and show announcement
+                    checkAndShowAnnouncement(settings);
+                } else {
+                    // Initialize with defaults
+                    const defaultSemester = '2/2568';
+                    document.getElementById('semesterInput').value = defaultSemester;
+                    await db.collection("system_settings").doc("config").set({
+                        isLocked: false,
+                        defaultSemester: defaultSemester,
+                        announcementEnabled: false,
+                        announcementTitle: '',
+                        announcementContent: '',
+                        updated_at: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+            } catch(e) {
+                console.error("Error loading admin settings:", e);
+                // Fallback to default
+                document.getElementById('semesterInput').value = '2/2568';
+            }
         }
 
-        // --- 2. MAIN FUNCTIONS ---
+        function updateUILockState() {
+            const lockBanner = document.getElementById('lockBanner');
+            const btnAddTeacher = document.getElementById('btnAddTeacher');
+            const btnImport = document.getElementById('btnImport');
+            const btnExport = document.getElementById('btnExport');
+            
+            if(isSystemLocked) {
+                lockBanner.classList.add('active');
+                btnAddTeacher.disabled = true;
+                btnImport.disabled = true;
+                // Keep export enabled
+            } else {
+                lockBanner.classList.remove('active');
+                btnAddTeacher.disabled = false;
+                btnImport.disabled = false;
+            }
+
+            // Update all edit/delete buttons
+            document.querySelectorAll('.btn-edit, .btn-del').forEach(btn => {
+                btn.disabled = isSystemLocked;
+            });
+        }
+
+        function showAdminLogin() {
+            document.getElementById('adminLoginModal').classList.add('show');
+            setTimeout(() => document.getElementById('pin1').focus(), 100);
+        }
+
+        function closeAdminLogin() {
+            document.getElementById('adminLoginModal').classList.remove('show');
+            // Clear PIN
+            ['pin1', 'pin2', 'pin3', 'pin4'].forEach(id => {
+                document.getElementById(id).value = '';
+            });
+        }
+
+        function moveToNext(current, nextId) {
+            if(current.value.length === 1) {
+                if(nextId) {
+                    document.getElementById(nextId).focus();
+                } else {
+                    checkPin();
+                }
+            }
+        }
+
+        function handlePaste(e) {
+            e.preventDefault();
+            const paste = (e.clipboardData || window.clipboardData).getData('text');
+            if(paste.length === 4 && /^\d{4}$/.test(paste)) {
+                document.getElementById('pin1').value = paste[0];
+                document.getElementById('pin2').value = paste[1];
+                document.getElementById('pin3').value = paste[2];
+                document.getElementById('pin4').value = paste[3];
+                checkPin();
+            }
+        }
+
+        function checkPin() {
+            const pin = ['pin1', 'pin2', 'pin3', 'pin4']
+                .map(id => document.getElementById(id).value)
+                .join('');
+            
+            if(pin.length === 4) {
+                verifyPin();
+            }
+        }
+
+        async function verifyPin() {
+            const pin = ['pin1', 'pin2', 'pin3', 'pin4']
+                .map(id => document.getElementById(id).value)
+                .join('');
+
+            if(pin === ADMIN_PIN) {
+                closeAdminLogin();
+                await showAdminPanel();
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'รหัส PIN ไม่ถูกต้อง',
+                    text: 'กรุณาลองใหม่อีกครั้ง',
+                    confirmButtonColor: '#ef4444'
+                });
+                // Clear PIN
+                ['pin1', 'pin2', 'pin3', 'pin4'].forEach(id => {
+                    document.getElementById(id).value = '';
+                });
+                document.getElementById('pin1').focus();
+            }
+        }
+
+        async function showAdminPanel() {
+            try {
+                // Load current settings
+                const settingsDoc = await db.collection("system_settings").doc("config").get();
+                
+                if(settingsDoc.exists) {
+                    const settings = settingsDoc.data();
+                    
+                    // Lock settings
+                    document.getElementById('systemLockToggle').checked = settings.isLocked || false;
+                    updateLockStatusBadge();
+                    
+                    // Semester settings
+                    document.getElementById('defaultSemesterInput').value = settings.defaultSemester || '2/2568';
+                    
+                    // Announcement settings
+                    document.getElementById('announcementToggle').checked = settings.announcementEnabled || false;
+                    document.getElementById('announcementTitle').value = settings.announcementTitle || '';
+                    document.getElementById('announcementContent').value = settings.announcementContent || '';
+                    updateAnnouncementStatus();
+                }
+
+                document.getElementById('adminPanelModal').classList.add('show');
+            } catch(e) {
+                console.error("Error loading admin panel:", e);
+                Swal.fire('Error', 'ไม่สามารถโหลดการตั้งค่าได้', 'error');
+            }
+        }
+
+        function closeAdminPanel() {
+            document.getElementById('adminPanelModal').classList.remove('show');
+        }
+
+        async function updateSystemLock() {
+            const isLocked = document.getElementById('systemLockToggle').checked;
+            
+            try {
+                await db.collection("system_settings").doc("config").update({
+                    isLocked: isLocked,
+                    updated_at: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                isSystemLocked = isLocked;
+                updateLockStatusBadge();
+                updateUILockState();
+
+                Swal.fire({
+                    icon: 'success',
+                    title: isLocked ? 'ล็อกระบบแล้ว' : 'ปลดล็อกระบบแล้ว',
+                    text: isLocked ? 'ครูไม่สามารถแก้ไขข้อมูลได้' : 'ครูสามารถแก้ไขข้อมูลได้ตามปกติ',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            } catch(e) {
+                console.error("Error updating lock status:", e);
+                Swal.fire('Error', 'ไม่สามารถอัปเดตสถานะได้', 'error');
+            }
+        }
+
+        function updateLockStatusBadge() {
+            const isLocked = document.getElementById('systemLockToggle').checked;
+            const badge = document.getElementById('lockStatus');
+            
+            if(isLocked) {
+                badge.className = 'status-badge locked';
+                badge.innerHTML = '<i class="fas fa-lock"></i> ล็อกอยู่';
+            } else {
+                badge.className = 'status-badge unlocked';
+                badge.innerHTML = '<i class="fas fa-unlock"></i> ปลดล็อก';
+            }
+        }
+
+        async function updateDefaultSemester() {
+            const semester = document.getElementById('defaultSemesterInput').value.trim();
+            
+            if(!semester) {
+                return Swal.fire('ข้อมูลไม่ครบ', 'กรุณาระบุภาคเรียน', 'warning');
+            }
+
+            try {
+                await db.collection("system_settings").doc("config").update({
+                    defaultSemester: semester,
+                    updated_at: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                document.getElementById('semesterInput').value = semester;
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'บันทึกสำเร็จ',
+                    text: `ตั้งค่าภาคเรียนเริ่มต้นเป็น ${semester} แล้ว`,
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+
+                // Reload teachers with new semester
+                loadTeachers();
+            } catch(e) {
+                console.error("Error updating default semester:", e);
+                Swal.fire('Error', 'ไม่สามารถบันทึกการตั้งค่าได้', 'error');
+            }
+        }
+
+        // --- ANNOUNCEMENT FUNCTIONS ---
+
+        function checkAndShowAnnouncement(settings) {
+            const announcementEnabled = settings.announcementEnabled || false;
+            const announcementTitle = settings.announcementTitle || '';
+            const announcementContent = settings.announcementContent || '';
+
+            if(!announcementEnabled || !announcementContent.trim()) {
+                return; // Don't show if disabled or empty
+            }
+
+            // Check if user clicked "don't show today"
+            const today = new Date().toDateString();
+            const dontShowDate = localStorage.getItem('announcement_hidden_date');
+            
+            if(dontShowDate === today) {
+                return; // Don't show if user opted out today
+            }
+
+            // Show announcement
+            document.getElementById('announcementModalTitle').textContent = announcementTitle || 'ประกาศสำคัญ';
+            document.getElementById('announcementModalContent').textContent = announcementContent;
+            
+            setTimeout(() => {
+                document.getElementById('announcementModal').classList.add('show');
+            }, 500); // Delay 0.5s after page load
+        }
+
+        function closeAnnouncement() {
+            const dontShow = document.getElementById('dontShowToday').checked;
+            
+            if(dontShow) {
+                const today = new Date().toDateString();
+                localStorage.setItem('announcement_hidden_date', today);
+            }
+
+            document.getElementById('announcementModal').classList.remove('show');
+        }
+
+        function updateAnnouncementStatus() {
+            const isEnabled = document.getElementById('announcementToggle').checked;
+            const badge = document.getElementById('announcementStatus');
+            
+            if(isEnabled) {
+                badge.style.background = '#dbeafe';
+                badge.style.color = '#2563eb';
+                badge.innerHTML = '<i class="fas fa-bell"></i> เปิดการแสดง';
+            } else {
+                badge.style.background = '#d1fae5';
+                badge.style.color = '#059669';
+                badge.innerHTML = '<i class="fas fa-bell-slash"></i> ปิดการแสดง';
+            }
+        }
+
+        async function saveAnnouncement() {
+            const enabled = document.getElementById('announcementToggle').checked;
+            const title = document.getElementById('announcementTitle').value.trim();
+            const content = document.getElementById('announcementContent').value.trim();
+
+            if(enabled && !content) {
+                return Swal.fire('ข้อมูลไม่ครบ', 'กรุณากรอกเนื้อหาประกาศ', 'warning');
+            }
+
+            try {
+                await db.collection("system_settings").doc("config").update({
+                    announcementEnabled: enabled,
+                    announcementTitle: title,
+                    announcementContent: content,
+                    updated_at: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'บันทึกสำเร็จ',
+                    text: enabled ? 'ประกาศจะแสดงเมื่อครูเข้าสู่ระบบ' : 'ปิดการแสดงประกาศแล้ว',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            } catch(e) {
+                console.error("Error saving announcement:", e);
+                Swal.fire('Error', 'ไม่สามารถบันทึกประกาศได้', 'error');
+            }
+        }
+
+        function previewAnnouncement() {
+            const title = document.getElementById('announcementTitle').value.trim() || 'ประกาศสำคัญ';
+            const content = document.getElementById('announcementContent').value.trim() || 'ไม่มีเนื้อหาประกาศ';
+
+            document.getElementById('announcementModalTitle').textContent = title;
+            document.getElementById('announcementModalContent').textContent = content;
+            document.getElementById('dontShowToday').checked = false;
+            
+            document.getElementById('announcementModal').classList.add('show');
+        }
+
+        async function updateDefaultSemester() {
+            const semester = document.getElementById('defaultSemesterInput').value.trim();
+            
+            if(!semester) {
+                return Swal.fire('ข้อมูลไม่ครบ', 'กรุณาระบุภาคเรียน', 'warning');
+            }
+
+            try {
+                await db.collection("system_settings").doc("config").update({
+                    defaultSemester: semester,
+                    updated_at: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                document.getElementById('semesterInput').value = semester;
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'บันทึกสำเร็จ',
+                    text: `ตั้งค่าภาคเรียนเริ่มต้นเป็น ${semester} แล้ว`,
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+
+                // Reload teachers with new semester
+                loadTeachers();
+            } catch(e) {
+                console.error("Error updating default semester:", e);
+                Swal.fire('Error', 'ไม่สามารถบันทึกการตั้งค่าได้', 'error');
+            }
+        }
+
+        // --- 3. MAIN FUNCTIONS ---
         
         async function loadTeachers() {
             const semester = document.getElementById('semesterInput').value.trim();
@@ -410,7 +1298,6 @@
             loader.style.display = 'block';
 
             try {
-                // Remove orderBy to prevent index error on initial load
                 const snap = await db.collection("teachers")
                     .where("semester", "==", semester)
                     .where("active", "==", true)
@@ -423,7 +1310,6 @@
                     teachersData.push(data);
                 });
 
-                // Sort using JS instead
                 teachersData.sort((a, b) => a.name.localeCompare(b.name, 'th'));
 
                 loader.style.display = 'none';
@@ -455,7 +1341,6 @@
                 const card = document.createElement('div');
                 card.className = 't-card';
                 
-                // Visual Schedule - Improved: Show period count instead of dots
                 let scheduleHTML = '';
                 const dayShortNames = ['จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.'];
                 days.forEach((day, index) => {
@@ -475,6 +1360,7 @@
                 });
 
                 const totalLoad = Object.values(t.schedule).flat().length;
+                const disabled = isSystemLocked ? 'disabled' : '';
 
                 card.innerHTML = `
                     <div class="t-header">
@@ -486,8 +1372,8 @@
                             </p>
                         </div>
                         <div class="t-actions">
-                            <button class="btn-edit" onclick="editTeacher('${t.id}')"><i class="fas fa-pencil-alt"></i></button>
-                            <button class="btn-del" onclick="deleteTeacher('${t.id}', '${t.name}')"><i class="fas fa-trash-alt"></i></button>
+                            <button class="btn-edit" onclick="editTeacher('${t.id}')" ${disabled}><i class="fas fa-pencil-alt"></i></button>
+                            <button class="btn-del" onclick="deleteTeacher('${t.id}', '${t.name}')" ${disabled}><i class="fas fa-trash-alt"></i></button>
                         </div>
                     </div>
                     <div class="schedule-mini">
@@ -507,7 +1393,7 @@
             renderGrid(filtered);
         }
 
-        // --- 3. MODAL & FORM LOGIC ---
+        // --- 4. MODAL & FORM LOGIC ---
 
         function renderScheduleTable() {
             const tbody = document.getElementById('scheduleBody');
@@ -538,7 +1424,6 @@
                             </div>
                         </td>
                     `;
-                    // Insert Lunch break after period 4
                     if(p === 4) {
                         cells += `<td rowspan="1" style="padding:0;"><div class="lunch-col">พักเที่ยง</div></td>`;
                     }
@@ -556,27 +1441,28 @@
                 cell.classList.add('active');
             } else {
                 cell.classList.remove('active');
-                // Clear inputs
                 cell.querySelector('.code-input').value = '';
                 cell.querySelector('.grade-input').value = '';
             }
         }
 
         function openModal() {
+            if(isSystemLocked) {
+                return Swal.fire('ระบบถูกล็อก', 'ไม่สามารถเพิ่มข้อมูลได้ในขณะนี้', 'warning');
+            }
+
             document.getElementById('modalTitle').innerText = 'เพิ่มครูใหม่';
             document.getElementById('editId').value = '';
             document.getElementById('tName').value = '';
             document.getElementById('tDept').value = '';
             document.getElementById('tPrefix').value = 'นาย';
             
-            // Clear inputs
             document.querySelectorAll('.cb-input').forEach(cb => {
                 cb.checked = false;
                 toggleCell(cb);
             });
             
-            const modal = document.getElementById('teacherModal');
-            modal.classList.add('show');
+            document.getElementById('teacherModal').classList.add('show');
         }
 
         function closeModal() {
@@ -584,13 +1470,16 @@
         }
 
         function editTeacher(id) {
+            if(isSystemLocked) {
+                return Swal.fire('ระบบถูกล็อก', 'ไม่สามารถแก้ไขข้อมูลได้ในขณะนี้', 'warning');
+            }
+
             const t = teachersData.find(x => x.id === id);
             if(!t) return;
 
             document.getElementById('modalTitle').innerText = 'แก้ไขข้อมูลครู';
             document.getElementById('editId').value = id;
             
-            // Parse Name
             const prefixes = ['นาย', 'นางสาว', 'นาง', 'ว่าที่ร้อยตรี'];
             let prefix = 'นาย';
             let name = t.name;
@@ -605,17 +1494,11 @@
             document.getElementById('tName').value = name;
             document.getElementById('tDept').value = t.department;
 
-            // Clear first
             document.querySelectorAll('.cb-input').forEach(cb => {
                 cb.checked = false;
                 toggleCell(cb);
             });
 
-            // Set Data
-            // t.schedule is object: {"จันทร์": [1,2]} (Backward compatible)
-            // t.teachingDetails is object: {"จันทร์_1": {code: "xxx", grade: "yyy"}}
-            
-            // Loop checkbox to set busy periods
             if(t.schedule) {
                 Object.entries(t.schedule).forEach(([day, periods]) => {
                     periods.forEach(p => {
@@ -628,10 +1511,8 @@
                 });
             }
 
-            // Loop details to set inputs
             if(t.teachingDetails) {
                 Object.entries(t.teachingDetails).forEach(([key, detail]) => {
-                    // key is "Day_Period" e.g. "จันทร์_1"
                     const [day, p] = key.split('_');
                     const cell = document.getElementById(`cell_${day}_${p}`);
                     if(cell) {
@@ -645,6 +1526,10 @@
         }
 
         async function saveTeacher() {
+            if(isSystemLocked) {
+                return Swal.fire('ระบบถูกล็อก', 'ไม่สามารถบันทึกข้อมูลได้ในขณะนี้', 'warning');
+            }
+
             const id = document.getElementById('editId').value;
             const prefix = document.getElementById('tPrefix').value;
             const nameRaw = document.getElementById('tName').value.trim();
@@ -657,9 +1542,6 @@
 
             const fullName = prefix + nameRaw;
             
-            // Prepare Data Structure
-            // 1. schedule: For existing system compatibility (Array of periods)
-            // 2. teachingDetails: For new features (Code & Grade)
             const schedule = { "จันทร์": [], "อังคาร": [], "พุธ": [], "พฤหัสบดี": [], "ศุกร์": [] };
             const teachingDetails = {};
 
@@ -667,29 +1549,25 @@
                 const day = cb.dataset.day;
                 const p = parseInt(cb.dataset.period);
                 
-                // Add to schedule array
                 schedule[day].push(p);
 
-                // Get Details
                 const cell = cb.closest('.sch-cell');
                 const code = cell.querySelector('.code-input').value.trim();
                 const grade = cell.querySelector('.grade-input').value;
 
-                // Add to details object
                 teachingDetails[`${day}_${p}`] = {
                     code: code,
                     grade: grade
                 };
             });
 
-            // Sort schedule arrays
             Object.keys(schedule).forEach(k => schedule[k].sort((a,b)=>a-b));
 
             const payload = {
                 name: fullName,
                 department: dept,
                 schedule: schedule,
-                teachingDetails: teachingDetails, // New Field
+                teachingDetails: teachingDetails,
                 semester: semester,
                 active: true,
                 updated_at: firebase.firestore.FieldValue.serverTimestamp()
@@ -713,6 +1591,10 @@
         }
 
         async function deleteTeacher(id, name) {
+            if(isSystemLocked) {
+                return Swal.fire('ระบบถูกล็อก', 'ไม่สามารถลบข้อมูลได้ในขณะนี้', 'warning');
+            }
+
             const result = await Swal.fire({
                 title: 'ยืนยันการลบ?',
                 text: `ต้องการลบข้อมูล ${name} ใช่หรือไม่?`,
@@ -734,7 +1616,7 @@
             }
         }
 
-        // --- 4. EXPORT / IMPORT ---
+        // --- 5. EXPORT / IMPORT ---
         function exportTeachers() {
             if(teachersData.length === 0) return Swal.fire('ว่างเปล่า', 'ไม่มีข้อมูลให้ Export', 'info');
             
@@ -744,7 +1626,6 @@
                 let p = '', n = t.name;
                 for(let pf of prefixes) if(t.name.startsWith(pf)) { p = pf; n = t.name.substring(pf.length).trim(); break; }
                 
-                // Helper to format day schedule
                 const formatDay = (day) => {
                     const periods = t.schedule[day] || [];
                     const details = t.teachingDetails || {};
@@ -769,6 +1650,11 @@
         }
 
         function importTeachers(event) {
+            if(isSystemLocked) {
+                event.target.value = '';
+                return Swal.fire('ระบบถูกล็อก', 'ไม่สามารถนำเข้าข้อมูลได้ในขณะนี้', 'warning');
+            }
+
             const file = event.target.files[0];
             if(!file) return;
             const reader = new FileReader();
@@ -785,11 +1671,8 @@
                     
                     const [pf, nm, dp, d1, d2, d3, d4, d5] = cols;
                     
-                    // Simple Parsing (Only periods) - Advanced parsing for code/grade from CSV requires complex regex
-                    // For now, importing restores basic schedule structure
                     const parseSch = (str) => {
                         if(!str) return [];
-                        // Supports "1;2;3" or "1(TH101-M.1);2" format
                         return str.split(';').map(x => parseInt(x)).filter(x => !isNaN(x));
                     };
 
