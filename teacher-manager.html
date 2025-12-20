@@ -181,6 +181,35 @@
         .t-info p { color: #64748b; font-size: 0.9rem; }
         .t-dept-badge { background: #eff6ff; color: var(--primary); padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; display: inline-block; margin-top: 5px; }
 
+        /* Update Status Badge */
+        .update-status {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 8px;
+            padding: 6px 10px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        .update-status i {
+            font-size: 0.75rem;
+            color: #64748b;
+        }
+        .update-status .time-text {
+            font-size: 0.75rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+        .update-status.recent {
+            background: #ecfdf5;
+            border-color: #10b981;
+        }
+        .update-status.recent i,
+        .update-status.recent .time-text {
+            color: #059669;
+        }
+
         .t-actions { display: flex; gap: 8px; }
         .btn-edit { background: #f3f4f6; color: var(--primary); padding: 8px; border-radius: 50%; width: 35px; height: 35px; }
         .btn-del { background: #fef2f2; color: #ef4444; padding: 8px; border-radius: 50%; width: 35px; height: 35px; }
@@ -289,6 +318,57 @@
             margin-bottom: 15px;
         }
 
+        /* Color Picker Group */
+        .color-picker-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .color-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 10px;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        .color-option:hover {
+            border-color: var(--primary);
+            background: #f8fafc;
+        }
+        .color-option.selected {
+            border-color: var(--primary);
+            background: #eff6ff;
+        }
+        .color-preview {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            position: relative;
+        }
+        .color-option.selected .color-preview::after {
+            content: '\f00c';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 1.5rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .color-label {
+            font-size: 0.8rem;
+            color: #64748b;
+            font-weight: 600;
+        }
+
         /* Toggle Switch */
         .toggle-switch {
             position: relative;
@@ -308,7 +388,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: #ef4444; /* แดง = ปิด (unchecked) */
+            background-color: #ef4444;
             transition: .4s;
             border-radius: 30px;
         }
@@ -324,7 +404,7 @@
             border-radius: 50%;
         }
         input:checked + .toggle-slider {
-            background-color: #10b981; /* เขียว = เปิด (checked) */
+            background-color: #10b981;
         }
         input:checked + .toggle-slider:before {
             transform: translateX(30px);
@@ -519,7 +599,6 @@
         }
 
         .announcement-header {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
             padding: 25px 30px;
             color: white;
             position: relative;
@@ -631,6 +710,7 @@
             .announcement-header { padding: 20px; }
             .announcement-title { font-size: 1.2rem; }
             .announcement-body { padding: 20px; }
+            .color-picker-group { grid-template-columns: repeat(3, 1fr); }
         }
 
     </style>
@@ -704,7 +784,7 @@
     <!-- Announcement Modal -->
     <div id="announcementModal" class="announcement-modal">
         <div class="announcement-box">
-            <div class="announcement-header">
+            <div class="announcement-header" id="announcementHeader">
                 <div class="announcement-icon">🔔</div>
                 <div class="announcement-title" id="announcementModalTitle">ประกาศสำคัญ</div>
             </div>
@@ -827,6 +907,37 @@
                         <textarea id="announcementContent" class="announcement-textarea" placeholder="พิมพ์ข้อความประกาศที่ต้องการแจ้งเตือนครู...&#10;&#10;สามารถขึ้นบรรทัดใหม่ได้ตามต้องการ"></textarea>
                     </div>
 
+                    <!-- Color Picker -->
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label><i class="fas fa-palette"></i> เลือกสีพื้นหลังประกาศ</label>
+                        <div class="color-picker-group" id="colorPickerGroup">
+                            <div class="color-option" data-color="linear-gradient(135deg, #ef4444, #dc2626)" onclick="selectColor(this)">
+                                <div class="color-preview" style="background: linear-gradient(135deg, #ef4444, #dc2626);"></div>
+                                <span class="color-label">แดง</span>
+                            </div>
+                            <div class="color-option" data-color="linear-gradient(135deg, #3b82f6, #2563eb)" onclick="selectColor(this)">
+                                <div class="color-preview" style="background: linear-gradient(135deg, #3b82f6, #2563eb);"></div>
+                                <span class="color-label">น้ำเงิน</span>
+                            </div>
+                            <div class="color-option" data-color="linear-gradient(135deg, #10b981, #059669)" onclick="selectColor(this)">
+                                <div class="color-preview" style="background: linear-gradient(135deg, #10b981, #059669);"></div>
+                                <span class="color-label">เขียว</span>
+                            </div>
+                            <div class="color-option" data-color="linear-gradient(135deg, #f59e0b, #d97706)" onclick="selectColor(this)">
+                                <div class="color-preview" style="background: linear-gradient(135deg, #f59e0b, #d97706);"></div>
+                                <span class="color-label">ส้ม</span>
+                            </div>
+                            <div class="color-option" data-color="linear-gradient(135deg, #8b5cf6, #7c3aed)" onclick="selectColor(this)">
+                                <div class="color-preview" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);"></div>
+                                <span class="color-label">ม่วง</span>
+                            </div>
+                            <div class="color-option" data-color="linear-gradient(135deg, #ec4899, #db2777)" onclick="selectColor(this)">
+                                <div class="color-preview" style="background: linear-gradient(135deg, #ec4899, #db2777);"></div>
+                                <span class="color-label">ชมพู</span>
+                            </div>
+                        </div>
+                    </div>
+
                     <div style="display: flex; gap: 10px;">
                         <button class="btn-primary" onclick="saveAnnouncement()">
                             <i class="fas fa-save"></i> บันทึกประกาศ
@@ -923,38 +1034,82 @@
         const days = ['จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์'];
         const ADMIN_PIN = '0000';
         let isSystemLocked = false;
+        let selectedAnnouncementColor = 'linear-gradient(135deg, #ef4444, #dc2626)'; // Default red
 
-        // --- ANNOUNCEMENT FUNCTIONS (Need to be defined before loadAdminSettings) ---
+        // --- TIME AGO FUNCTION ---
+        function getTimeAgo(timestamp) {
+            if (!timestamp) return 'ไม่ทราบ';
+            
+            const now = new Date();
+            const updateTime = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+            const diffMs = now - updateTime;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+
+            if (diffMins < 1) return 'เมื่อสักครู่';
+            if (diffMins < 60) return `${diffMins} นาทีที่แล้ว`;
+            if (diffHours < 24) return `${diffHours} ชั่วโมงที่แล้ว`;
+            if (diffDays < 7) return `${diffDays} วันที่แล้ว`;
+            if (diffDays < 30) return `${Math.floor(diffDays / 7)} สัปดาห์ที่แล้ว`;
+            if (diffDays < 365) return `${Math.floor(diffDays / 30)} เดือนที่แล้ว`;
+            return `${Math.floor(diffDays / 365)} ปีที่แล้ว`;
+        }
+
+        function isRecent(timestamp) {
+            if (!timestamp) return false;
+            const now = new Date();
+            const updateTime = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+            const diffHours = (now - updateTime) / 3600000;
+            return diffHours < 24; // Recent if within 24 hours
+        }
+
+        // --- COLOR PICKER FUNCTION ---
+        function selectColor(element) {
+            // Remove selected class from all options
+            document.querySelectorAll('.color-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            // Add selected class to clicked option
+            element.classList.add('selected');
+            
+            // Save selected color
+            selectedAnnouncementColor = element.dataset.color;
+        }
+
+        // --- ANNOUNCEMENT FUNCTIONS ---
         
         function checkAndShowAnnouncement(settings) {
             const announcementEnabled = settings.announcementEnabled || false;
             const announcementTitle = settings.announcementTitle || '';
             const announcementContent = settings.announcementContent || '';
+            const announcementColor = settings.announcementColor || 'linear-gradient(135deg, #ef4444, #dc2626)';
 
-            console.log('Checking announcement:', { announcementEnabled, announcementTitle, announcementContent });
+            console.log('Checking announcement:', { announcementEnabled, announcementTitle, announcementContent, announcementColor });
 
             if(!announcementEnabled || !announcementContent.trim()) {
                 console.log('Announcement disabled or empty');
-                return; // Don't show if disabled or empty
+                return;
             }
 
-            // Check if user clicked "don't show today"
             const today = new Date().toDateString();
             const dontShowDate = localStorage.getItem('announcement_hidden_date');
             
             if(dontShowDate === today) {
                 console.log('User opted out today');
-                return; // Don't show if user opted out today
+                return;
             }
 
-            // Show announcement
-            console.log('Showing announcement');
+            // Apply color and show announcement
+            console.log('Showing announcement with color:', announcementColor);
+            document.getElementById('announcementHeader').style.background = announcementColor;
             document.getElementById('announcementModalTitle').textContent = announcementTitle || 'ประกาศสำคัญ';
             document.getElementById('announcementModalContent').textContent = announcementContent;
             
             setTimeout(() => {
                 document.getElementById('announcementModal').classList.add('show');
-            }, 500); // Delay 0.5s after page load
+            }, 500);
         }
 
         function closeAnnouncement() {
@@ -977,7 +1132,7 @@
                 badge.style.color = '#2563eb';
                 badge.innerHTML = '<i class="fas fa-bell"></i> เปิดการแสดง';
             } else {
-                badge.style.background = '#fee2e2'; /* แดง = ปิด */
+                badge.style.background = '#fee2e2';
                 badge.style.color = '#dc2626';
                 badge.innerHTML = '<i class="fas fa-bell-slash"></i> ปิดการแสดง';
             }
@@ -987,6 +1142,7 @@
             const enabled = document.getElementById('announcementToggle').checked;
             const title = document.getElementById('announcementTitle').value.trim();
             const content = document.getElementById('announcementContent').value.trim();
+            const color = selectedAnnouncementColor;
 
             if(enabled && !content) {
                 return Swal.fire('ข้อมูลไม่ครบ', 'กรุณากรอกเนื้อหาประกาศ', 'warning');
@@ -997,6 +1153,7 @@
                     announcementEnabled: enabled,
                     announcementTitle: title,
                     announcementContent: content,
+                    announcementColor: color,
                     updated_at: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
@@ -1008,7 +1165,6 @@
                     showConfirmButton: false
                 });
 
-                // Clear the "don't show today" flag so admin can test immediately
                 localStorage.removeItem('announcement_hidden_date');
             } catch(e) {
                 console.error("Error saving announcement:", e);
@@ -1019,7 +1175,9 @@
         function previewAnnouncement() {
             const title = document.getElementById('announcementTitle').value.trim() || 'ประกาศสำคัญ';
             const content = document.getElementById('announcementContent').value.trim() || 'ไม่มีเนื้อหาประกาศ';
+            const color = selectedAnnouncementColor;
 
+            document.getElementById('announcementHeader').style.background = color;
             document.getElementById('announcementModalTitle').textContent = title;
             document.getElementById('announcementModalContent').textContent = content;
             document.getElementById('dontShowToday').checked = false;
@@ -1031,11 +1189,8 @@
             console.log('🚀 Starting application...');
             
             renderScheduleTable();
-            
-            // Load admin settings first (sets semester)
             await loadAdminSettings();
             
-            // Then load teachers with the correct semester
             console.log('📚 Loading teachers with semester:', document.getElementById('semesterInput').value);
             loadTeachers();
         }
@@ -1046,7 +1201,6 @@
             try {
                 console.log('🔄 Loading admin settings...');
                 
-                // Load from Firebase
                 const settingsDoc = await db.collection("system_settings").doc("config").get();
                 
                 if(settingsDoc.exists) {
@@ -1060,12 +1214,10 @@
                     document.getElementById('semesterInput').value = defaultSemester;
                     updateUILockState();
 
-                    // Check and show announcement
                     checkAndShowAnnouncement(settings);
                 } else {
                     console.log('⚠️ No settings found, creating defaults...');
                     
-                    // Initialize with defaults
                     const defaultSemester = '2/2568';
                     document.getElementById('semesterInput').value = defaultSemester;
                     
@@ -1075,6 +1227,7 @@
                         announcementEnabled: false,
                         announcementTitle: '',
                         announcementContent: '',
+                        announcementColor: 'linear-gradient(135deg, #ef4444, #dc2626)',
                         updated_at: firebase.firestore.FieldValue.serverTimestamp()
                     });
                     
@@ -1082,7 +1235,6 @@
                 }
             } catch(e) {
                 console.error("❌ Error loading admin settings:", e);
-                // Fallback to default
                 const fallbackSemester = '2/2568';
                 console.log('⚠️ Using fallback semester:', fallbackSemester);
                 document.getElementById('semesterInput').value = fallbackSemester;
@@ -1093,20 +1245,17 @@
             const lockBanner = document.getElementById('lockBanner');
             const btnAddTeacher = document.getElementById('btnAddTeacher');
             const btnImport = document.getElementById('btnImport');
-            const btnExport = document.getElementById('btnExport');
             
             if(isSystemLocked) {
                 lockBanner.classList.add('active');
                 btnAddTeacher.disabled = true;
                 btnImport.disabled = true;
-                // Keep export enabled
             } else {
                 lockBanner.classList.remove('active');
                 btnAddTeacher.disabled = false;
                 btnImport.disabled = false;
             }
 
-            // Update all edit/delete buttons
             document.querySelectorAll('.btn-edit, .btn-del').forEach(btn => {
                 btn.disabled = isSystemLocked;
             });
@@ -1119,7 +1268,6 @@
 
         function closeAdminLogin() {
             document.getElementById('adminLoginModal').classList.remove('show');
-            // Clear PIN
             ['pin1', 'pin2', 'pin3', 'pin4'].forEach(id => {
                 document.getElementById(id).value = '';
             });
@@ -1172,7 +1320,6 @@
                     text: 'กรุณาลองใหม่อีกครั้ง',
                     confirmButtonColor: '#ef4444'
                 });
-                // Clear PIN
                 ['pin1', 'pin2', 'pin3', 'pin4'].forEach(id => {
                     document.getElementById(id).value = '';
                 });
@@ -1182,24 +1329,32 @@
 
         async function showAdminPanel() {
             try {
-                // Load current settings
                 const settingsDoc = await db.collection("system_settings").doc("config").get();
                 
                 if(settingsDoc.exists) {
                     const settings = settingsDoc.data();
                     
-                    // Lock settings
                     document.getElementById('systemLockToggle').checked = settings.isLocked || false;
                     updateLockStatusBadge();
                     
-                    // Semester settings
                     document.getElementById('defaultSemesterInput').value = settings.defaultSemester || '2/2568';
                     
-                    // Announcement settings
                     document.getElementById('announcementToggle').checked = settings.announcementEnabled || false;
                     document.getElementById('announcementTitle').value = settings.announcementTitle || '';
                     document.getElementById('announcementContent').value = settings.announcementContent || '';
                     updateAnnouncementStatus();
+
+                    // Set selected color
+                    const savedColor = settings.announcementColor || 'linear-gradient(135deg, #ef4444, #dc2626)';
+                    selectedAnnouncementColor = savedColor;
+                    
+                    // Mark the correct color as selected
+                    document.querySelectorAll('.color-option').forEach(opt => {
+                        opt.classList.remove('selected');
+                        if(opt.dataset.color === savedColor) {
+                            opt.classList.add('selected');
+                        }
+                    });
                 }
 
                 document.getElementById('adminPanelModal').classList.add('show');
@@ -1275,7 +1430,6 @@
                     showConfirmButton: false
                 });
 
-                // Reload teachers with new semester
                 loadTeachers();
             } catch(e) {
                 console.error("Error updating default semester:", e);
@@ -1358,6 +1512,11 @@
                 const totalLoad = Object.values(t.schedule).flat().length;
                 const disabled = isSystemLocked ? 'disabled' : '';
 
+                // Update status with time ago
+                const timeAgo = getTimeAgo(t.updated_at);
+                const recent = isRecent(t.updated_at);
+                const updateStatusClass = recent ? 'update-status recent' : 'update-status';
+
                 card.innerHTML = `
                     <div class="t-header">
                         <div class="t-info">
@@ -1366,6 +1525,10 @@
                             <p style="margin-top: 5px; font-size: 0.85rem;">
                                 <i class="fas fa-clock"></i> ภาระงาน: ${totalLoad} คาบ/สัปดาห์
                             </p>
+                            <div class="${updateStatusClass}">
+                                <i class="fas fa-sync-alt"></i>
+                                <span class="time-text">แก้ไขล่าสุด: ${timeAgo}</span>
+                            </div>
                         </div>
                         <div class="t-actions">
                             <button class="btn-edit" onclick="editTeacher('${t.id}')" ${disabled}><i class="fas fa-pencil-alt"></i></button>
@@ -1680,7 +1843,8 @@
                     try {
                         await db.collection("teachers").add({
                             name: pf+nm, department: dp, schedule: sch, semester: semester, active: true,
-                            created_at: firebase.firestore.FieldValue.serverTimestamp()
+                            created_at: firebase.firestore.FieldValue.serverTimestamp(),
+                            updated_at: firebase.firestore.FieldValue.serverTimestamp()
                         });
                         count++;
                     } catch(err) { console.error(err); }
