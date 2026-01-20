@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบจัดสอนแทน V.8.5.1 (Hotfix: Modal Error)</title>
+    <title>ระบบจัดสอนแทน V.9.0 (Multi-Room Mode + Period Selection)</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -117,6 +117,49 @@
         .edit-badge { display:none; position:absolute; top:-10px; right:20px; background:#f59e0b; color:white; padding:5px 15px; border-radius:20px; font-weight:bold; box-shadow:0 2px 5px rgba(0,0,0,0.2); animation:pulse 1.5s infinite; }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
 
+        /* NEW: Multi-Room Mode Toggle */
+        .multi-room-toggle {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #f59e0b;
+            margin-bottom: 20px;
+            animation: slideIn 0.5s ease-out;
+        }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+        .toggle-switch-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .toggle-switch-container label {
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            font-weight: 700;
+            color: #92400e;
+        }
+        .toggle-switch-container input[type="checkbox"] {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            accent-color: #f59e0b;
+        }
+        .multi-room-badge {
+            display: inline-block;
+            background: #f59e0b;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-left: 5px;
+            animation: bounce 1.5s infinite;
+        }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+
         .input-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-weight: 500; font-size: 0.9rem; }
         select, input[type="text"], input[type="date"], input[type="month"] { 
@@ -141,7 +184,25 @@
         .card { background: white; border: 1px solid #e2e8f0; border-radius: 10px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); transition: all 0.3s ease; }
         .card:hover { box-shadow: 0 4px 15px rgba(30, 58, 138, 0.1); transform: translateY(-2px); }
         .card-header { background: #fee2e2; padding: 10px 20px; color: #991b1b; font-weight: 600; border-left: 4px solid #ef4444; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
-        .period-block { padding: 15px; border-bottom: 1px dashed #e2e8f0; }
+        
+        /* NEW: Period Block Styles */
+        .period-block { 
+            padding: 15px; 
+            border-bottom: 1px dashed #e2e8f0; 
+            transition: all 0.3s ease;
+        }
+        .period-block.disabled {
+            opacity: 0.5;
+            background: #f8fafc;
+            pointer-events: none;
+        }
+        .period-checkbox {
+            width: 20px !important;
+            height: 20px !important;
+            margin-right: 10px !important;
+            cursor: pointer;
+            accent-color: var(--primary);
+        }
         .period-title { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
         .badge-p { background: var(--accent); color: white; padding: 4px 10px; border-radius: 5px; font-weight: bold; font-size: 0.9rem; }
         
@@ -152,6 +213,17 @@
         .workload-badge { margin-left: auto; font-size: 0.75rem; padding: 2px 8px; border-radius: 10px; background: #e2e8f0; white-space: nowrap; }
         .load-high { background: #fecaca; color: #991b1b; }
         .load-medium { background: #fef08a; color: #854d0e; }
+        
+        /* NEW: Multi-Room Indicator */
+        .multi-room-indicator {
+            background: #fef08a;
+            color: #854d0e;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            border: 1px solid #f59e0b;
+        }
 
         .btn-primary, .btn-save, .btn-warning, .btn-print, .btn-summary { 
             position: relative;
@@ -304,8 +376,6 @@
         .rank-2 { background: #c0c0c0; color: #1e293b; }
         .rank-3 { background: #cd7f32; color: white; }
 
-        /* Teacher Management CSS - Removed (Use teacher-manager.html) */
-
         .a4-paper {
             width: 210mm; 
             min-height: 297mm; 
@@ -398,7 +468,6 @@
             body { background: white; padding: 0; margin: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             .app-container, .modal-tools { display: none !important; }
             
-            /* ซ่อน Modals ทั้งหมดเมื่อพิมพ์ */
             #copyModal { display: none !important; }
             
             .modal { position: static; background: white; width: 100%; height: auto; display: block !important; }
@@ -459,8 +528,8 @@
         <div class="header">
             <img src="https://nonthaphathr.github.io/uploadimg/logosonthan.png" alt="Logo" class="header-logo">
             <div class="header-text">
-                <h1>ระบบจัดสอนแทน V.8.5</h1>
-                <p>✨ Auto-fill + แก้ไขหน้าประวัติ</p>
+                <h1>ระบบจัดสอนแทน V.9.0</h1>
+                <p>✨ Multi-Room Mode + Period Selection</p>
             </div>
         </div>
 
@@ -468,10 +537,10 @@
             <button class="nav-btn active" onclick="switchTab('allocation')">📝 จัดสอนแทน</button>
             <button class="nav-btn" onclick="switchTab('history')">📂 ประวัติ/แก้ไข</button>
             <a href="teacher-manager.html" target="_blank" style="text-decoration: none;">
-    <button class="nav-btn" onclick="event.stopPropagation()">
-        👥 จัดการครู/ตาราง (ระบบใหม่) <i class="fas fa-external-link-alt" style="font-size: 0.8rem; margin-left: 5px;"></i>
-    </button>
-</a>
+                <button class="nav-btn" onclick="event.stopPropagation()">
+                    👥 จัดการครู/ตาราง <i class="fas fa-external-link-alt" style="font-size: 0.8rem; margin-left: 5px;"></i>
+                </button>
+            </a>
             <button class="nav-btn" onclick="switchTab('dashboard')">📊 ดูสถิติ</button>
         </div>
 
@@ -498,6 +567,22 @@
                             ⚠️ ต้องตรงกับภาคเรียนที่บันทึกใน "จัดการครู/ตาราง"
                         </p>
                     </div>
+                </div>
+
+                <!-- NEW: Multi-Room Mode Toggle -->
+                <div class="multi-room-toggle">
+                    <div class="toggle-switch-container">
+                        <label>
+                            <input type="checkbox" id="multiRoomMode">
+                            <span>
+                                <i class="fas fa-door-open"></i> เปิดใช้โหมด "ดูแลหลายห้อง"
+                                <span class="multi-room-badge">NEW</span>
+                            </span>
+                        </label>
+                    </div>
+                    <p style="font-size: 0.85rem; color: #92400e; margin-top: 8px; margin-left: 35px;">
+                        ⚠️ เมื่อเปิดใช้งาน: ครูสามารถสอนแทนได้แม้ไม่มีคาบว่าง (จะดูแลหลายห้องพร้อมกัน)
+                    </p>
                 </div>
 
                 <div class="input-row">
@@ -561,7 +646,12 @@
                     </div>
                 </div>
 
-                <h3 style="margin-bottom:15px; color:var(--primary);">ผลการค้นหา (กรุณาระบุรายละเอียด)</h3>
+                <h3 style="margin-bottom:15px; color:var(--primary);">
+                    ผลการค้นหา (กรุณาระบุรายละเอียด)
+                    <span style="font-size: 0.9rem; color: #64748b; font-weight: normal;">
+                        - ติ๊กเลือกคาบที่ต้องการจัดสอนแทน
+                    </span>
+                </h3>
                 <div id="matchCards"></div>
                 
                 <div style="margin-top: 20px; padding: 15px; background: #eff6ff; border-radius: 8px; border: 1px solid #93c5fd;">
@@ -593,25 +683,6 @@
                 </button>
             </div>
             <div id="historyList"></div>
-        </div>
-
-        <!-- Teachers Management Tab -->
-        <div id="teachers" class="page-section">
-            <h3 style="color: var(--primary); margin-bottom: 20px;">👥 จัดการข้อมูลครูและตารางสอน</h3>
-            
-            <div class="semester-selector">
-                <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
-                    <p style="color: #64748b; flex: 1;">
-                        ⚠️ หน้านี้ถูกย้ายไปยัง "จัดการครู/ตาราง (ระบบใหม่)" แล้ว<br>
-                        กรุณาใช้ปุ่มด้านบนเพื่อเข้าสู่ระบบจัดการครู
-                    </p>
-                </div>
-            </div>
-
-            <div style="text-align: center; padding: 50px;">
-                <i class="fas fa-arrow-up" style="font-size: 3rem; color: var(--primary);"></i>
-                <p style="margin-top: 20px; font-size: 1.1rem;">คลิกปุ่ม "จัดการครู/ตาราง (ระบบใหม่)" ด้านบน</p>
-            </div>
         </div>
 
         <!-- Dashboard Tab -->
@@ -741,8 +812,6 @@
         </div>
     </div>
 
-    <!-- Teacher Form Modal - REMOVED (Use teacher-manager.html) -->
-
     <script>
         // ============================================
         // CONFIG & INIT
@@ -805,14 +874,12 @@
 
             if(id === 'history') loadHistory();
             if(id === 'dashboard') loadStatistics();
-            if(id === 'teachers') loadTeachers();
         }
 
         // ============================================
         // MODAL MANAGEMENT
         // ============================================
         function closeAllModals() {
-            // Close only existing modals
             const copyModal = document.getElementById('copyModal');
             const previewModal = document.getElementById('previewModal');
             
@@ -827,12 +894,8 @@
         };
 
         // ============================================
-        // TEACHER MANAGEMENT (Moved to teacher-manager.html)
+        // TEACHER MANAGEMENT
         // ============================================
-        // Functions removed: loadTeachers, showAddTeacherForm, editTeacher, 
-        // saveTeacher, deleteTeacher, exportTeachers, importTeachers
-        // Please use teacher-manager.html for teacher management
-
         function updateTeacherCheckboxes() {
             const container = document.getElementById('teacherCheckboxes');
             container.innerHTML = teachersData.map((t, i) => `
@@ -872,12 +935,10 @@
             console.log('🚀 ===== SYSTEM INITIALIZATION =====');
             initializeRouting();
             
-            // Load saved semester from localStorage or default to current semester
             const savedSemester = localStorage.getItem('selectedSemester') || '2/2568';
             document.getElementById('semesterSelect').value = savedSemester;
             console.log('📚 Initial Semester:', savedSemester);
             
-            // Load teachers data for selected semester
             await reloadTeachersData();
 
             document.getElementById('docDate').valueAsDate = new Date();
@@ -892,6 +953,7 @@
             
             console.log('✅ System initialization complete');
         };
+        
         // ============================================
         // SEMESTER & TEACHER DATA RELOAD
         // ============================================
@@ -900,7 +962,6 @@
             console.log('🔄 ===== RELOADING TEACHERS DATA =====');
             console.log('📚 Selected Semester:', semester);
             
-            // Save to localStorage
             localStorage.setItem('selectedSemester', semester);
             
             Swal.fire({
@@ -925,7 +986,6 @@
 
                 console.log('✅ Loaded', teachersData.length, 'teachers from Firebase');
                 
-                // DEBUG
                 teachersData.forEach(t => {
                     console.log(`   👨‍🏫 ${t.name}:`, {
                         hasSchedule: !!t.schedule,
@@ -936,7 +996,6 @@
 
                 updateTeacherCheckboxes();
                 
-                // Reset selection
                 selectedTeachers = [];
                 document.getElementById('selectedTags').innerHTML = '';
                 document.querySelectorAll('.teacher-grid input[type="checkbox"]').forEach(cb => cb.checked = false);
@@ -1006,15 +1065,27 @@
             }
         }
 
+        // NEW: Toggle Period Selection
+        function togglePeriodSelection(checkbox, absentName, period) {
+            const periodBlock = checkbox.closest('.period-block');
+            if(checkbox.checked) {
+                periodBlock.classList.remove('disabled');
+            } else {
+                periodBlock.classList.add('disabled');
+            }
+        }
+
         async function processAllocation() {
             console.log('🚀 ===== PROCESS ALLOCATION START =====');
             daySchedule = document.getElementById('daySchedule').value;
             docDate = document.getElementById('docDate').value;
             const isEditMode = document.getElementById('currentEditId').value !== "";
+            const isMultiRoomMode = document.getElementById('multiRoomMode').checked;
 
             console.log('📋 Selected Day:', daySchedule);
             console.log('📅 Selected Date:', docDate);
             console.log('👥 Selected Teachers:', selectedTeachers);
+            console.log('🚪 Multi-Room Mode:', isMultiRoomMode);
 
             if(!daySchedule || !docDate || selectedTeachers.length === 0) 
                 return Swal.fire('ข้อมูลไม่ครบ', 'กรุณาเลือกวันในตาราง, วันที่เอกสาร และครูที่ลา', 'warning');
@@ -1037,7 +1108,7 @@
             const container = document.getElementById('matchCards');
             container.innerHTML = '';
             
-           selectedTeachers.forEach(absentName => {
+            selectedTeachers.forEach(absentName => {
                 const teacherObj = teachersData.find(t => t.name === absentName);
                 const periods = teacherObj.schedule[daySchedule] || [];
                 
@@ -1050,7 +1121,6 @@
                     return;
                 }
 
-                // ✨ NEW: Get teachingDetails for auto-fill
                 const teachingDetails = teacherObj.teachingDetails || {};
                 console.log('   📚 Teaching Details:', teachingDetails);
 
@@ -1068,7 +1138,6 @@
                 periods.sort((a,b)=>a-b).forEach(period => {
                     const candidates = findCandidates(daySchedule, period, selectedTeachers);
                     
-                    // ✨ NEW: Get subject code and grade from teachingDetails
                     const detailKey = `${daySchedule}_${period}`;
                     const detail = teachingDetails[detailKey] || {};
                     const subjectCode = detail.code || '';
@@ -1076,11 +1145,14 @@
                     
                     console.log(`   📝 Period ${period}:`, {detailKey, detail, subjectCode, gradeLevel});
                     
-                    // สร้าง CSS class สำหรับ visual feedback
-                    const autoFilledClass = (subjectCode || gradeLevel) ? 'auto-filled' : '';
-                    
+                    // NEW: Period Selection Checkbox
                     html += `<div class="period-block">
                         <div class="period-title">
+                            <input type="checkbox" 
+                                   id="enable_${absentName}_${period}" 
+                                   class="period-checkbox"
+                                   checked 
+                                   onchange="togglePeriodSelection(this, '${absentName}', ${period})">
                             <span class="badge-p">คาบ ${period}</span>
                             <input type="text" id="subj_${absentName}_${period}" placeholder="รหัสวิชา" value="${subjectCode}" 
                                    style="width:100px; padding:5px; ${(subjectCode) ? 'background:#e0f2fe; border-color:#0284c7;' : ''}" 
@@ -1104,13 +1176,23 @@
                             const totalLoad = (workloadMap[t.name] || 0);
                             const inputName = `rad_${absentName}_${period}`;
                             const busyPeriods = t.schedule[daySchedule] || [];
-                            const busyText = busyPeriods.length > 0 ? `สอนคาบ: ${busyPeriods.join(', ')}` : 'ว่างตลอดวัน';
+                            
+                            let busyText = '';
+                            let multiRoomWarning = '';
+                            
+                            if(isMultiRoomMode && busyPeriods.includes(period)) {
+                                busyText = `🚨 <strong>กำลังสอนคาบ ${period}</strong>`;
+                                multiRoomWarning = '<span class="multi-room-indicator">ดูแลหลายห้อง</span>';
+                            } else {
+                                busyText = busyPeriods.length > 0 ? `สอนคาบ: ${busyPeriods.join(', ')}` : 'ว่างตลอดวัน';
+                            }
 
                             html += `
                                 <div class="candidate-opt" onclick="selectRadio(this, '${t.name}', '${absentName}', ${period})">
                                     <input type="radio" name="${inputName}" value="${t.name}" data-dept="${t.department}">
                                     <div style="flex:1;">
                                         <strong>${t.name}</strong> <span style="font-size:0.8rem; color:#64748b;">(${t.department})</span>
+                                        ${multiRoomWarning}
                                         <div class="meta-info">📅 ${busyText}</div>
                                     </div>
                                     <div class="workload-badge" data-teacher="${t.name}">
@@ -1125,6 +1207,7 @@
                 html += `</div></div>`;
                 container.innerHTML += html;
             });
+            
             document.getElementById('resultArea').style.display = 'block';
             
             if(isEditMode) {
@@ -1154,15 +1237,32 @@
             setTimeout(() => document.getElementById('resultArea').scrollIntoView({behavior:'smooth'}), 100);
         }
 
+        // NEW: Updated findCandidates with Multi-Room Mode Support
         function findCandidates(day, period, exclude) {
-            return teachersData
-                .filter(t => !exclude.includes(t.name) && !(t.schedule[day]||[]).includes(period))
-                .sort((a,b) => {
-                    const loadA = (workloadMap[a.name]||0) + (realtimeWorkload[a.name]||0);
-                    const loadB = (workloadMap[b.name]||0) + (realtimeWorkload[b.name]||0);
-                    return loadA - loadB;
-                })
-                .slice(0, 5);
+            const isMultiRoomMode = document.getElementById('multiRoomMode').checked;
+            
+            if(isMultiRoomMode) {
+                // โหมดดูแลหลายห้อง: แสดงครูทุกคนที่ไม่ใช่คนที่ลา
+                console.log('🚪 Multi-Room Mode: Showing all teachers');
+                return teachersData
+                    .filter(t => !exclude.includes(t.name))
+                    .sort((a,b) => {
+                        const loadA = (workloadMap[a.name]||0) + (realtimeWorkload[a.name]||0);
+                        const loadB = (workloadMap[b.name]||0) + (realtimeWorkload[b.name]||0);
+                        return loadA - loadB;
+                    });
+            } else {
+                // โหมดปกติ: เฉพาะครูที่ว่าง
+                console.log('📅 Normal Mode: Showing only free teachers');
+                return teachersData
+                    .filter(t => !exclude.includes(t.name) && !(t.schedule[day]||[]).includes(period))
+                    .sort((a,b) => {
+                        const loadA = (workloadMap[a.name]||0) + (realtimeWorkload[a.name]||0);
+                        const loadB = (workloadMap[b.name]||0) + (realtimeWorkload[b.name]||0);
+                        return loadA - loadB;
+                    })
+                    .slice(0, 5);
+            }
         }
 
         function selectRadio(el, teacherName, absentName, period) {
@@ -1219,6 +1319,54 @@
             }).join('');
         }
 
+        // NEW: Updated collectFormData with Period Selection Support
+        function collectFormData() {
+            const data = [];
+            const cards = document.querySelectorAll('.card');
+            let isValid = false;
+
+            cards.forEach(card => {
+                const absent = card.dataset.absent;
+                if(!absent) return;
+                
+                const reasonSelect = document.getElementById(`reason_${absent}`);
+                const reason = reasonSelect ? reasonSelect.value : 'ไปราชการ';
+                
+                card.querySelectorAll('.period-block').forEach(block => {
+                    const period = block.querySelector('.badge-p').innerText.replace('คาบ ', '');
+                    
+                    // NEW: ตรวจสอบว่าคาบนี้ถูกเลือกหรือไม่
+                    const enableCheckbox = document.getElementById(`enable_${absent}_${period}`);
+                    if(!enableCheckbox || !enableCheckbox.checked) {
+                        console.log(`⏭️ Skipping period ${period} for ${absent} (not selected)`);
+                        return; // ข้ามคาบที่ไม่ได้เลือก
+                    }
+                    
+                    const radio = block.querySelector('input[type="radio"]:checked');
+                    if(radio) {
+                        isValid = true;
+                        const subj = document.getElementById(`subj_${absent}_${period}`).value || "-";
+                        const grade = document.getElementById(`grade_${absent}_${period}`).value || "-";
+                        data.push({
+                            absent: absent,
+                            period: parseInt(period),
+                            sub: radio.value,
+                            dept: radio.dataset.dept,
+                            subject: subj,
+                            grade: grade,
+                            reason: reason
+                        });
+                    }
+                });
+            });
+
+            if(!isValid) {
+                Swal.fire('เตือน', 'กรุณาเลือกผู้สอนแทนอย่างน้อย 1 รายการ', 'warning');
+                return null;
+            }
+            return data;
+        }
+
         async function saveAllocation() {
             const data = collectFormData();
             if(!data) return;
@@ -1260,45 +1408,6 @@
                 Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถบันทึกข้อมูลได้', 'error');
             }
         }
-
-       function collectFormData() {
-    const data = [];
-    const cards = document.querySelectorAll('.card');
-    let isValid = false;
-
-    cards.forEach(card => {
-        const absent = card.dataset.absent;
-        if(!absent) return;
-        
-        const reasonSelect = document.getElementById(`reason_${absent}`);
-        const reason = reasonSelect ? reasonSelect.value : 'ไปราชการ';
-        
-        card.querySelectorAll('.period-block').forEach(block => {
-            const period = block.querySelector('.badge-p').innerText.replace('คาบ ', '');
-            const radio = block.querySelector('input[type="radio"]:checked');
-            if(radio) {
-                isValid = true;
-                const subj = document.getElementById(`subj_${absent}_${period}`).value || "-";
-                const grade = document.getElementById(`grade_${absent}_${period}`).value || "-";
-                data.push({
-                    absent: absent,
-                    period: parseInt(period),
-                    sub: radio.value,
-                    dept: radio.dataset.dept,
-                    subject: subj,
-                    grade: grade,
-                    reason: reason
-                });
-            }
-        });
-    });
-
-    if(!isValid) {
-        Swal.fire('เตือน', 'กรุณาเลือกผู้สอนแทนอย่างน้อย 1 รายการ', 'warning');
-        return null;
-    }
-    return data;
-    }
 
         async function preparePreview() {
             if(!isSaved) {
@@ -1650,7 +1759,6 @@
             console.log('   Type:', type);
             console.log('   Data:', record);
             
-            // สร้าง lastPreviewData จากข้อมูลที่ดึงมา
             window.lastPreviewData = { 
                 data: record.records, 
                 scheduler: record.scheduler || 'นายนนทพัทธ์ หิรัญเรือง', 
@@ -1672,7 +1780,8 @@
             document.getElementById('previewModal').style.display = 'block';
         }
 
-        function showCopyModal(id) {
+        // NEW: Updated showCopyModal with Multi-Room Detection (including teacher's own classes)
+        async function showCopyModal(id) {
             const record = historyDataCache.find(x => x.id === id);
             if(!record) {
                 console.error('❌ Record not found for copy:', id);
@@ -1681,27 +1790,93 @@
 
             console.log('📋 Preparing copy text for record:', id);
             console.log('   Records count:', record.records.length);
-
-            const dateStr = formatThaiDate(record.docDate);
-            const currentUrl = window.location.href.split('#')[0] + '#history';
             
-            let text = `📢 **ขอแจ้งข้อมูลสรุปการจัดสอนแทน**\n📅 วันที่: ${dateStr}\n------------------------------\n`;
-            const sortedRecords = [...record.records].sort((a,b) => a.period - b.period);
-            
-            sortedRecords.forEach((r, index) => {
-                const subName = formatTeacherNameShort(r.sub);
-                const absentName = formatTeacherNameShort(r.absent);
-                text += `${index+1}. คาบ ${r.period}: ${subName} (แทน ${absentName})\n   - วิชา: ${r.subject || '-'} ชั้น: ${r.grade || '-'} (${r.reason || 'ไปราชการ'})\n`;
+            // แสดง loading
+            Swal.fire({
+                title: 'กำลังเตรียมข้อความ...',
+                html: 'กำลังตรวจสอบตารางสอนของครู',
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); }
             });
-            
-            text += `------------------------------\n🔗 คลิกลิงก์ระบบ:\n${currentUrl}`;
 
-            console.log('✅ Copy text prepared:', text.length, 'characters');
+            try {
+                // โหลดข้อมูลครูจาก Firebase เพื่อเช็คตารางสอน
+                const daySchedule = record.daySchedule || 'จันทร์';
+                const semester = document.getElementById('semesterSelect').value;
+                
+                const teachersSnap = await db.collection("teachers")
+                    .where("semester", "==", semester)
+                    .where("active", "==", true)
+                    .get();
+                
+                const teachersScheduleMap = {};
+                teachersSnap.forEach(doc => {
+                    const t = doc.data();
+                    teachersScheduleMap[t.name] = t.schedule || {};
+                });
+                
+                console.log('✅ Loaded teachers schedule for', daySchedule);
 
-            document.getElementById('copyTextBox').value = text;
-            
-            closeAllModals();
-            document.getElementById('copyModal').style.display = 'block';
+                const dateStr = formatThaiDate(record.docDate);
+                const currentUrl = window.location.href.split('#')[0] + '#history';
+                
+                let text = `📢 **ขอแจ้งข้อมูลสรุปการจัดสอนแทน**\n📅 วันที่: ${dateStr}\n------------------------------\n`;
+                const sortedRecords = [...record.records].sort((a,b) => a.period - b.period);
+                
+                // NEW: นับจำนวนห้องที่แต่ละครูต้องดูแลในแต่ละคาบ
+                const teacherPeriodCount = {};
+                sortedRecords.forEach(r => {
+                    const key = `${r.sub}_${r.period}`;
+                    teacherPeriodCount[key] = (teacherPeriodCount[key] || 0) + 1;
+                });
+                
+                console.log('📊 Teacher substitution count:', teacherPeriodCount);
+                
+                sortedRecords.forEach((r, index) => {
+                    const subName = formatTeacherNameShort(r.sub);
+                    const absentName = formatTeacherNameShort(r.absent);
+                    const key = `${r.sub}_${r.period}`;
+                    
+                    // นับจำนวนห้องที่สอนแทน
+                    let roomCount = teacherPeriodCount[key] || 1;
+                    
+                    // NEW: เช็คว่าครูมีคาบสอนของตัวเองในคาบนี้หรือไม่
+                    const teacherSchedule = teachersScheduleMap[r.sub];
+                    if(teacherSchedule && teacherSchedule[daySchedule]) {
+                        const teacherPeriods = teacherSchedule[daySchedule] || [];
+                        if(teacherPeriods.includes(r.period)) {
+                            roomCount = roomCount + 1; // เพิ่ม 1 สำหรับห้องของตัวเอง
+                            console.log(`   ✨ ${r.sub} has own class at period ${r.period}, total rooms: ${roomCount}`);
+                        }
+                    }
+                    
+                    console.log(`   Record ${index+1}: ${key} -> ${roomCount} ห้อง`);
+                    
+                    // NEW: เพิ่มข้อความแจ้งเตือนถ้าดูแลหลายห้อง (มากกว่า 1 ห้อง)
+                    let multiRoomNote = '';
+                    if(roomCount > 1) {
+                        multiRoomNote = ` *ดูแล ${roomCount} ห้อง เนื่องจากครูไม่มีคนว่าง`;
+                    }
+                    
+                    text += `${index+1}. คาบ ${r.period}: ${subName} (แทน ${absentName})${multiRoomNote}\n   - วิชา: ${r.subject || '-'} ชั้น: ${r.grade || '-'} (${r.reason || 'ไปราชการ'})\n`;
+                });
+                
+                text += `------------------------------\n🔗 คลิกลิงก์ระบบ:\n${currentUrl}`;
+
+                console.log('✅ Copy text prepared:', text.length, 'characters');
+                console.log('📝 Final text preview:\n', text.substring(0, 500));
+
+                Swal.close();
+                
+                document.getElementById('copyTextBox').value = text;
+                
+                closeAllModals();
+                document.getElementById('copyModal').style.display = 'block';
+                
+            } catch(e) {
+                console.error('❌ Error preparing copy text:', e);
+                Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถโหลดข้อมูลครูได้', 'error');
+            }
         }
 
         function copyToClipboard() {
@@ -1714,9 +1889,8 @@
             console.log('📋 Copying text to clipboard:', copyText.value.length, 'characters');
 
             copyText.select();
-            copyText.setSelectionRange(0, 99999); // For mobile devices
+            copyText.setSelectionRange(0, 99999);
 
-            // Try modern clipboard API first
             if(navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(copyText.value)
                     .then(() => {
@@ -1735,7 +1909,6 @@
                         fallbackCopy();
                     });
             } else {
-                // Fallback for older browsers
                 fallbackCopy();
             }
 
