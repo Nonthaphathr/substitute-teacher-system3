@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบจัดสอนแทน V.9.0 (Multi-Room Mode + Period Selection)</title>
+    <title>ระบบจัดสอนแทน V.9.1 (Enhanced)</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -206,9 +206,56 @@
         .period-title { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
         .badge-p { background: var(--accent); color: white; padding: 4px 10px; border-radius: 5px; font-weight: bold; font-size: 0.9rem; }
         
-        .candidate-opt { display: flex; align-items: center; gap: 10px; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 5px; cursor: pointer; transition: all 0.2s ease; position: relative; }
+        /* NEW: Tooltip Styles */
+        .candidate-opt { 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            padding: 10px; 
+            border: 1px solid #e2e8f0; 
+            border-radius: 6px; 
+            margin-bottom: 5px; 
+            cursor: pointer; 
+            transition: all 0.2s ease; 
+            position: relative; 
+        }
         .candidate-opt:hover { background: #f8fafc; transform: translateX(5px); }
         .candidate-opt.selected { background: #eff6ff; border-color: var(--accent); outline: 1px solid var(--accent); }
+        
+        .schedule-tooltip {
+            position: absolute;
+            left: 105%;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #1e293b;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            white-space: pre-line;
+            z-index: 1000;
+            min-width: 200px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+            pointer-events: none;
+        }
+        .schedule-tooltip::before {
+            content: '';
+            position: absolute;
+            right: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            border: 8px solid transparent;
+            border-right-color: #1e293b;
+        }
+        .candidate-opt:hover .schedule-tooltip {
+            opacity: 1;
+            visibility: visible;
+        }
+        
         .meta-info { font-size: 0.8rem; color: #64748b; margin-top: 2px; }
         .workload-badge { margin-left: auto; font-size: 0.75rem; padding: 2px 8px; border-radius: 10px; background: #e2e8f0; white-space: nowrap; }
         .load-high { background: #fecaca; color: #991b1b; }
@@ -376,6 +423,82 @@
         .rank-2 { background: #c0c0c0; color: #1e293b; }
         .rank-3 { background: #cd7f32; color: white; }
 
+        /* NEW: Teacher Schedule Viewer Styles */
+        .teacher-schedule-viewer {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .teacher-schedule-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+        .teacher-schedule-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.15);
+        }
+        .teacher-schedule-card h4 {
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+            border-bottom: 2px solid var(--primary-light);
+            padding-bottom: 8px;
+        }
+        .teacher-schedule-card .dept-badge {
+            display: inline-block;
+            background: #eff6ff;
+            color: var(--primary);
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            margin-bottom: 10px;
+        }
+        .day-schedule {
+            margin-bottom: 10px;
+            padding: 8px;
+            background: #f8fafc;
+            border-radius: 6px;
+        }
+        .day-schedule .day-name {
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 5px;
+        }
+        .period-item {
+            font-size: 0.85rem;
+            padding: 4px 8px;
+            margin: 2px 0;
+            background: white;
+            border-left: 3px solid var(--accent);
+            border-radius: 3px;
+        }
+        .period-item.empty {
+            color: #94a3b8;
+            border-left-color: #cbd5e1;
+        }
+        .schedule-search {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+        .schedule-search input {
+            width: 100%;
+            max-width: 400px;
+            padding: 10px 15px;
+            border: 2px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        .schedule-search input:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+
         .a4-paper {
             width: 210mm; 
             min-height: 297mm; 
@@ -508,6 +631,20 @@
             .period-title input, .period-title select { width: 100%; }
             .a4-paper { width: 100%; height: auto; min-height: auto; padding: 10mm; font-size: 11pt; }
             .header { flex-direction: column; }
+            .teacher-schedule-viewer {
+                grid-template-columns: 1fr;
+            }
+            .schedule-tooltip {
+                left: auto;
+                right: 105%;
+                transform: translateY(-50%);
+            }
+            .schedule-tooltip::before {
+                left: 100%;
+                right: auto;
+                border-right-color: transparent;
+                border-left-color: #1e293b;
+            }
         }
 
         .loading-spinner {
@@ -528,14 +665,15 @@
         <div class="header">
             <img src="https://nonthaphathr.github.io/uploadimg/logosonthan.png" alt="Logo" class="header-logo">
             <div class="header-text">
-                <h1>ระบบจัดสอนแทน V.9.0</h1>
-                <p>✨ Multi-Room Mode + Period Selection</p>
+                <h1>ระบบจัดสอนแทน V.9.1</h1>
+                <p>✨ Enhanced with Tooltips & Schedule Viewer</p>
             </div>
         </div>
 
         <div class="nav-bar">
             <button class="nav-btn active" onclick="switchTab('allocation')">📝 จัดสอนแทน</button>
             <button class="nav-btn" onclick="switchTab('history')">📂 ประวัติ/แก้ไข</button>
+            <button class="nav-btn" onclick="switchTab('scheduleViewer')">📅 ตรวจสอบคาบสอนครู</button>
             <a href="teacher-manager.html" target="_blank" style="text-decoration: none;">
                 <button class="nav-btn" onclick="event.stopPropagation()">
                     👥 จัดการครู/ตาราง <i class="fas fa-external-link-alt" style="font-size: 0.8rem; margin-left: 5px;"></i>
@@ -569,7 +707,6 @@
                     </div>
                 </div>
 
-                <!-- NEW: Multi-Room Mode Toggle -->
                 <div class="multi-room-toggle">
                     <div class="toggle-switch-container">
                         <label>
@@ -649,7 +786,7 @@
                 <h3 style="margin-bottom:15px; color:var(--primary);">
                     ผลการค้นหา (กรุณาระบุรายละเอียด)
                     <span style="font-size: 0.9rem; color: #64748b; font-weight: normal;">
-                        - ติ๊กเลือกคาบที่ต้องการจัดสอนแทน
+                        - ติ๊กเลือกคาบที่ต้องการจัดสอนแทน | 💡 ชี้เมาส์ที่ครูเพื่อดูตารางสอน
                     </span>
                 </h3>
                 <div id="matchCards"></div>
@@ -683,6 +820,21 @@
                 </button>
             </div>
             <div id="historyList"></div>
+        </div>
+
+        <!-- NEW: Teacher Schedule Viewer Tab -->
+        <div id="scheduleViewer" class="page-section">
+            <h3 style="color: var(--primary); margin-bottom: 20px;">📅 ตรวจสอบคาบสอนครู</h3>
+            
+            <div class="schedule-search">
+                <input type="text" id="scheduleSearchInput" placeholder="🔍 ค้นหาครู..." onkeyup="filterScheduleViewer()">
+            </div>
+
+            <div class="teacher-schedule-viewer" id="scheduleViewerContainer">
+                <div style="text-align: center; padding: 40px; color: #64748b;">
+                    กำลังโหลดข้อมูล...
+                </div>
+            </div>
         </div>
 
         <!-- Dashboard Tab -->
@@ -874,6 +1026,7 @@
 
             if(id === 'history') loadHistory();
             if(id === 'dashboard') loadStatistics();
+            if(id === 'scheduleViewer') loadScheduleViewer();
         }
 
         // ============================================
@@ -926,6 +1079,27 @@
             const monthName = thaiMonths[parseInt(dateParts[1]) - 1];
             const yearBE = parseInt(dateParts[0]) + 543;
             return `${dayNum} ${monthName} พ.ศ. ${yearBE}`;
+        }
+
+        // NEW: Build Tooltip Text for Teacher Schedule
+        function buildScheduleTooltip(teacher, day) {
+            const teacherSchedule = teacher.schedule[day] || [];
+            const teacherDetails = teacher.teachingDetails || {};
+            
+            if(teacherSchedule.length === 0) {
+                return `📅 วัน${day}:\nว่างตลอดวัน`;
+            }
+            
+            let tooltipText = `📅 วัน${day}:\n`;
+            teacherSchedule.forEach(period => {
+                const detailKey = `${day}_${period}`;
+                const detail = teacherDetails[detailKey] || {};
+                const subj = detail.code || '-';
+                const grade = detail.grade || '-';
+                tooltipText += `คาบ ${period}: ${subj} (${grade})\n`;
+            });
+            
+            return tooltipText.trim();
         }
 
         // ============================================
@@ -1031,6 +1205,78 @@
         }
 
         // ============================================
+        // NEW: SCHEDULE VIEWER FUNCTIONS
+        // ============================================
+        function loadScheduleViewer() {
+            console.log('📅 Loading Schedule Viewer...');
+            const container = document.getElementById('scheduleViewerContainer');
+            
+            if(teachersData.length === 0) {
+                container.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #64748b;">
+                        <i class="fas fa-user-slash" style="font-size: 3rem; margin-bottom: 15px; display: block;"></i>
+                        <p>ไม่พบข้อมูลครู</p>
+                        <p style="font-size: 0.9rem; margin-top: 10px;">กรุณาเลือกภาคเรียนและโหลดข้อมูลครูก่อน</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const days = ['จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์'];
+            
+            container.innerHTML = teachersData.map(teacher => {
+                let scheduleHTML = '';
+                
+                days.forEach(day => {
+                    const periods = teacher.schedule[day] || [];
+                    const teacherDetails = teacher.teachingDetails || {};
+                    
+                    let periodHTML = '';
+                    if(periods.length === 0) {
+                        periodHTML = '<div class="period-item empty">ว่างตลอดวัน</div>';
+                    } else {
+                        periods.sort((a,b) => a-b).forEach(period => {
+                            const detailKey = `${day}_${period}`;
+                            const detail = teacherDetails[detailKey] || {};
+                            const subj = detail.code || '-';
+                            const grade = detail.grade || '-';
+                            periodHTML += `<div class="period-item">คาบ ${period}: ${subj} (${grade})</div>`;
+                        });
+                    }
+                    
+                    scheduleHTML += `
+                        <div class="day-schedule">
+                            <div class="day-name">${day}</div>
+                            ${periodHTML}
+                        </div>
+                    `;
+                });
+                
+                return `
+                    <div class="teacher-schedule-card" data-teacher-name="${teacher.name}">
+                        <h4>${teacher.name}</h4>
+                        <span class="dept-badge">${teacher.department}</span>
+                        ${scheduleHTML}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function filterScheduleViewer() {
+            const searchText = document.getElementById('scheduleSearchInput').value.toLowerCase();
+            const cards = document.querySelectorAll('.teacher-schedule-card');
+            
+            cards.forEach(card => {
+                const teacherName = card.dataset.teacherName.toLowerCase();
+                if(teacherName.includes(searchText)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // ============================================
         // ALLOCATION FUNCTIONS
         // ============================================
         function toggleSelect(name, cb) {
@@ -1065,7 +1311,6 @@
             }
         }
 
-        // NEW: Toggle Period Selection
         function togglePeriodSelection(checkbox, absentName, period) {
             const periodBlock = checkbox.closest('.period-block');
             if(checkbox.checked) {
@@ -1145,7 +1390,6 @@
                     
                     console.log(`   📝 Period ${period}:`, {detailKey, detail, subjectCode, gradeLevel});
                     
-                    // NEW: Period Selection Checkbox
                     html += `<div class="period-block">
                         <div class="period-title">
                             <input type="checkbox" 
@@ -1177,6 +1421,9 @@
                             const inputName = `rad_${absentName}_${period}`;
                             const busyPeriods = t.schedule[daySchedule] || [];
                             
+                            // NEW: Build tooltip text
+                            const tooltipText = buildScheduleTooltip(t, daySchedule);
+                            
                             let busyText = '';
                             let multiRoomWarning = '';
                             
@@ -1198,6 +1445,7 @@
                                     <div class="workload-badge" data-teacher="${t.name}">
                                         บันทึก: ${totalLoad} | ใหม่: <span class="realtime-count">0</span>
                                     </div>
+                                    <div class="schedule-tooltip">${tooltipText}</div>
                                 </div>
                             `;
                         });
@@ -1237,12 +1485,10 @@
             setTimeout(() => document.getElementById('resultArea').scrollIntoView({behavior:'smooth'}), 100);
         }
 
-        // NEW: Updated findCandidates with Multi-Room Mode Support
         function findCandidates(day, period, exclude) {
             const isMultiRoomMode = document.getElementById('multiRoomMode').checked;
             
             if(isMultiRoomMode) {
-                // โหมดดูแลหลายห้อง: แสดงครูทุกคนที่ไม่ใช่คนที่ลา
                 console.log('🚪 Multi-Room Mode: Showing all teachers');
                 return teachersData
                     .filter(t => !exclude.includes(t.name))
@@ -1252,7 +1498,6 @@
                         return loadA - loadB;
                     });
             } else {
-                // โหมดปกติ: เฉพาะครูที่ว่าง
                 console.log('📅 Normal Mode: Showing only free teachers');
                 return teachersData
                     .filter(t => !exclude.includes(t.name) && !(t.schedule[day]||[]).includes(period))
@@ -1319,7 +1564,6 @@
             }).join('');
         }
 
-        // NEW: Updated collectFormData with Period Selection Support
         function collectFormData() {
             const data = [];
             const cards = document.querySelectorAll('.card');
@@ -1335,11 +1579,10 @@
                 card.querySelectorAll('.period-block').forEach(block => {
                     const period = block.querySelector('.badge-p').innerText.replace('คาบ ', '');
                     
-                    // NEW: ตรวจสอบว่าคาบนี้ถูกเลือกหรือไม่
                     const enableCheckbox = document.getElementById(`enable_${absent}_${period}`);
                     if(!enableCheckbox || !enableCheckbox.checked) {
                         console.log(`⏭️ Skipping period ${period} for ${absent} (not selected)`);
-                        return; // ข้ามคาบที่ไม่ได้เลือก
+                        return;
                     }
                     
                     const radio = block.querySelector('input[type="radio"]:checked');
@@ -1395,13 +1638,24 @@
                     cancelEdit();
                 } else {
                     await db.collection("substitutions").add(payload);
-                    Swal.fire('บันทึกข้อมูลแล้ว', '', 'success');
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'บันทึกข้อมูลแล้ว',
+                        text: 'กำลังนำไปหน้าประวัติ...',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
                 }
                 
                 isSaved = true;
                 updatePrintButtons();
                 
                 window.lastPreviewData = { data, scheduler, academicHead, deputyDirector, director, docDate };
+                
+                // NEW: Auto redirect to history tab after save
+                setTimeout(() => {
+                    switchTab('history');
+                }, 1500);
                 
             } catch(e) { 
                 console.error("Firebase save error:", e);
@@ -1780,7 +2034,6 @@
             document.getElementById('previewModal').style.display = 'block';
         }
 
-        // NEW: Updated showCopyModal with Multi-Room Detection (including teacher's own classes)
         async function showCopyModal(id) {
             const record = historyDataCache.find(x => x.id === id);
             if(!record) {
@@ -1791,7 +2044,6 @@
             console.log('📋 Preparing copy text for record:', id);
             console.log('   Records count:', record.records.length);
             
-            // แสดง loading
             Swal.fire({
                 title: 'กำลังเตรียมข้อความ...',
                 html: 'กำลังตรวจสอบตารางสอนของครู',
@@ -1800,7 +2052,6 @@
             });
 
             try {
-                // โหลดข้อมูลครูจาก Firebase เพื่อเช็คตารางสอน
                 const daySchedule = record.daySchedule || 'จันทร์';
                 const semester = document.getElementById('semesterSelect').value;
                 
@@ -1823,7 +2074,6 @@
                 let text = `📢 **ขอแจ้งข้อมูลสรุปการจัดสอนแทน**\n📅 วันที่: ${dateStr}\n------------------------------\n`;
                 const sortedRecords = [...record.records].sort((a,b) => a.period - b.period);
                 
-                // NEW: นับจำนวนห้องที่แต่ละครูต้องดูแลในแต่ละคาบ
                 const teacherPeriodCount = {};
                 sortedRecords.forEach(r => {
                     const key = `${r.sub}_${r.period}`;
@@ -1837,22 +2087,19 @@
                     const absentName = formatTeacherNameShort(r.absent);
                     const key = `${r.sub}_${r.period}`;
                     
-                    // นับจำนวนห้องที่สอนแทน
                     let roomCount = teacherPeriodCount[key] || 1;
                     
-                    // NEW: เช็คว่าครูมีคาบสอนของตัวเองในคาบนี้หรือไม่
                     const teacherSchedule = teachersScheduleMap[r.sub];
                     if(teacherSchedule && teacherSchedule[daySchedule]) {
                         const teacherPeriods = teacherSchedule[daySchedule] || [];
                         if(teacherPeriods.includes(r.period)) {
-                            roomCount = roomCount + 1; // เพิ่ม 1 สำหรับห้องของตัวเอง
+                            roomCount = roomCount + 1;
                             console.log(`   ✨ ${r.sub} has own class at period ${r.period}, total rooms: ${roomCount}`);
                         }
                     }
                     
                     console.log(`   Record ${index+1}: ${key} -> ${roomCount} ห้อง`);
                     
-                    // NEW: เพิ่มข้อความแจ้งเตือนถ้าดูแลหลายห้อง (มากกว่า 1 ห้อง)
                     let multiRoomNote = '';
                     if(roomCount > 1) {
                         multiRoomNote = ` *ดูแล ${roomCount} ห้อง เนื่องจากครูไม่มีคนว่าง`;
