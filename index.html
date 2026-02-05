@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ระบบจัดสอนแทน V.9.1 (Enhanced)</title>
+    <link rel="icon" type="image/png" href="https://nonthaphathr.github.io/uploadimg/logosonthan.png">
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -66,7 +67,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Sarabun', sans-serif; background: var(--bg); color: #1e293b; padding: 20px; }
 
-        .app-container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 15px; box-shadow: 0 4px 20px rgba(30, 58, 138, 0.1); overflow: hidden; min-height: 90vh; }
+        .app-container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 15px; box-shadow: 0 4px 20px rgba(30, 58, 138, 0.1); overflow: visible; min-height: 90vh; }
         
         .header { 
             background: linear-gradient(135deg, #1e3a8a, #2563eb); 
@@ -109,7 +110,7 @@
         .nav-btn:hover::before { width: 200px; height: 200px; }
         .nav-btn.active, .nav-btn:hover { background: var(--primary); color: white; border-color: var(--primary); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(30, 58, 138, 0.3); }
 
-        .page-section { display: none; padding: 25px; animation: fadeIn 0.4s ease-out; }
+        .page-section { display: none; padding: 25px; animation: fadeIn 0.4s ease-out; overflow: visible; }
         .page-section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -181,7 +182,7 @@
         .tag { background: #dbeafe; color: #1e40af; padding: 2px 10px; border-radius: 15px; font-size: 0.8rem; animation: tagPop 0.3s ease; }
         @keyframes tagPop { from { transform: scale(0); } to { transform: scale(1); } }
 
-        .card { background: white; border: 1px solid #e2e8f0; border-radius: 10px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); transition: all 0.3s ease; }
+        .card { background: white; border: 1px solid #e2e8f0; border-radius: 10px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); transition: all 0.3s ease; overflow: visible; }
         .card:hover { box-shadow: 0 4px 15px rgba(30, 58, 138, 0.1); transform: translateY(-2px); }
         .card-header { background: #fee2e2; padding: 10px 20px; color: #991b1b; font-weight: 600; border-left: 4px solid #ef4444; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
         
@@ -190,6 +191,8 @@
             padding: 15px; 
             border-bottom: 1px dashed #e2e8f0; 
             transition: all 0.3s ease;
+            overflow: visible;
+            position: relative;
         }
         .period-block.disabled {
             opacity: 0.5;
@@ -224,22 +227,23 @@
         
         .schedule-tooltip {
             position: absolute;
-            left: 105%;
+            left: calc(100% + 15px);
             top: 50%;
             transform: translateY(-50%);
             background: #1e293b;
             color: white;
-            padding: 10px 15px;
+            padding: 12px 16px;
             border-radius: 8px;
             font-size: 0.85rem;
             line-height: 1.6;
             white-space: pre-line;
-            z-index: 1000;
-            min-width: 200px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            z-index: 9999;
+            min-width: 220px;
+            max-width: 300px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
             opacity: 0;
             visibility: hidden;
-            transition: opacity 0.3s, visibility 0.3s;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
             pointer-events: none;
         }
         .schedule-tooltip::before {
@@ -636,7 +640,7 @@
             }
             .schedule-tooltip {
                 left: auto;
-                right: 105%;
+                right: calc(100% + 15px);
                 transform: translateY(-50%);
             }
             .schedule-tooltip::before {
@@ -644,6 +648,7 @@
                 right: auto;
                 border-right-color: transparent;
                 border-left-color: #1e293b;
+            }
             }
         }
 
