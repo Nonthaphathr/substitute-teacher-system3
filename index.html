@@ -630,6 +630,142 @@
             }
         }
 
+        /* Mobile Schedule Modal */
+        .mobile-schedule-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 10000;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .mobile-schedule-modal.active {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+        
+        .mobile-schedule-content {
+            background: white;
+            width: 100%;
+            max-height: 70vh;
+            border-radius: 20px 20px 0 0;
+            padding: 20px;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        @keyframes slideUp {
+            from {
+                transform: translateY(100%);
+            }
+            to {
+                transform: translateY(0);
+            }
+        }
+        
+        .mobile-schedule-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .mobile-schedule-header h4 {
+            color: var(--primary);
+            font-size: 1.2rem;
+            margin: 0;
+        }
+        
+        .modal-close-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-close-btn:active {
+            transform: scale(0.95);
+            background: #dc2626;
+        }
+        
+        .mobile-schedule-body {
+            font-size: 1rem;
+        }
+        
+        .mobile-day-section {
+            background: #f8fafc;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .mobile-day-title {
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 8px;
+            font-size: 1.05rem;
+        }
+        
+        .mobile-period-item {
+            background: white;
+            padding: 8px 12px;
+            margin-bottom: 6px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .mobile-period-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .mobile-period-num {
+            background: var(--accent);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 5px;
+            font-weight: 600;
+            min-width: 60px;
+            text-align: center;
+        }
+        
+        .mobile-period-detail {
+            flex: 1;
+            margin-left: 10px;
+            color: #1e293b;
+        }
+        
+        .mobile-no-schedule {
+            text-align: center;
+            padding: 30px;
+            color: #94a3b8;
+        }
+        
+        .mobile-no-schedule i {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+
         @media (max-width: 768px) {
             .period-title { flex-direction: column; align-items: flex-start; }
             .period-title input, .period-title select { width: 100%; }
@@ -638,16 +774,25 @@
             .teacher-schedule-viewer {
                 grid-template-columns: 1fr;
             }
+            /* Hide desktop tooltip on mobile */
             .schedule-tooltip {
-                left: auto;
-                right: calc(100% + 15px);
-                transform: translateY(-50%);
+                display: none !important;
             }
-            .schedule-tooltip::before {
-                left: 100%;
-                right: auto;
-                border-right-color: transparent;
-                border-left-color: #1e293b;
+            /* Make teacher name tappable on mobile */
+            .teacher-name-mobile {
+                display: inline-block;
+                padding: 2px 6px;
+                border-radius: 4px;
+                transition: all 0.2s ease;
+            }
+            .teacher-name-mobile:active {
+                background: #dbeafe;
+                transform: scale(0.98);
+            }
+            .teacher-name-mobile::after {
+                content: ' 📋';
+                font-size: 0.8rem;
+                opacity: 0.6;
             }
             }
         }
@@ -1108,6 +1253,63 @@
         }
 
         // ============================================
+        // MOBILE SCHEDULE MODAL
+        // ============================================
+        function showMobileScheduleModal(teacher, currentDay) {
+            const modal = document.getElementById('mobileScheduleModal');
+            const teacherNameEl = document.getElementById('mobileModalTeacherName');
+            const bodyEl = document.getElementById('mobileScheduleBody');
+            
+            teacherNameEl.textContent = `ตารางสอน: ${teacher.name}`;
+            
+            const teachingDetails = teacher.teachingDetails || {};
+            const daySchedule = teacher.schedule[currentDay] || [];
+            
+            if(daySchedule.length === 0) {
+                bodyEl.innerHTML = `
+                    <div class="mobile-no-schedule">
+                        <i class="fas fa-calendar-times"></i>
+                        <p>ครูไม่มีคาบสอนในวัน${currentDay}</p>
+                    </div>
+                `;
+            } else {
+                let html = `<div class="mobile-day-section">
+                    <div class="mobile-day-title">📅 วัน${currentDay}</div>`;
+                
+                daySchedule.forEach(period => {
+                    const detailKey = `${currentDay}_${period}`;
+                    const detail = teachingDetails[detailKey] || {};
+                    const subjectCode = detail.code || '-';
+                    const gradeLevel = detail.grade || '-';
+                    
+                    html += `
+                        <div class="mobile-period-item">
+                            <span class="mobile-period-num">คาบ ${period}</span>
+                            <div class="mobile-period-detail">
+                                <strong>${subjectCode}</strong><br>
+                                <span style="color: #64748b; font-size: 0.9rem;">ระดับชั้น: ${gradeLevel}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += `</div>`;
+                bodyEl.innerHTML = html;
+            }
+            
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeMobileScheduleModal(event) {
+            if(event && event.target !== event.currentTarget) return;
+            
+            const modal = document.getElementById('mobileScheduleModal');
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // ============================================
         // INIT ON PAGE LOAD
         // ============================================
         window.onload = async () => {
@@ -1429,6 +1631,9 @@
                             // NEW: Build tooltip text
                             const tooltipText = buildScheduleTooltip(t, daySchedule);
                             
+                            // Store teacher data for mobile modal (escape JSON for data attribute)
+                            const teacherJSON = JSON.stringify(t).replace(/"/g, '&quot;');
+                            
                             let busyText = '';
                             let multiRoomWarning = '';
                             
@@ -1443,7 +1648,14 @@
                                 <div class="candidate-opt" onclick="selectRadio(this, '${t.name}', '${absentName}', ${period})">
                                     <input type="radio" name="${inputName}" value="${t.name}" data-dept="${t.department}">
                                     <div style="flex:1;">
-                                        <strong>${t.name}</strong> <span style="font-size:0.8rem; color:#64748b;">(${t.department})</span>
+                                        <span class="teacher-name-mobile" 
+                                              data-teacher='${teacherJSON}' 
+                                              data-day="${daySchedule}"
+                                              ontouchstart="event.stopPropagation(); showMobileScheduleModal(JSON.parse(this.getAttribute('data-teacher')), this.getAttribute('data-day'))"
+                                              style="cursor: pointer;">
+                                            <strong>${t.name}</strong>
+                                        </span>
+                                        <span style="font-size:0.8rem; color:#64748b;">(${t.department})</span>
                                         ${multiRoomWarning}
                                         <div class="meta-info">📅 ${busyText}</div>
                                     </div>
@@ -2413,5 +2625,19 @@
             });
         }
     </script>
+
+    <!-- Mobile Schedule Modal -->
+    <div id="mobileScheduleModal" class="mobile-schedule-modal" onclick="closeMobileScheduleModal(event)">
+        <div class="mobile-schedule-content" onclick="event.stopPropagation()">
+            <div class="mobile-schedule-header">
+                <h4 id="mobileModalTeacherName">ตารางสอน</h4>
+                <button class="modal-close-btn" onclick="closeMobileScheduleModal()">✕</button>
+            </div>
+            <div class="mobile-schedule-body" id="mobileScheduleBody">
+                <!-- Content will be inserted here -->
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>
