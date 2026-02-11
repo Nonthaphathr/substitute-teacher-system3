@@ -445,12 +445,22 @@
             transform: translateY(-5px);
             box-shadow: 0 8px 20px rgba(30, 58, 138, 0.15);
         }
+        .teacher-schedule-card.student-card {
+            border-left: 4px solid #16a34a;
+        }
+        .teacher-schedule-card.student-card:hover {
+            box-shadow: 0 8px 20px rgba(22, 163, 74, 0.15);
+        }
         .teacher-schedule-card h4 {
             color: var(--primary);
             margin-bottom: 10px;
             font-size: 1.1rem;
             border-bottom: 2px solid var(--primary-light);
             padding-bottom: 8px;
+        }
+        .teacher-schedule-card.student-card h4 {
+            color: #16a34a;
+            border-bottom-color: #dcfce7;
         }
         .teacher-schedule-card .dept-badge {
             display: inline-block;
@@ -497,6 +507,39 @@
             border: 2px solid #cbd5e1;
             border-radius: 8px;
             font-size: 1rem;
+        }
+        
+        /* Filter Controls */
+        .filter-input, .filter-select {
+            padding: 10px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-family: 'Sarabun';
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        .filter-input:focus, .filter-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        .filter-select {
+            background: white;
+            cursor: pointer;
+        }
+        .btn-secondary {
+            background: #64748b;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Sarabun';
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        .btn-secondary:hover {
+            background: #475569;
+            transform: translateY(-2px);
         }
         .schedule-search input:focus {
             border-color: var(--primary);
@@ -974,10 +1017,50 @@
 
         <!-- NEW: Teacher Schedule Viewer Tab -->
         <div id="scheduleViewer" class="page-section">
-            <h3 style="color: var(--primary); margin-bottom: 20px;">📅 ตรวจสอบคาบสอนครู</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+                <h3 style="color: var(--primary); margin: 0;">
+                    <span id="scheduleViewerTitle">📅 ตรวจสอบคาบสอนครู</span>
+                </h3>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <button class="btn-primary" id="toggleScheduleModeBtn" onclick="toggleScheduleMode()" style="padding: 8px 16px; font-size: 0.9rem;">
+                        <i class="fas fa-exchange-alt"></i> สลับเป็นคาบนักเรียน
+                    </button>
+                </div>
+            </div>
             
-            <div class="schedule-search">
-                <input type="text" id="scheduleSearchInput" placeholder="🔍 ค้นหาครู..." onkeyup="filterScheduleViewer()">
+            <!-- Filter Controls -->
+            <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+                <input type="text" 
+                       id="scheduleSearchInput" 
+                       class="filter-input" 
+                       placeholder="🔍 ค้นหาชื่อ..." 
+                       onkeyup="applyScheduleFilters()"
+                       style="flex: 1; min-width: 200px;">
+                
+                <select id="scheduleDayFilter" 
+                        class="filter-select" 
+                        onchange="applyScheduleFilters()"
+                        style="min-width: 150px;">
+                    <option value="">📅 ทุกวัน</option>
+                    <option value="จันทร์">จันทร์</option>
+                    <option value="อังคาร">อังคาร</option>
+                    <option value="พุธ">พุธ</option>
+                    <option value="พฤหัสบดี">พฤหัสบดี</option>
+                    <option value="ศุกร์">ศุกร์</option>
+                </select>
+                
+                <input type="number" 
+                       id="schedulePeriodFilter" 
+                       class="filter-input" 
+                       placeholder="🕐 คาบที่ (1-10)" 
+                       min="1" 
+                       max="10"
+                       onchange="applyScheduleFilters()"
+                       style="width: 150px;">
+                
+                <button class="btn-secondary" onclick="clearScheduleFilters()" style="padding: 8px 16px;">
+                    <i class="fas fa-redo"></i> ล้างตัวกรอง
+                </button>
             </div>
 
             <div class="teacher-schedule-viewer" id="scheduleViewerContainer">
@@ -1131,6 +1214,7 @@
 
         let historyDataCache = [];
         let teachersData = [];
+        let scheduleViewMode = 'teacher'; // 'teacher' or 'student'
         let isSaved = false;
         let selectedTeachers = [];
         let daySchedule = "";
@@ -1416,6 +1500,15 @@
         // ============================================
         function loadScheduleViewer() {
             console.log('📅 Loading Schedule Viewer...');
+            
+            if(scheduleViewMode === 'teacher') {
+                loadTeacherScheduleViewer();
+            } else {
+                loadStudentScheduleViewer();
+            }
+        }
+        
+        function loadTeacherScheduleViewer() {
             const container = document.getElementById('scheduleViewerContainer');
             
             if(teachersData.length === 0) {
@@ -1447,12 +1540,12 @@
                             const detail = teacherDetails[detailKey] || {};
                             const subj = detail.code || '-';
                             const grade = detail.grade || '-';
-                            periodHTML += `<div class="period-item">คาบ ${period}: ${subj} (${grade})</div>`;
+                            periodHTML += `<div class="period-item" data-day="${day}" data-period="${period}">คาบ ${period}: ${subj} (${grade})</div>`;
                         });
                     }
                     
                     scheduleHTML += `
-                        <div class="day-schedule">
+                        <div class="day-schedule" data-day="${day}">
                             <div class="day-name">${day}</div>
                             ${periodHTML}
                         </div>
@@ -1467,20 +1560,207 @@
                     </div>
                 `;
             }).join('');
+            
+            // Apply current filters
+            applyScheduleFilters();
+        }
+        
+        function loadStudentScheduleViewer() {
+            const container = document.getElementById('scheduleViewerContainer');
+            
+            if(teachersData.length === 0) {
+                container.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #64748b;">
+                        <i class="fas fa-book-open" style="font-size: 3rem; margin-bottom: 15px; display: block;"></i>
+                        <p>ไม่พบข้อมูลตารางเรียน</p>
+                        <p style="font-size: 0.9rem; margin-top: 10px;">กรุณาเลือกภาคเรียนและโหลดข้อมูลครูก่อน</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // สร้าง Map ของตารางนักเรียน จาก teachingDetails
+            const studentScheduleMap = {};
+            const days = ['จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์'];
+            
+            teachersData.forEach(teacher => {
+                const details = teacher.teachingDetails || {};
+                days.forEach(day => {
+                    const periods = teacher.schedule[day] || [];
+                    periods.forEach(period => {
+                        const key = `${day}_${period}`;
+                        const detail = details[key];
+                        if(detail && detail.grade) {
+                            const gradeLevel = detail.grade;
+                            if(!studentScheduleMap[gradeLevel]) {
+                                studentScheduleMap[gradeLevel] = {};
+                            }
+                            if(!studentScheduleMap[gradeLevel][day]) {
+                                studentScheduleMap[gradeLevel][day] = [];
+                            }
+                            studentScheduleMap[gradeLevel][day].push({
+                                period: period,
+                                subject: detail.code || '-',
+                                teacher: teacher.name
+                            });
+                        }
+                    });
+                });
+            });
+            
+            // เรียงลำดับชั้นเรียน
+            const sortedGrades = Object.keys(studentScheduleMap).sort((a, b) => {
+                // Extract number from grade (e.g., "ม.1" -> 1)
+                const numA = parseInt(a.match(/\d+/)?.[0] || 0);
+                const numB = parseInt(b.match(/\d+/)?.[0] || 0);
+                return numA - numB;
+            });
+            
+            container.innerHTML = sortedGrades.map(grade => {
+                let scheduleHTML = '';
+                
+                days.forEach(day => {
+                    const periods = studentScheduleMap[grade][day] || [];
+                    
+                    let periodHTML = '';
+                    if(periods.length === 0) {
+                        periodHTML = '<div class="period-item empty">ไม่มีคาบเรียน</div>';
+                    } else {
+                        // เรียงตามคาบ
+                        periods.sort((a,b) => a.period - b.period).forEach(item => {
+                            periodHTML += `<div class="period-item" data-day="${day}" data-period="${item.period}">
+                                คาบ ${item.period}: ${item.subject}<br>
+                                <small style="color: #64748b;">ครู ${item.teacher}</small>
+                            </div>`;
+                        });
+                    }
+                    
+                    scheduleHTML += `
+                        <div class="day-schedule" data-day="${day}">
+                            <div class="day-name">${day}</div>
+                            ${periodHTML}
+                        </div>
+                    `;
+                });
+                
+                return `
+                    <div class="teacher-schedule-card student-card" data-grade="${grade}">
+                        <h4>📚 ${grade}</h4>
+                        <span class="dept-badge" style="background: #dcfce7; color: #15803d;">ตารางนักเรียน</span>
+                        ${scheduleHTML}
+                    </div>
+                `;
+            }).join('');
+            
+            // Apply current filters
+            applyScheduleFilters();
         }
 
-        function filterScheduleViewer() {
+        function applyScheduleFilters() {
             const searchText = document.getElementById('scheduleSearchInput').value.toLowerCase();
+            const dayFilter = document.getElementById('scheduleDayFilter').value;
+            const periodFilter = document.getElementById('schedulePeriodFilter').value;
+            
             const cards = document.querySelectorAll('.teacher-schedule-card');
             
             cards.forEach(card => {
-                const teacherName = card.dataset.teacherName.toLowerCase();
-                if(teacherName.includes(searchText)) {
-                    card.style.display = 'block';
-                } else {
-                    card.style.display = 'none';
+                let shouldShow = true;
+                
+                // Filter by name/grade
+                if(searchText) {
+                    const name = (card.dataset.teacherName || card.dataset.grade || '').toLowerCase();
+                    if(!name.includes(searchText)) {
+                        shouldShow = false;
+                    }
                 }
+                
+                // Filter by day and period
+                if(shouldShow && (dayFilter || periodFilter)) {
+                    const daySchedules = card.querySelectorAll('.day-schedule');
+                    let hasMatch = false;
+                    
+                    daySchedules.forEach(daySchedule => {
+                        const day = daySchedule.dataset.day;
+                        
+                        // Check day filter
+                        if(dayFilter && day !== dayFilter) {
+                            daySchedule.style.display = 'none';
+                            return;
+                        }
+                        
+                        // Check period filter
+                        if(periodFilter) {
+                            const periods = daySchedule.querySelectorAll('.period-item');
+                            let dayHasMatch = false;
+                            
+                            periods.forEach(periodItem => {
+                                const period = periodItem.dataset.period;
+                                if(period === periodFilter) {
+                                    periodItem.style.display = 'block';
+                                    dayHasMatch = true;
+                                    hasMatch = true;
+                                } else if(periodItem.classList.contains('empty')) {
+                                    // Keep empty indicator
+                                    periodItem.style.display = 'block';
+                                } else {
+                                    periodItem.style.display = 'none';
+                                }
+                            });
+                            
+                            // Show day if it has matching period
+                            daySchedule.style.display = dayHasMatch ? 'block' : 'none';
+                        } else {
+                            daySchedule.style.display = 'block';
+                            hasMatch = true;
+                        }
+                    });
+                    
+                    // If filtering by day/period, only show cards with matches
+                    if((dayFilter || periodFilter) && !hasMatch) {
+                        shouldShow = false;
+                    }
+                } else {
+                    // Reset visibility
+                    card.querySelectorAll('.day-schedule, .period-item').forEach(el => {
+                        el.style.display = 'block';
+                    });
+                }
+                
+                card.style.display = shouldShow ? 'block' : 'none';
             });
+        }
+        
+        function clearScheduleFilters() {
+            document.getElementById('scheduleSearchInput').value = '';
+            document.getElementById('scheduleDayFilter').value = '';
+            document.getElementById('schedulePeriodFilter').value = '';
+            applyScheduleFilters();
+        }
+        
+        function toggleScheduleMode() {
+            const btn = document.getElementById('toggleScheduleModeBtn');
+            const title = document.getElementById('scheduleViewerTitle');
+            const searchInput = document.getElementById('scheduleSearchInput');
+            
+            if(scheduleViewMode === 'teacher') {
+                scheduleViewMode = 'student';
+                btn.innerHTML = '<i class="fas fa-exchange-alt"></i> สลับเป็นคาบครู';
+                title.innerHTML = '📚 ตรวจสอบคาบนักเรียน';
+                searchInput.placeholder = '🔍 ค้นหาระดับชั้น...';
+            } else {
+                scheduleViewMode = 'teacher';
+                btn.innerHTML = '<i class="fas fa-exchange-alt"></i> สลับเป็นคาบนักเรียน';
+                title.innerHTML = '📅 ตรวจสอบคาบสอนครู';
+                searchInput.placeholder = '🔍 ค้นหาชื่อครู...';
+            }
+            
+            clearScheduleFilters();
+            loadScheduleViewer();
+        }
+
+        function filterScheduleViewer() {
+            // Legacy function - redirect to new function
+            applyScheduleFilters();
         }
 
         // ============================================
