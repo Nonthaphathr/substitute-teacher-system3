@@ -890,9 +890,11 @@
                             <option value="1/2567">1/2567</option>
                             <option value="2/2567">2/2567</option>
                             <option value="1/2568">1/2568</option>
-                            <option value="2/2568" selected>2/2568</option>
+                            <option value="2/2568">2/2568</option>
                             <option value="1/2569">1/2569</option>
                             <option value="2/2569">2/2569</option>
+                            <option value="1/2570">1/2570</option>
+                            <option value="2/2570">2/2570</option>
                         </select>
                         <p style="font-size: 0.85rem; color: #64748b; margin-top: 5px;">
                             ⚠️ ต้องตรงกับภาคเรียนที่บันทึกใน "จัดการครู/ตาราง"
@@ -1188,7 +1190,20 @@
     <!-- Copy Modal -->
     <div id="copyModal" class="modal" style="z-index: 2000;">
         <div class="modal-content-sm">
-            <h3 style="color:var(--primary);">📋 คัดลอกรายการแจ้งลง Line</h3>
+            <h3 style="color:var(--primary);">📋 คัดลอกข้อความแจ้งลง Line</h3>
+
+            <div style="display:flex; gap:8px; margin-bottom:12px;">
+                <button id="copyTabTeacherBtn" onclick="switchCopyTab('teacher')" class="nav-btn" style="flex:1; border:none;">👨‍🏫 แจ้งครู</button>
+                <button id="copyTabStudentBtn" onclick="switchCopyTab('student')" class="nav-btn" style="flex:1; border:none;">🎓 แจ้งนักเรียน</button>
+            </div>
+
+            <div id="copyRoomSelectorWrap" style="display:none; margin-bottom:12px;">
+                <label style="font-size:0.85rem; color:#64748b; font-weight:600;">เลือกห้อง:</label>
+                <select id="copyRoomSelect" onchange="onCopyRoomChange(this.value)" style="width:100%; padding:10px; border-radius:8px; border:1px solid #cbd5e1; margin-top:5px; font-size:0.95rem;">
+                    <option value="all">📋 รวมทุกห้อง</option>
+                </select>
+            </div>
+
             <textarea id="copyTextBox" class="copy-box"></textarea>
             <div style="display:flex; justify-content:flex-end; gap:10px;">
                 <button onclick="copyToClipboard()" class="nav-btn" style="background:var(--primary); color:white; border:none;">📋 คัดลอกข้อความ</button>
@@ -1315,6 +1330,24 @@
             return `${dayNum} ${monthName} พ.ศ. ${yearBE}`;
         }
 
+        // คำนวณภาคเรียนปัจจุบันจากวันที่วันนี้ (ไม่ใช้ค่า hardcode เพื่อไม่ให้ค้างปีเก่า)
+        // พ.ค.-ต.ค. = ภาคเรียนที่ 1 ของปีการศึกษานั้น, พ.ย.-เม.ย. = ภาคเรียนที่ 2
+        function getCurrentSemesterBE() {
+            const today = new Date();
+            const month = today.getMonth() + 1; // 1-12
+            let yearBE = today.getFullYear() + 543;
+            let sem;
+            if(month >= 5 && month <= 10) {
+                sem = 1;
+            } else if(month >= 11) {
+                sem = 2;
+            } else {
+                sem = 2;
+                yearBE -= 1; // ม.ค.-เม.ย. ยังนับเป็นภาคเรียนที่ 2 ของปีการศึกษาก่อนหน้า
+            }
+            return `${sem}/${yearBE}`;
+        }
+
         // NEW: Build Tooltip Text for Teacher Schedule
         function buildScheduleTooltip(teacher, day) {
             const teacherSchedule = teacher.schedule[day] || [];
@@ -1400,9 +1433,18 @@
             console.log('🚀 ===== SYSTEM INITIALIZATION =====');
             initializeRouting();
             
-            const savedSemester = localStorage.getItem('selectedSemester') || '2/2568';
-            document.getElementById('semesterSelect').value = savedSemester;
-            console.log('📚 Initial Semester:', savedSemester);
+            const currentSemester = getCurrentSemesterBE();
+            const savedSemester = localStorage.getItem('selectedSemester') || currentSemester;
+            const semesterSelectEl = document.getElementById('semesterSelect');
+            if(![...semesterSelectEl.options].some(o => o.value === savedSemester)) {
+                // เผื่อกรณีอนาคตที่ค่าที่คำนวณได้ยังไม่มีใน <option> ให้เพิ่มเข้าไปอัตโนมัติ
+                const opt = document.createElement('option');
+                opt.value = savedSemester;
+                opt.textContent = savedSemester;
+                semesterSelectEl.appendChild(opt);
+            }
+            semesterSelectEl.value = savedSemester;
+            console.log('📚 Current semester (auto-detected):', currentSemester, '| Using:', savedSemester);
             
             await reloadTeachersData();
 
@@ -2531,6 +2573,14 @@
             document.getElementById('previewModal').style.display = 'block';
         }
 
+        // ============================================
+        // COPY MODAL STATE (แจ้งครู / แจ้งนักเรียน)
+        // ============================================
+        let copyModalRecord = null;
+        let copyModalTeachersScheduleMap = {};
+        let copyModalTab = 'teacher'; // 'teacher' | 'student'
+        let copyModalRoom = 'all';
+
         async function showCopyModal(id) {
             const record = historyDataCache.find(x => x.id === id);
             if(!record) {
@@ -2540,7 +2590,7 @@
 
             console.log('📋 Preparing copy text for record:', id);
             console.log('   Records count:', record.records.length);
-            
+
             Swal.fire({
                 title: 'กำลังเตรียมข้อความ...',
                 html: 'กำลังตรวจสอบตารางสอนของครู',
@@ -2551,76 +2601,187 @@
             try {
                 const daySchedule = record.daySchedule || 'จันทร์';
                 const semester = document.getElementById('semesterSelect').value;
-                
+
                 const teachersSnap = await db.collection("teachers")
                     .where("semester", "==", semester)
                     .where("active", "==", true)
                     .get();
-                
+
                 const teachersScheduleMap = {};
                 teachersSnap.forEach(doc => {
                     const t = doc.data();
                     teachersScheduleMap[t.name] = t.schedule || {};
                 });
-                
+
                 console.log('✅ Loaded teachers schedule for', daySchedule);
 
-                const dateStr = formatThaiDate(record.docDate);
-                const currentUrl = window.location.href.split('#')[0] + '#history';
-                
-                let text = `📢 **ขอแจ้งข้อมูลสรุปการจัดสอนแทน**\n📅 วันที่: ${dateStr}\n------------------------------\n`;
-                const sortedRecords = [...record.records].sort((a,b) => a.period - b.period);
-                
-                const teacherPeriodCount = {};
-                sortedRecords.forEach(r => {
-                    const key = `${r.sub}_${r.period}`;
-                    teacherPeriodCount[key] = (teacherPeriodCount[key] || 0) + 1;
-                });
-                
-                console.log('📊 Teacher substitution count:', teacherPeriodCount);
-                
-                sortedRecords.forEach((r, index) => {
-                    const subName = formatTeacherNameShort(r.sub);
+                copyModalRecord = record;
+                copyModalTeachersScheduleMap = teachersScheduleMap;
+                copyModalTab = 'teacher';
+                copyModalRoom = 'all';
+
+                populateCopyRoomOptions();
+                switchCopyTab('teacher');
+
+                Swal.close();
+                closeAllModals();
+                document.getElementById('copyModal').style.display = 'block';
+
+            } catch(e) {
+                console.error('❌ Error preparing copy text:', e);
+                Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถโหลดข้อมูลครูได้', 'error');
+            }
+        }
+
+        // เติมรายชื่อห้องที่มีในรอบนี้ลงในตัวเลือก "แจ้งนักเรียน"
+        function populateCopyRoomOptions() {
+            const roomSelect = document.getElementById('copyRoomSelect');
+            const rooms = getDistinctRooms(copyModalRecord);
+            roomSelect.innerHTML = '<option value="all">📋 รวมทุกห้อง</option>' +
+                rooms.map(g => `<option value="${g}">🏫 ห้อง ${g}</option>`).join('');
+            roomSelect.value = 'all';
+        }
+
+        function getDistinctRooms(record) {
+            const rooms = new Set();
+            (record.records || []).forEach(r => { if(r.grade) rooms.add(r.grade); });
+            return Array.from(rooms).sort((a,b) => a.localeCompare(b, 'th'));
+        }
+
+        function switchCopyTab(tab) {
+            copyModalTab = tab;
+
+            const teacherBtn = document.getElementById('copyTabTeacherBtn');
+            const studentBtn = document.getElementById('copyTabStudentBtn');
+            const roomWrap = document.getElementById('copyRoomSelectorWrap');
+
+            if(tab === 'teacher') {
+                teacherBtn.style.background = 'var(--primary)';
+                teacherBtn.style.color = 'white';
+                studentBtn.style.background = '#e2e8f0';
+                studentBtn.style.color = '#334155';
+                roomWrap.style.display = 'none';
+            } else {
+                studentBtn.style.background = 'var(--primary)';
+                studentBtn.style.color = 'white';
+                teacherBtn.style.background = '#e2e8f0';
+                teacherBtn.style.color = '#334155';
+                roomWrap.style.display = 'block';
+            }
+
+            renderCopyModalText();
+        }
+
+        function onCopyRoomChange(value) {
+            copyModalRoom = value;
+            renderCopyModalText();
+        }
+
+        function renderCopyModalText() {
+            if(!copyModalRecord) return;
+            const text = copyModalTab === 'teacher'
+                ? buildTeacherCopyText(copyModalRecord, copyModalTeachersScheduleMap)
+                : buildStudentCopyText(copyModalRecord, copyModalRoom);
+            document.getElementById('copyTextBox').value = text;
+            console.log('✅ Copy text prepared:', text.length, 'characters');
+        }
+
+        // ข้อความแจ้งครู: จัดกลุ่มตามครูผู้สอนแทนแต่ละคน แยกช่วงว่างชัดเจน
+        function buildTeacherCopyText(record, teachersScheduleMap) {
+            const daySchedule = record.daySchedule || 'จันทร์';
+            const dateStr = formatThaiDate(record.docDate);
+            const currentUrl = window.location.href.split('#')[0] + '#history';
+
+            const sortedRecords = [...record.records].sort((a,b) => a.period - b.period);
+
+            const teacherPeriodCount = {};
+            sortedRecords.forEach(r => {
+                const key = `${r.sub}_${r.period}`;
+                teacherPeriodCount[key] = (teacherPeriodCount[key] || 0) + 1;
+            });
+
+            // จัดกลุ่มตามครูผู้สอนแทน โดยรักษาลำดับการปรากฏครั้งแรก
+            const teacherOrder = [];
+            const groups = {};
+            sortedRecords.forEach(r => {
+                if(!groups[r.sub]) {
+                    groups[r.sub] = [];
+                    teacherOrder.push(r.sub);
+                }
+                groups[r.sub].push(r);
+            });
+
+            let text = `📢 ขอแจ้งข้อมูลสรุปการจัดสอนแทน\n📅 วันที่: ${dateStr}\n\n`;
+
+            teacherOrder.forEach(subKey => {
+                const subName = formatTeacherNameShort(subKey);
+                text += `👤 ${subName}\n`;
+
+                groups[subKey].forEach(r => {
                     const absentName = formatTeacherNameShort(r.absent);
                     const key = `${r.sub}_${r.period}`;
-                    
+
                     let roomCount = teacherPeriodCount[key] || 1;
-                    
                     const teacherSchedule = teachersScheduleMap[r.sub];
                     if(teacherSchedule && teacherSchedule[daySchedule]) {
                         const teacherPeriods = teacherSchedule[daySchedule] || [];
                         if(teacherPeriods.includes(r.period)) {
                             roomCount = roomCount + 1;
-                            console.log(`   ✨ ${r.sub} has own class at period ${r.period}, total rooms: ${roomCount}`);
                         }
                     }
-                    
-                    console.log(`   Record ${index+1}: ${key} -> ${roomCount} ห้อง`);
-                    
+
                     let multiRoomNote = '';
                     if(roomCount > 1) {
                         multiRoomNote = ` *ดูแล ${roomCount} ห้อง เนื่องจากครูไม่มีคนว่าง`;
                     }
-                    
-                    text += `${index+1}. คาบ ${r.period}: ${subName} (แทน ${absentName})${multiRoomNote}\n   - วิชา: ${r.subject || '-'} ชั้น: ${r.grade || '-'} (${r.reason || 'ไปราชการ'})\n`;
+
+                    text += `   • คาบ ${r.period} แทน ${absentName}${multiRoomNote}\n     วิชา: ${r.subject || '-'} | ชั้น: ${r.grade || '-'} | (${r.reason || 'ไปราชการ'})\n`;
                 });
-                
-                text += `------------------------------\n🔗 คลิกลิงก์ระบบ:\n${currentUrl}`;
 
-                console.log('✅ Copy text prepared:', text.length, 'characters');
-                console.log('📝 Final text preview:\n', text.substring(0, 500));
+                text += `\n`; // เว้นบรรทัดว่างแยกครูแต่ละคนให้ชัดเจน
+            });
 
-                Swal.close();
-                
-                document.getElementById('copyTextBox').value = text;
-                
-                closeAllModals();
-                document.getElementById('copyModal').style.display = 'block';
-                
-            } catch(e) {
-                console.error('❌ Error preparing copy text:', e);
-                Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถโหลดข้อมูลครูได้', 'error');
-            }
+            text += `------------------------------\n🔗 คลิกลิงก์ระบบ:\n${currentUrl}`;
+            return text;
+        }
+
+        // ข้อความแจ้งนักเรียน: จัดกลุ่มตามห้องเรียน เลือกได้ทั้งแบบรวมทุกห้องหรือรายห้อง
+        function buildStudentCopyText(record, room) {
+            const dateStr = formatThaiDate(record.docDate);
+            const sortedRecords = [...record.records].sort((a,b) => a.period - b.period);
+
+            const roomOrder = [];
+            const roomGroups = {};
+            sortedRecords.forEach(r => {
+                const g = r.grade || 'ไม่ระบุห้อง';
+                if(!roomGroups[g]) {
+                    roomGroups[g] = [];
+                    roomOrder.push(g);
+                }
+                roomGroups[g].push(r);
+            });
+
+            const roomsToShow = room === 'all'
+                ? getDistinctRooms(record).filter(g => roomGroups[g])
+                : [room];
+
+            const headerLabel = room === 'all' ? 'ทุกห้อง' : `ห้อง ${room}`;
+            let text = `📢 แจ้งนักเรียน${headerLabel === 'ทุกห้อง' ? '' : ' ' + headerLabel}\n📅 วันที่: ${dateStr}\nเรื่อง: การจัดครูสอนแทน\n\n`;
+
+            roomsToShow.forEach(g => {
+                const list = roomGroups[g] || [];
+                if(list.length === 0) return;
+
+                text += `🏫 ห้อง ${g}\n`;
+                list.forEach(r => {
+                    const subName = formatTeacherNameShort(r.sub);
+                    text += `   • คาบ ${r.period} วิชา ${r.subject || '-'} : ${subName} สอนแทน\n`;
+                });
+                text += `\n`; // เว้นบรรทัดว่างแยกห้องแต่ละห้องให้ชัดเจน
+            });
+
+            text += `------------------------------\nหมายเหตุ: ให้นักเรียนเข้าเรียนตามปกติ`;
+            return text;
         }
 
         function copyToClipboard() {
