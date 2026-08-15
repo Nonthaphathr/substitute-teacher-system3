@@ -276,6 +276,129 @@
             border: 1px solid #f59e0b;
         }
 
+        /* ===== NEW: Duplicate-period (ซ้ำคาบ) conflict styles ===== */
+        .candidate-opt.conflict {
+            background: #fff1f2;
+            border-color: #fb7185;
+        }
+        .candidate-opt.conflict.selected {
+            background: #ffe4e6;
+            border-color: #e11d48;
+            outline: 2px solid #e11d48;
+        }
+        .conflict-note {
+            display: none;
+            font-size: 0.78rem;
+            color: #b91c1c;
+            font-weight: 700;
+            margin-top: 3px;
+            line-height: 1.4;
+        }
+        .conflict-banner {
+            display: none;
+            background: #fef2f2;
+            border: 2px solid #ef4444;
+            border-left-width: 6px;
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-bottom: 15px;
+            color: #991b1b;
+            font-size: 0.9rem;
+            line-height: 1.7;
+        }
+        .conflict-banner h4 { margin: 0 0 6px 0; color: #b91c1c; }
+        .conflict-banner ul { margin: 5px 0 0 0; padding-left: 20px; }
+
+        /* ===== NEW: Auto-allocate button & panel ===== */
+        .auto-panel {
+            background: linear-gradient(135deg, #f5f3ff, #eef2ff);
+            border: 2px solid #a5b4fc;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .btn-auto {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #7c3aed, #4f46e5);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Sarabun';
+            font-size: 1rem;
+            font-weight: 700;
+        }
+        .btn-auto:hover { box-shadow: 0 4px 15px rgba(79, 70, 229, 0.45); }
+        .btn-ghost {
+            padding: 10px 18px;
+            background: white;
+            color: #4f46e5;
+            border: 1px solid #a5b4fc;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Sarabun';
+            font-size: 0.9rem;
+        }
+        .btn-ghost:hover { background: #eef2ff; }
+        .auto-panel .auto-opt { display: flex; align-items: center; gap: 6px; font-size: 0.88rem; color: #3730a3; }
+        .auto-panel .auto-opt input[type="number"] { width: 65px; padding: 6px; border: 1px solid #c7d2fe; border-radius: 6px; font-family: 'Sarabun'; }
+        .auto-tag {
+            background: #ddd6fe;
+            color: #4c1d95;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            border: 1px solid #8b5cf6;
+        }
+
+        /* ===== NEW: History filter bar ===== */
+        .filter-bar {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
+            gap: 12px;
+            align-items: end;
+        }
+        .filter-bar .f-item label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 4px;
+        }
+        .filter-bar .f-item input,
+        .filter-bar .f-item select {
+            width: 100%;
+            padding: 9px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-family: 'Sarabun';
+            font-size: 0.9rem;
+        }
+        .filter-summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            font-size: 0.9rem;
+            color: #475569;
+            margin-bottom: 12px;
+            padding: 8px 12px;
+            background: #eff6ff;
+            border-radius: 8px;
+            border: 1px solid #bfdbfe;
+        }
+
         .btn-primary, .btn-save, .btn-warning, .btn-print, .btn-summary { 
             position: relative;
             overflow: hidden;
@@ -971,6 +1094,31 @@
             </div>
 
             <div id="resultArea" style="display: none;">
+                <!-- NEW: Auto Allocation Panel -->
+                <div class="auto-panel">
+                    <button class="btn-auto" onclick="autoAllocate()">
+                        <i class="fas fa-wand-magic-sparkles"></i> ⚡ จัดอัตโนมัติ
+                    </button>
+                    <button class="btn-ghost" onclick="clearAllSelections()">
+                        <i class="fas fa-eraser"></i> ล้างการเลือกทั้งหมด
+                    </button>
+                    <div class="auto-opt">
+                        <label for="maxPerTeacher">สูงสุด/คน/วัน:</label>
+                        <input type="number" id="maxPerTeacher" value="2" min="1" max="8">
+                        <span>คาบ</span>
+                    </div>
+                    <div class="auto-opt">
+                        <input type="checkbox" id="autoPreferSameDept" checked>
+                        <label for="autoPreferSameDept">ให้ความสำคัญครูกลุ่มสาระเดียวกัน</label>
+                    </div>
+                    <div style="flex-basis:100%; font-size:0.82rem; color:#4338ca;">
+                        💡 ระบบจะกระจายภาระงานให้เท่ากัน หลีกเลี่ยงการจัดซ้ำคาบเด็ดขาด และไม่ให้ครูคนเดียวรับเกินโควตา — <strong>กรุณาตรวจสอบผลก่อนกดบันทึก</strong>
+                    </div>
+                </div>
+
+                <!-- NEW: Duplicate period warning banner -->
+                <div class="conflict-banner" id="conflictBanner"></div>
+
                 <div class="realtime-summary" id="realtimeSummary">
                     <h4>📊 สรุปภาระงานสอนแทน (วันนี้ - Realtime)</h4>
                     <div class="summary-grid" id="summaryGrid">
@@ -1010,11 +1158,73 @@
         <div id="history" class="page-section">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
                 <h3 style="color: var(--primary); margin: 0;">📂 ประวัติการจัดสอนแทน</h3>
-                <button onclick="loadHistory()" class="btn-primary" style="display: flex; align-items: center; gap: 8px;">
+                <button onclick="loadHistory(true)" class="btn-primary" style="display: flex; align-items: center; gap: 8px;">
                     <i class="fas fa-sync-alt"></i> รีเฟรชข้อมูล
                 </button>
             </div>
+
+            <!-- NEW: History Filters -->
+            <div class="filter-bar">
+                <div class="f-item">
+                    <label for="histSearch">🔎 ค้นหา (ชื่อครู / รหัสวิชา / เหตุผล)</label>
+                    <input type="text" id="histSearch" placeholder="พิมพ์คำค้น..." oninput="renderHistory(true)">
+                </div>
+                <div class="f-item">
+                    <label for="histDateFrom">📅 ตั้งแต่วันที่</label>
+                    <input type="date" id="histDateFrom" onchange="renderHistory(true)">
+                </div>
+                <div class="f-item">
+                    <label for="histDateTo">📅 ถึงวันที่</label>
+                    <input type="date" id="histDateTo" onchange="renderHistory(true)">
+                </div>
+                <div class="f-item">
+                    <label for="histDay">🗓️ วันในตาราง</label>
+                    <select id="histDay" onchange="renderHistory(true)">
+                        <option value="">-- ทุกวัน --</option>
+                        <option value="จันทร์">จันทร์</option>
+                        <option value="อังคาร">อังคาร</option>
+                        <option value="พุธ">พุธ</option>
+                        <option value="พฤหัสบดี">พฤหัสบดี</option>
+                        <option value="ศุกร์">ศุกร์</option>
+                    </select>
+                </div>
+                <div class="f-item">
+                    <label for="histTeacher">👤 ครู</label>
+                    <select id="histTeacher" onchange="renderHistory(true)">
+                        <option value="">-- ทุกคน --</option>
+                    </select>
+                </div>
+                <div class="f-item">
+                    <label for="histRole">🎯 บทบาท</label>
+                    <select id="histRole" onchange="renderHistory(true)">
+                        <option value="any">ครูที่ลา หรือ ครูสอนแทน</option>
+                        <option value="absent">ครูที่ลา/ไปราชการ</option>
+                        <option value="sub">ครูสอนแทน</option>
+                    </select>
+                </div>
+                <div class="f-item">
+                    <label for="histReason">📋 เหตุผล</label>
+                    <select id="histReason" onchange="renderHistory(true)">
+                        <option value="">-- ทั้งหมด --</option>
+                        <option value="ลาป่วย">ลาป่วย</option>
+                        <option value="ลากิจ">ลากิจ</option>
+                        <option value="ไปราชการ">ไปราชการ</option>
+                    </select>
+                </div>
+                <div class="f-item">
+                    <label>&nbsp;</label>
+                    <button class="btn-ghost" style="width:100%;" onclick="clearHistoryFilters()">
+                        <i class="fas fa-times-circle"></i> ล้างตัวกรอง
+                    </button>
+                </div>
+            </div>
+
+            <div class="filter-summary" id="historySummary">
+                <span>กำลังโหลดข้อมูล...</span>
+            </div>
+
             <div id="historyList"></div>
+            <div id="historyMore" style="text-align:center; margin-top:15px;"></div>
         </div>
 
         <!-- NEW: Teacher Schedule Viewer Tab -->
@@ -1238,6 +1448,13 @@
         let realtimeWorkload = {};
         let mainChartInstance = null;
         let teacherChartInstance = null;
+
+        // NEW: แผนที่คาบสอนแทนที่ "บันทึกไว้แล้ว" ในวันเดียวกัน (สำหรับตรวจจับการจัดซ้ำคาบ)
+        // รูปแบบ: { [period:number]: [{ sub, absent, subject, grade }] }
+        let dbPeriodMap = {};
+        // NEW: ตัวแปรสำหรับหน้าประวัติ (โหลดทั้งหมด + กรอง)
+        let historyRenderLimit = 20;
+        const HISTORY_PAGE_SIZE = 20;
 
         // ============================================
         // URL ROUTING
@@ -1842,11 +2059,158 @@
 
         function togglePeriodSelection(checkbox, absentName, period) {
             const periodBlock = checkbox.closest('.period-block');
+            const key = `${absentName}_${period}`;
+            window.selectionTracker = window.selectionTracker || {};
+
             if(checkbox.checked) {
                 periodBlock.classList.remove('disabled');
+                // คืนค่าการเลือกเดิม (ถ้ามี) กลับเข้าสู่การนับภาระงาน
+                const radio = periodBlock.querySelector('input[type="radio"]:checked');
+                if(radio && !window.selectionTracker[key]) {
+                    realtimeWorkload[radio.value] = (realtimeWorkload[radio.value] || 0) + 1;
+                    window.selectionTracker[key] = radio.value;
+                }
             } else {
                 periodBlock.classList.add('disabled');
+                // ถอดการเลือกออกจากการนับภาระงาน เพื่อไม่ให้ตรวจซ้ำคาบผิดพลาด
+                const prev = window.selectionTracker[key];
+                if(prev) {
+                    realtimeWorkload[prev] = Math.max(0, (realtimeWorkload[prev] || 0) - 1);
+                    delete window.selectionTracker[key];
+                }
             }
+
+            isSaved = false;
+            updatePrintButtons();
+            updateAllBadges();
+            updateConflictMarks();
+            updateRealtimeSummary();
+        }
+
+        // ============================================
+        // NEW: DUPLICATE PERIOD (ซ้ำคาบ) DETECTION
+        // ============================================
+
+        /**
+         * แยก key ของ selectionTracker (`${absentName}_${period}`) ออกเป็นชื่อครูที่ลา และคาบ
+         * ใช้ lastIndexOf เพราะชื่อครูอาจมีเครื่องหมาย _ หรือช่องว่างปนอยู่
+         */
+        function parseSelectionKey(key) {
+            const idx = key.lastIndexOf('_');
+            if(idx === -1) return null;
+            const period = parseInt(key.substring(idx + 1));
+            if(isNaN(period)) return null;
+            return { absent: key.substring(0, idx), period: period };
+        }
+
+        /**
+         * ตรวจสอบว่า "ครูสอนแทนคนนี้" ถูกจัดให้สอนในคาบนี้ที่อื่นอยู่แล้วหรือไม่
+         * ตรวจ 2 แหล่ง:
+         *   1) screen  = รายการที่กำลังจัดอยู่บนหน้าจอ (ครูที่ลาคนอื่นในคาบเดียวกัน)
+         *   2) db      = รายการที่บันทึกไว้แล้วในฐานข้อมูลของวันที่เดียวกัน (เอกสารฉบับอื่น)
+         * @returns {Array<{source:'screen'|'db', absent:string, subject?:string, grade?:string}>}
+         */
+        function getConflicts(teacherName, period, excludeKey) {
+            const conflicts = [];
+            if(!teacherName) return conflicts;
+            period = parseInt(period);
+
+            // 1) จากฐานข้อมูล (วันที่เดียวกัน แต่เป็นเอกสารคนละฉบับ)
+            (dbPeriodMap[period] || []).forEach(r => {
+                if(r.sub === teacherName) {
+                    conflicts.push({ source: 'db', absent: r.absent, subject: r.subject, grade: r.grade });
+                }
+            });
+
+            // 2) จากหน้าจอปัจจุบัน
+            const tracker = window.selectionTracker || {};
+            Object.keys(tracker).forEach(key => {
+                if(key === excludeKey) return;
+                if(tracker[key] !== teacherName) return;
+                const parsed = parseSelectionKey(key);
+                if(parsed && parsed.period === period) {
+                    conflicts.push({ source: 'screen', absent: parsed.absent });
+                }
+            });
+
+            return conflicts;
+        }
+
+        /** สร้างข้อความอธิบายการชนคาบแบบสั้น */
+        function describeConflicts(period, conflicts) {
+            return conflicts.map(c => {
+                const who = formatTeacherNameShort(c.absent);
+                const extra = [c.subject, c.grade].filter(x => x && x !== '-').join(' ');
+                const tag = c.source === 'db' ? ' [บันทึกแล้วในระบบ]' : ' [ในหน้าจอนี้]';
+                return `คาบ ${period} แทน ${who}${extra ? ' (' + extra + ')' : ''}${tag}`;
+            });
+        }
+
+        /** อัปเดตสีแดง/ข้อความเตือนบนตัวเลือกครูทุกรายการ + แถบสรุปด้านบน */
+        function updateConflictMarks() {
+            document.querySelectorAll('.candidate-opt').forEach(opt => {
+                const name = opt.dataset.teacherName;
+                const period = parseInt(opt.dataset.period);
+                const absent = opt.dataset.absent;
+                if(!name || isNaN(period)) return;
+
+                const conflicts = getConflicts(name, period, `${absent}_${period}`);
+                const note = opt.querySelector('.conflict-note');
+
+                if(conflicts.length > 0) {
+                    opt.classList.add('conflict');
+                    if(note) {
+                        note.style.display = 'block';
+                        note.innerHTML = '🚨 ซ้ำคาบ! ' + describeConflicts(period, conflicts).join(' • ');
+                    }
+                } else {
+                    opt.classList.remove('conflict');
+                    if(note) { note.style.display = 'none'; note.innerHTML = ''; }
+                }
+            });
+            updateConflictBanner();
+        }
+
+        /** รวบรวมรายการที่ "เลือกไว้แล้ว" และซ้ำคาบกัน เพื่อแสดงแถบเตือนรวม */
+        function getSelectedConflicts() {
+            const tracker = window.selectionTracker || {};
+            const result = [];
+            Object.keys(tracker).forEach(key => {
+                const parsed = parseSelectionKey(key);
+                if(!parsed) return;
+                const teacherName = tracker[key];
+                const conflicts = getConflicts(teacherName, parsed.period, key);
+                if(conflicts.length > 0) {
+                    result.push({
+                        teacher: teacherName,
+                        period: parsed.period,
+                        absent: parsed.absent,
+                        conflicts: conflicts
+                    });
+                }
+            });
+            return result;
+        }
+
+        function updateConflictBanner() {
+            const banner = document.getElementById('conflictBanner');
+            if(!banner) return;
+            const list = getSelectedConflicts();
+
+            if(list.length === 0) {
+                banner.style.display = 'none';
+                banner.innerHTML = '';
+                return;
+            }
+
+            banner.style.display = 'block';
+            banner.innerHTML = `
+                <h4>🚨 พบการจัดสอนแทนซ้ำคาบ ${list.length} รายการ</h4>
+                <div>ครูท่านเดียวกันถูกจัดให้สอนแทนมากกว่า 1 ห้องในคาบเดียวกัน กรุณาตรวจสอบก่อนบันทึก</div>
+                <ul>
+                    ${list.map(x => `<li><strong>${formatTeacherNameShort(x.teacher)}</strong> — คาบ ${x.period} แทน ${formatTeacherNameShort(x.absent)} ชนกับ ${describeConflicts(x.period, x.conflicts).join(', ')}</li>`).join('')}
+                </ul>
+            `;
         }
 
         async function processAllocation() {
@@ -1866,17 +2230,27 @@
 
             workloadMap = {};
             realtimeWorkload = {};
+            dbPeriodMap = {};
             window.selectionTracker = {};
             isSaved = false;
             updatePrintButtons();
-            
+
             try {
                 const snap = await db.collection("substitutions").where("docDate", "==", docDate).get();
                 snap.forEach(doc => {
                     if(isEditMode && doc.id === document.getElementById('currentEditId').value) return;
                     const recs = doc.data().records || [];
-                    recs.forEach(r => workloadMap[r.sub] = (workloadMap[r.sub] || 0) + 1);
+                    recs.forEach(r => {
+                        workloadMap[r.sub] = (workloadMap[r.sub] || 0) + 1;
+                        // NEW: เก็บว่าครูคนไหนถูกจัดสอนแทนคาบไหนไว้แล้วบ้าง (ใช้ตรวจซ้ำคาบ)
+                        const p = parseInt(r.period);
+                        if(!isNaN(p)) {
+                            if(!dbPeriodMap[p]) dbPeriodMap[p] = [];
+                            dbPeriodMap[p].push({ sub: r.sub, absent: r.absent, subject: r.subject, grade: r.grade });
+                        }
+                    });
                 });
+                console.log('🔁 DB Period Map (สำหรับตรวจซ้ำคาบ):', dbPeriodMap);
             } catch(e) { console.error("Workload Error:", e); }
 
             const container = document.getElementById('matchCards');
@@ -1898,7 +2272,7 @@
                 const teachingDetails = teacherObj.teachingDetails || {};
                 console.log('   📚 Teaching Details:', teachingDetails);
 
-                let html = `<div class="card" data-absent="${absentName}">
+                let html = `<div class="card" data-absent="${absentName}" data-absent-dept="${teacherObj.department || ''}">
                     <div class="card-header">
                         <span>${absentName} (ลา)</span>
                         <select id="reason_${absentName}" class="reason-select">
@@ -1967,11 +2341,17 @@
                             }
 
                             html += `
-                                <div class="candidate-opt" onclick="selectRadio(this, '${t.name}', '${absentName}', ${period})">
+                                <div class="candidate-opt"
+                                     data-teacher-name="${t.name}"
+                                     data-absent="${absentName}"
+                                     data-period="${period}"
+                                     data-dept="${t.department}"
+                                     data-busy="${busyPeriods.includes(period) ? '1' : '0'}"
+                                     onclick="selectRadio(this, '${t.name}', '${absentName}', ${period})">
                                     <input type="radio" name="${inputName}" value="${t.name}" data-dept="${t.department}">
                                     <div style="flex:1;">
-                                        <span class="teacher-name-mobile" 
-                                              data-teacher='${teacherJSON}' 
+                                        <span class="teacher-name-mobile"
+                                              data-teacher='${teacherJSON}'
                                               data-day="${daySchedule}"
                                               ontouchstart="event.stopPropagation(); showMobileScheduleModal(JSON.parse(this.getAttribute('data-teacher')), this.getAttribute('data-day'))"
                                               style="cursor: pointer;">
@@ -1980,6 +2360,7 @@
                                         <span style="font-size:0.8rem; color:#64748b;">(${t.department})</span>
                                         ${multiRoomWarning}
                                         <div class="meta-info">📅 ${busyText}</div>
+                                        <div class="conflict-note"></div>
                                     </div>
                                     <div class="workload-badge" data-teacher="${t.name}">
                                         บันทึก: ${totalLoad} | ใหม่: <span class="realtime-count">0</span>
@@ -2010,18 +2391,220 @@
                         if(gradeInput) gradeInput.value = r.grade;
                         if(reasonSelect) reasonSelect.value = r.reason;
 
+                        // คืนค่าการเลือกเดิมแบบ "เงียบ" เพื่อไม่ให้เด้ง popup เตือนซ้ำคาบรัวๆ ตอนเปิดแก้ไข
                         const radios = document.getElementsByName(`rad_${r.absent}_${r.period}`);
                         radios.forEach(rad => {
                             if(rad.value === r.sub) {
-                                rad.click();
+                                const opt = rad.closest('.candidate-opt');
+                                if(opt) selectRadio(opt, r.sub, r.absent, parseInt(r.period), true);
                             }
                         });
                     });
                 }
             }
             
+            updateConflictMarks();
             updateRealtimeSummary();
             setTimeout(() => document.getElementById('resultArea').scrollIntoView({behavior:'smooth'}), 100);
+        }
+
+        // ============================================
+        // NEW: AUTO ALLOCATION (จัดอัตโนมัติ)
+        // ============================================
+
+        /** ล้างการเลือกครูสอนแทนทั้งหมดบนหน้าจอ */
+        function clearAllSelections(skipConfirm) {
+            const doClear = () => {
+                document.querySelectorAll('#matchCards .candidate-opt').forEach(opt => {
+                    opt.classList.remove('selected');
+                    const radio = opt.querySelector('input[type="radio"]');
+                    if(radio) radio.checked = false;
+                });
+                realtimeWorkload = {};
+                window.selectionTracker = {};
+                isSaved = false;
+                updatePrintButtons();
+                updateAllBadges();
+                updateConflictMarks();
+                updateRealtimeSummary();
+            };
+
+            if(skipConfirm) { doClear(); return Promise.resolve(true); }
+
+            return Swal.fire({
+                icon: 'question',
+                title: 'ล้างการเลือกทั้งหมด?',
+                text: 'การเลือกครูสอนแทนที่ทำไว้บนหน้าจอจะถูกล้าง (ข้อมูลที่บันทึกแล้วไม่ได้รับผลกระทบ)',
+                showCancelButton: true,
+                confirmButtonText: 'ล้างเลย',
+                cancelButtonText: 'ยกเลิก',
+                confirmButtonColor: '#ef4444'
+            }).then(res => {
+                if(res.isConfirmed) { doClear(); return true; }
+                return false;
+            });
+        }
+
+        /** รวบรวม "ช่อง" ที่ต้องจัดสอนแทนทั้งหมดจากหน้าจอ (เฉพาะคาบที่ติ๊กเปิดใช้งาน) */
+        function collectAutoSlots() {
+            const slots = [];
+            document.querySelectorAll('#matchCards .card').forEach(card => {
+                const absent = card.dataset.absent;
+                const absentDept = card.dataset.absentDept || '';
+                if(!absent) return;
+
+                card.querySelectorAll('.period-block').forEach(block => {
+                    const badge = block.querySelector('.badge-p');
+                    if(!badge) return;
+                    const period = parseInt(badge.innerText.replace('คาบ ', '').trim());
+                    if(isNaN(period)) return;
+
+                    const enableCheckbox = document.getElementById(`enable_${absent}_${period}`);
+                    if(!enableCheckbox || !enableCheckbox.checked) return;
+
+                    const options = Array.from(block.querySelectorAll('.candidate-opt'));
+                    slots.push({ absent, absentDept, period, block, options });
+                });
+            });
+            return slots;
+        }
+
+        /**
+         * ให้คะแนนตัวเลือก (ยิ่งน้อยยิ่งดี)
+         * ลำดับความสำคัญ: ไม่ซ้ำคาบเด็ดขาด > ไม่เกินโควตาต่อคน/วัน > กระจายภาระงาน > กลุ่มสาระเดียวกัน
+         */
+        function scoreCandidate(opt, slot, cfg) {
+            const name = opt.dataset.teacherName;
+            const key = `${slot.absent}_${slot.period}`;
+            const conflicts = getConflicts(name, slot.period, key);
+            const load = (workloadMap[name] || 0) + (realtimeWorkload[name] || 0);
+
+            let score = 0;
+            let blocked = false;
+
+            // 1) ซ้ำคาบ = ห้ามเด็ดขาด
+            if(conflicts.length > 0) { score += 1000000; blocked = true; }
+
+            // 2) เกินโควตาคาบต่อคนต่อวัน
+            if(load >= cfg.maxPerTeacher) score += 10000 + (load - cfg.maxPerTeacher) * 1000;
+
+            // 3) กระจายภาระงานให้เท่ากัน (น้ำหนักหลัก)
+            score += load * 100;
+
+            // 4) โหมดดูแลหลายห้อง: ครูที่ติดสอนคาบนั้นอยู่ ให้เลี่ยงก่อน
+            if(opt.dataset.busy === '1') score += 500;
+
+            // 5) ครูกลุ่มสาระเดียวกันกับครูที่ลา = ได้เปรียบ
+            if(cfg.preferSameDept && slot.absentDept && opt.dataset.dept === slot.absentDept) score -= 40;
+
+            // 6) tie-break แบบสุ่มเล็กน้อย เพื่อไม่ให้ตกที่ครูคนเดิมทุกครั้ง
+            score += Math.random();
+
+            return { score, blocked, name, load };
+        }
+
+        async function autoAllocate() {
+            const slots = collectAutoSlots();
+            if(slots.length === 0) {
+                return Swal.fire('ไม่มีคาบให้จัด', 'กรุณาประมวลผลและติ๊กเลือกคาบที่ต้องการจัดสอนแทนก่อน', 'warning');
+            }
+
+            const hasExisting = Object.keys(window.selectionTracker || {}).length > 0;
+            let mode = 'all';
+
+            if(hasExisting) {
+                const res = await Swal.fire({
+                    icon: 'question',
+                    title: '⚡ จัดอัตโนมัติ',
+                    html: `<div style="text-align:left; line-height:1.8;">
+                             พบการเลือกครูสอนแทนไว้แล้ว ต้องการให้ระบบทำอย่างไร?
+                           </div>`,
+                    showDenyButton: true,
+                    showCancelButton: true,
+                    confirmButtonText: '🔄 จัดใหม่ทั้งหมด',
+                    denyButtonText: '➕ เติมเฉพาะคาบที่ยังว่าง',
+                    cancelButtonText: 'ยกเลิก',
+                    confirmButtonColor: '#4f46e5',
+                    denyButtonColor: '#059669'
+                });
+                if(res.isDismissed) return;
+                mode = res.isConfirmed ? 'all' : 'fill';
+            }
+
+            const cfg = {
+                maxPerTeacher: Math.max(1, parseInt(document.getElementById('maxPerTeacher').value) || 2),
+                preferSameDept: document.getElementById('autoPreferSameDept').checked
+            };
+
+            if(mode === 'all') clearAllSelections(true);
+
+            // จัดคาบที่มี "ตัวเลือกน้อยที่สุด" ก่อน เพื่อลดโอกาสตันในภายหลัง
+            let queue = slots.slice();
+            if(mode === 'fill') {
+                queue = queue.filter(s => !window.selectionTracker[`${s.absent}_${s.period}`]);
+            }
+            queue.sort((a, b) => a.options.length - b.options.length);
+
+            const assigned = [];
+            const failed = [];
+            const overQuota = [];
+
+            queue.forEach(slot => {
+                if(slot.options.length === 0) {
+                    failed.push({ slot, reason: 'ไม่มีครูว่างในคาบนี้' });
+                    return;
+                }
+
+                const scored = slot.options
+                    .map(opt => ({ opt, ...scoreCandidate(opt, slot, cfg) }))
+                    .sort((a, b) => a.score - b.score);
+
+                const best = scored[0];
+
+                // ไม่ซ้ำคาบเด็ดขาด: ถ้าทุกตัวเลือกชนคาบ ให้เว้นว่างไว้ให้ผู้ใช้ตัดสินใจเอง
+                if(best.blocked) {
+                    failed.push({ slot, reason: 'ทุกตัวเลือกติดสอนแทนคาบนี้อยู่แล้ว (ซ้ำคาบ)' });
+                    return;
+                }
+
+                selectRadio(best.opt, best.name, slot.absent, slot.period, true);
+                assigned.push({ slot, name: best.name });
+
+                const newLoad = (workloadMap[best.name] || 0) + (realtimeWorkload[best.name] || 0);
+                if(newLoad > cfg.maxPerTeacher) {
+                    overQuota.push(`${formatTeacherNameShort(best.name)} (${newLoad} คาบ)`);
+                }
+            });
+
+            updateAllBadges();
+            updateConflictMarks();
+            updateRealtimeSummary();
+
+            const uniqueOver = [...new Set(overQuota)];
+            let html = `<div style="text-align:left; line-height:1.9; font-size:0.95rem;">
+                <div>✅ จัดสำเร็จ <strong style="color:#059669;">${assigned.length}</strong> คาบ</div>`;
+
+            if(failed.length > 0) {
+                html += `<div style="margin-top:8px;">⚠️ จัดไม่สำเร็จ <strong style="color:#b91c1c;">${failed.length}</strong> คาบ:</div>
+                         <ul style="padding-left:20px; color:#b91c1c;">
+                            ${failed.map(f => `<li>${formatTeacherNameShort(f.slot.absent)} คาบ ${f.slot.period} — ${f.reason}</li>`).join('')}
+                         </ul>`;
+            }
+            if(uniqueOver.length > 0) {
+                html += `<div style="margin-top:8px; color:#b45309;">📌 เกินโควตา ${cfg.maxPerTeacher} คาบ/วัน (เพราะครูว่างไม่พอ): ${uniqueOver.join(', ')}</div>`;
+            }
+            html += `<div style="margin-top:12px; color:#64748b; font-size:0.88rem;">
+                        กรุณาตรวจสอบผลการจัดและปรับแก้ตามต้องการ ก่อนกด <strong>บันทึกการจัดสอนแทน</strong>
+                     </div></div>`;
+
+            Swal.fire({
+                icon: failed.length > 0 ? 'warning' : 'success',
+                title: '⚡ จัดอัตโนมัติเสร็จสิ้น',
+                html: html,
+                confirmButtonText: 'ตรวจสอบผล',
+                confirmButtonColor: '#4f46e5',
+                width: 600
+            });
         }
 
         function findCandidates(day, period, exclude) {
@@ -2045,11 +2628,11 @@
                         const loadB = (workloadMap[b.name]||0) + (realtimeWorkload[b.name]||0);
                         return loadA - loadB;
                     })
-                    .slice(0, 5);
+                    .slice(0, 8);
             }
         }
 
-        function selectRadio(el, teacherName, absentName, period) {
+        function selectRadio(el, teacherName, absentName, period, silent) {
             const container = el.parentElement;
             const key = `${absentName}_${period}`;
             const previousTeacher = window.selectionTracker[key];
@@ -2066,7 +2649,32 @@
             isSaved = false;
             updatePrintButtons();
             updateAllBadges();
+            updateConflictMarks();
             updateRealtimeSummary();
+
+            // NEW: เตือนทันทีถ้าครูท่านนี้ถูกจัดสอนคาบนี้ไว้ที่อื่นแล้ว (เตือนแต่ยังเลือกได้)
+            if(!silent) {
+                const conflicts = getConflicts(teacherName, period, key);
+                if(conflicts.length > 0) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: '🚨 จัดสอนแทนซ้ำคาบ!',
+                        html: `
+                            <div style="text-align:left; font-size:0.95rem; line-height:1.8;">
+                                <strong>${formatTeacherNameShort(teacherName)}</strong> ถูกจัดให้สอนแทนใน
+                                <strong>คาบ ${period}</strong> อยู่แล้ว:
+                                <ul style="margin-top:8px; padding-left:20px; color:#b91c1c;">
+                                    ${describeConflicts(period, conflicts).map(t => `<li>${t}</li>`).join('')}
+                                </ul>
+                                <div style="margin-top:10px; color:#64748b; font-size:0.88rem;">
+                                    หากตั้งใจให้ดูแลหลายห้องพร้อมกัน สามารถเลือกต่อได้ — มิฉะนั้นกรุณาเปลี่ยนเป็นครูท่านอื่น
+                                </div>
+                            </div>`,
+                        confirmButtonText: 'รับทราบ (เลือกต่อ)',
+                        confirmButtonColor: '#e11d48'
+                    });
+                }
+            }
         }
 
         function updateAllBadges() {
@@ -2153,6 +2761,27 @@
             const data = collectFormData();
             if(!data) return;
 
+            // NEW: เตือนก่อนบันทึกถ้ายังมีการจัดซ้ำคาบค้างอยู่ (เตือนแต่บันทึกต่อได้)
+            const conflictList = getSelectedConflicts();
+            if(conflictList.length > 0) {
+                const confirmRes = await Swal.fire({
+                    icon: 'warning',
+                    title: `🚨 พบการจัดซ้ำคาบ ${conflictList.length} รายการ`,
+                    html: `<div style="text-align:left; font-size:0.92rem; line-height:1.8;">
+                             <ul style="padding-left:20px; color:#b91c1c;">
+                               ${conflictList.map(x => `<li><strong>${formatTeacherNameShort(x.teacher)}</strong> คาบ ${x.period} แทน ${formatTeacherNameShort(x.absent)} — ชนกับ ${describeConflicts(x.period, x.conflicts).join(', ')}</li>`).join('')}
+                             </ul>
+                             <div style="margin-top:10px; color:#64748b;">ต้องการบันทึกต่อหรือไม่?</div>
+                           </div>`,
+                    showCancelButton: true,
+                    confirmButtonText: 'บันทึกต่อไป',
+                    cancelButtonText: 'กลับไปแก้ไข',
+                    confirmButtonColor: '#e11d48',
+                    width: 620
+                });
+                if(!confirmRes.isConfirmed) return;
+            }
+
             const scheduler = document.getElementById('schedulerName').value;
             const academicHead = document.getElementById('academicHeadName').value;
             const deputyDirector = document.getElementById('deputyDirectorName').value;
@@ -2193,6 +2822,7 @@
                 
                 // NEW: Auto redirect to history tab after save
                 setTimeout(() => {
+                    loadHistory(true);
                     switchTab('history');
                 }, 1500);
                 
@@ -2470,75 +3100,205 @@
             updatePrintButtons();
         }
 
-        function loadHistory() {
-            console.log('📂 ===== LOADING HISTORY =====');
+        /**
+         * โหลดประวัติ "ทั้งหมด" จากฐานข้อมูล (ไม่จำกัดจำนวนอีกต่อไป)
+         * แล้วเก็บไว้ใน historyDataCache เพื่อกรอง/ค้นหาฝั่งหน้าเว็บ
+         * @param {boolean} force โหลดใหม่จาก Firebase แม้จะมี cache อยู่แล้ว
+         */
+        function loadHistory(force) {
             const list = document.getElementById('historyList');
-            list.innerHTML = '<div style="text-align:center; padding:20px;">🔄 กำลังโหลด...</div>';
-            historyDataCache = []; 
-            
-            db.collection("substitutions").orderBy("created_at", "desc").limit(15).get()
+            const summary = document.getElementById('historySummary');
+
+            // ถ้ามี cache อยู่แล้วและไม่ได้สั่งรีเฟรช ให้ render จาก cache ทันที
+            if(!force && historyDataCache.length > 0) {
+                populateHistoryTeacherFilter();
+                renderHistory(true);
+                return;
+            }
+
+            console.log('📂 ===== LOADING HISTORY (ALL RECORDS) =====');
+            list.innerHTML = '<div style="text-align:center; padding:20px;">🔄 กำลังโหลดข้อมูลทั้งหมด...</div>';
+            document.getElementById('historyMore').innerHTML = '';
+            summary.innerHTML = '<span>🔄 กำลังโหลด...</span>';
+            historyDataCache = [];
+
+            db.collection("substitutions").get()
             .then(snap => {
                 console.log('✅ Loaded', snap.size, 'records from Firebase');
-                
-                list.innerHTML = '';
-                if(snap.empty) {
-                    list.innerHTML = '<div style="text-align:center; padding:20px; color:#64748b;">ไม่มีข้อมูล</div>';
-                    return;
-                }
-                
-                snap.forEach((doc, index) => {
+
+                snap.forEach(doc => {
                     const d = doc.data();
                     d.id = doc.id;
+                    d.records = d.records || [];
                     historyDataCache.push(d);
-
-                    console.log(`   📄 Record ${index + 1}:`, {
-                        id: doc.id,
-                        date: d.docDate,
-                        day: d.daySchedule,
-                        recordsCount: d.records?.length || 0
-                    });
-
-                    const item = document.createElement('div');
-                    item.className = 'card';
-                    item.style = 'padding:15px; margin-bottom:10px;';
-                    
-                    item.innerHTML = `
-                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
-                            <div>
-                                <strong>📅 ${formatThaiDate(d.docDate)}</strong>
-                                <span style="font-size:0.8rem; color:#64748b; margin-left:10px;">วัน${d.daySchedule || ''}</span>
-                            </div>
-                            <div class="btn-action-group">
-                                <button onclick="showHistoryPDF('${doc.id}', 'memo')" class="btn-sm" style="background:#3b82f6; color:white;">
-                                    🖨️ พิมพ์บันทึกข้อความ
-                                </button>
-                                <button onclick="showHistoryPDF('${doc.id}', 'summary')" class="btn-sm" style="background:#d97706; color:white;">
-                                    📄 พิมพ์ใบสรุป
-                                </button>
-                                <button onclick="showCopyModal('${doc.id}')" class="btn-sm" style="background:#059669; color:white;">
-                                    📋 คัดลอก Line
-                                </button>
-                                <button onclick="editLog('${doc.id}')" class="btn-sm" style="background:#8b5cf6; color:white;">
-                                    ✏️ แก้ไข
-                                </button>
-                                <button onclick="deleteLog('${doc.id}')" class="btn-sm" style="background:#fee2e2; color:red;">
-                                    🗑️ ลบ
-                                </button>
-                            </div>
-                        </div>
-                        <ul style="margin-top:10px; padding-left:20px; font-size:0.9rem;">
-                            ${d.records.map(r => `<li>คาบ ${r.period}: <strong>${formatTeacherNameShort(r.sub)}</strong> แทน ${formatTeacherNameShort(r.absent)} (${r.reason})</li>`).join('')}
-                        </ul>
-                    `;
-                    list.appendChild(item);
                 });
-                
-                console.log('✅ History loaded successfully. Cache contains', historyDataCache.length, 'records');
+
+                // เรียงจากวันที่ล่าสุดไปเก่าสุด (fallback ไปที่ created_at ถ้าวันที่เท่ากัน)
+                historyDataCache.sort((a, b) => {
+                    const dateCompare = (b.docDate || '').localeCompare(a.docDate || '');
+                    if(dateCompare !== 0) return dateCompare;
+                    const ta = a.created_at && a.created_at.seconds ? a.created_at.seconds : 0;
+                    const tb = b.created_at && b.created_at.seconds ? b.created_at.seconds : 0;
+                    return tb - ta;
+                });
+
+                populateHistoryTeacherFilter();
+                renderHistory(true);
+                console.log('✅ History cache contains', historyDataCache.length, 'records');
             })
             .catch(error => {
                 console.error('❌ Load history error:', error);
                 list.innerHTML = '<div style="color:red; padding:20px;">เกิดข้อผิดพลาดในการโหลดข้อมูล</div>';
+                summary.innerHTML = '<span style="color:red;">โหลดข้อมูลไม่สำเร็จ</span>';
             });
+        }
+
+        /** เติมรายชื่อครูทั้งหมดที่ปรากฏในประวัติ ลงใน dropdown ตัวกรอง */
+        function populateHistoryTeacherFilter() {
+            const select = document.getElementById('histTeacher');
+            if(!select) return;
+            const current = select.value;
+            const names = new Set();
+
+            historyDataCache.forEach(d => {
+                d.records.forEach(r => {
+                    if(r.absent) names.add(r.absent);
+                    if(r.sub) names.add(r.sub);
+                });
+            });
+
+            const sorted = Array.from(names).sort((a, b) => a.localeCompare(b, 'th'));
+            select.innerHTML = '<option value="">-- ทุกคน --</option>' +
+                sorted.map(n => `<option value="${n}">${n}</option>`).join('');
+            if(sorted.includes(current)) select.value = current;
+        }
+
+        function clearHistoryFilters() {
+            ['histSearch', 'histDateFrom', 'histDateTo'].forEach(id => document.getElementById(id).value = '');
+            document.getElementById('histDay').value = '';
+            document.getElementById('histTeacher').value = '';
+            document.getElementById('histRole').value = 'any';
+            document.getElementById('histReason').value = '';
+            renderHistory(true);
+        }
+
+        /** คัดกรอง historyDataCache ตามค่าตัวกรองบนหน้าจอ */
+        function getFilteredHistory() {
+            const search = (document.getElementById('histSearch').value || '').trim().toLowerCase();
+            const dateFrom = document.getElementById('histDateFrom').value;
+            const dateTo = document.getElementById('histDateTo').value;
+            const day = document.getElementById('histDay').value;
+            const teacher = document.getElementById('histTeacher').value;
+            const role = document.getElementById('histRole').value;
+            const reason = document.getElementById('histReason').value;
+
+            return historyDataCache.filter(d => {
+                if(dateFrom && (d.docDate || '') < dateFrom) return false;
+                if(dateTo && (d.docDate || '') > dateTo) return false;
+                if(day && d.daySchedule !== day) return false;
+
+                if(teacher) {
+                    const match = d.records.some(r => {
+                        if(role === 'absent') return r.absent === teacher;
+                        if(role === 'sub') return r.sub === teacher;
+                        return r.absent === teacher || r.sub === teacher;
+                    });
+                    if(!match) return false;
+                }
+
+                if(reason && !d.records.some(r => r.reason === reason)) return false;
+
+                if(search) {
+                    const haystack = [
+                        d.docDate, d.daySchedule, d.scheduler,
+                        ...d.records.map(r => [r.absent, r.sub, r.subject, r.grade, r.reason, 'คาบ ' + r.period].join(' '))
+                    ].join(' ').toLowerCase();
+                    if(!haystack.includes(search)) return false;
+                }
+
+                return true;
+            });
+        }
+
+        /**
+         * แสดงผลรายการประวัติตามตัวกรอง
+         * @param {boolean} reset เริ่มนับจำนวนที่แสดงใหม่ (ใช้เมื่อเปลี่ยนตัวกรอง)
+         */
+        function renderHistory(reset) {
+            const list = document.getElementById('historyList');
+            const moreBox = document.getElementById('historyMore');
+            const summary = document.getElementById('historySummary');
+            if(reset) historyRenderLimit = HISTORY_PAGE_SIZE;
+
+            const filtered = getFilteredHistory();
+            const totalPeriods = filtered.reduce((sum, d) => sum + d.records.length, 0);
+
+            summary.innerHTML = `
+                <span>พบ <strong style="color:#1e3a8a;">${filtered.length}</strong> รายการ
+                      (จากทั้งหมด <strong>${historyDataCache.length}</strong> รายการในฐานข้อมูล)
+                      • รวม <strong>${totalPeriods}</strong> คาบสอนแทน</span>
+                <span style="font-size:0.82rem; color:#64748b;">แสดง ${Math.min(historyRenderLimit, filtered.length)} รายการ</span>
+            `;
+
+            if(filtered.length === 0) {
+                list.innerHTML = '<div style="text-align:center; padding:30px; color:#64748b;">🔍 ไม่พบข้อมูลที่ตรงกับตัวกรอง</div>';
+                moreBox.innerHTML = '';
+                return;
+            }
+
+            const visible = filtered.slice(0, historyRenderLimit);
+            list.innerHTML = visible.map(d => {
+                const reasons = [...new Set(d.records.map(r => r.reason).filter(Boolean))];
+                const absentees = [...new Set(d.records.map(r => r.absent))];
+                return `
+                <div class="card" style="padding:15px; margin-bottom:10px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                        <div>
+                            <strong>📅 ${formatThaiDate(d.docDate)}</strong>
+                            <span style="font-size:0.8rem; color:#64748b; margin-left:10px;">วัน${d.daySchedule || ''}</span>
+                            <span style="font-size:0.8rem; color:#64748b; margin-left:10px;">• ${d.records.length} คาบ</span>
+                            <div style="font-size:0.8rem; color:#94a3b8; margin-top:3px;">
+                                ครูที่ลา: ${absentees.map(formatTeacherNameShort).join(', ')} ${reasons.length ? '• ' + reasons.join(', ') : ''}
+                            </div>
+                        </div>
+                        <div class="btn-action-group">
+                            <button onclick="showHistoryPDF('${d.id}', 'memo')" class="btn-sm" style="background:#3b82f6; color:white;">
+                                🖨️ พิมพ์บันทึกข้อความ
+                            </button>
+                            <button onclick="showHistoryPDF('${d.id}', 'summary')" class="btn-sm" style="background:#d97706; color:white;">
+                                📄 พิมพ์ใบสรุป
+                            </button>
+                            <button onclick="showCopyModal('${d.id}')" class="btn-sm" style="background:#059669; color:white;">
+                                📋 คัดลอก Line
+                            </button>
+                            <button onclick="editLog('${d.id}')" class="btn-sm" style="background:#8b5cf6; color:white;">
+                                ✏️ แก้ไข
+                            </button>
+                            <button onclick="deleteLog('${d.id}')" class="btn-sm" style="background:#fee2e2; color:red;">
+                                🗑️ ลบ
+                            </button>
+                        </div>
+                    </div>
+                    <ul style="margin-top:10px; padding-left:20px; font-size:0.9rem;">
+                        ${d.records.map(r => `<li>คาบ ${r.period}: <strong>${formatTeacherNameShort(r.sub)}</strong> แทน ${formatTeacherNameShort(r.absent)} (${r.reason})</li>`).join('')}
+                    </ul>
+                </div>`;
+            }).join('');
+
+            if(filtered.length > historyRenderLimit) {
+                moreBox.innerHTML = `
+                    <button class="btn-ghost" onclick="showMoreHistory()">
+                        ⬇️ แสดงเพิ่มอีก ${Math.min(HISTORY_PAGE_SIZE, filtered.length - historyRenderLimit)} รายการ
+                        (เหลืออีก ${filtered.length - historyRenderLimit})
+                    </button>`;
+            } else {
+                moreBox.innerHTML = '<span style="color:#94a3b8; font-size:0.85rem;">— แสดงครบทุกรายการแล้ว —</span>';
+            }
+        }
+
+        function showMoreHistory() {
+            historyRenderLimit += HISTORY_PAGE_SIZE;
+            renderHistory(false);
         }
 
         function showHistoryPDF(id, type) {
@@ -2857,7 +3617,7 @@
                 if(r.isConfirmed) {
                     db.collection("substitutions").doc(id).delete().then(() => {
                         Swal.fire('ลบแล้ว!', '', 'success');
-                        loadHistory();
+                        loadHistory(true);
                     });
                 }
             });
