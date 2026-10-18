@@ -373,6 +373,33 @@
         .top-item:last-child { border-bottom: none; }
         .top-item:nth-child(even) { background-color: #f8fafc; }
 
+
+        /* =========================================
+           ตารางสรุปรวบยอดรายเดือน (แนวนอน A4)
+           ========================================= */
+        .a4-paper.a4-land {
+            width: 297mm; min-width: 297mm;
+            height: 210mm; min-height: 210mm;
+            padding: 8mm 10mm 6mm 10mm;
+            display: flex; flex-direction: column;
+        }
+        .land-head { text-align: center; line-height: 1.25; margin-bottom: 3mm; flex: 0 0 auto; }
+        .land-head .t1 { font-size: 16pt; font-weight: bold; }
+        .land-head .t2 { font-size: 13pt; }
+        .land-page-no { text-align: right; font-size: 11pt; flex: 0 0 auto; height: 5mm; line-height: 5mm; }
+        .month-table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 11.5pt; line-height: 1.15; }
+        .month-table th, .month-table td { border: 1px solid #000; padding: 0.8mm 1.2mm; vertical-align: middle; text-align: center; word-wrap: break-word; overflow-wrap: anywhere; }
+        .month-table th { font-weight: bold; background: #f1f5f9; }
+        .month-table td.text-left { text-align: left; }
+        .month-table td.sign-cell { height: 12mm; }
+        .month-table .small { font-size: 10.5pt; }
+        .month-table .muted { color: #666; font-style: italic; }
+        .month-table tr.redirect-row td { background: #fffbeb; }
+        .month-table tr.total-row td { font-weight: bold; background: #f8fafc; }
+        .land-foot-sign { margin-top: 4mm; font-size: 12pt; display: flex; justify-content: flex-end; }
+        .land-foot-sign div { width: 90mm; text-align: center; line-height: 1.35; }
+        .measure-box { position: absolute; left: -99999px; top: 0; visibility: hidden; }
+
         /* Print Styles */
         @media print {
             @page { 
@@ -406,6 +433,13 @@
             .a4-paper:last-child {
                 page-break-after: auto;
             }
+            .a4-paper.a4-land {
+                page: land;
+                width: 297mm; min-width: auto;
+                height: 205mm; min-height: 0;
+                padding: 8mm 10mm 5mm 10mm;
+            }
+            @page land { size: A4 landscape; margin: 0; }
             /* บังคับ CSS สำหรับหน้าสถิติเวลาพิมพ์ */
             .stats-page {
                 font-size: 12pt !important;
@@ -515,6 +549,15 @@
             </div>
         </div>
 
+        <div class="form-group" style="margin-bottom:10px">
+            <label><i class="fas fa-layer-group"></i> เอกสารที่ต้องการพิมพ์</label>
+            <div style="display:flex; gap:22px; flex-wrap:wrap; font-size:0.95rem;">
+                <label style="font-weight:500"><input type="checkbox" id="optCover"> หน้าปก</label>
+                <label style="font-weight:500"><input type="checkbox" id="optStats" checked> หน้าสถิติสรุป (แนบท้าย)</label>
+            </div>
+            <div style="font-size:0.85rem; color:#64748b; margin-top:6px">ชุดเอกสาร: บันทึกข้อความปะหน้า + ตารางสรุปรวบยอดรายเดือน (พร้อมช่องลงนามครูผู้สอนแทน) เสนอผู้อำนวยการเดือนละครั้ง</div>
+        </div>
+
         <button class="btn-generate" onclick="generateReport()">
             <i class="fas fa-file-pdf"></i> สร้างรายงาน
         </button>
@@ -617,12 +660,14 @@
                 snap.forEach(doc => {
                     const d = doc.data();
                     dateSet.add(d.docDate);
-                    d.records.forEach(r => {
-                        allRecords.push({ ...r, docDate: d.docDate });
-                        subTeacherCount[r.sub] = (subTeacherCount[r.sub] || 0) + 1;
+                    (d.records || []).forEach(r => {
+                        const rep = d.reports ? d.reports[reportKey(r)] : null;
+                        allRecords.push({ ...r, docDate: d.docDate, daySchedule: d.daySchedule || '', report: rep || null });
+                        if(!r.redirect) subTeacherCount[r.sub] = (subTeacherCount[r.sub] || 0) + 1;
                         absentTeacherCount[r.absent] = (absentTeacherCount[r.absent] || 0) + 1;
                     });
                 });
+                allRecords.sort((a, b) => (a.docDate === b.docDate ? a.period - b.period : a.docDate < b.docDate ? -1 : 1));
 
                 reportData.records = allRecords;
                 reportData.stats = {
@@ -643,7 +688,7 @@
                     });
                 }
 
-                renderReport();
+                await renderReport();
                 document.getElementById('controlPanel').style.display = 'none';
                 document.getElementById('reportContainer').style.display = 'block';
                 document.getElementById('printButtons').style.display = 'flex';
@@ -655,9 +700,129 @@
             }
         }
 
-        function renderReport() {
+        // คีย์ของรายงานจากครูสอนแทน (ต้องตรงกับ index.html และ sub-report.html)
+        function reportKey(r) {
+            return `${r.period}|${r.sub}|${r.absent}`.replace(/[.\/\[\]*`~]/g, '_');
+        }
+        function esc(s) {
+            return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        }
+        const THAI_MONTHS_SHORT = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+        function shortThaiDate(d) {
+            const p = (d || '').split('-');
+            if(p.length < 3) return d || '';
+            return `${parseInt(p[2])} ${THAI_MONTHS_SHORT[parseInt(p[1]) - 1]} ${String(parseInt(p[0]) + 543).slice(-2)}`;
+        }
+
+        async function renderReport() {
             const container = document.getElementById('reportContainer');
-            container.innerHTML = generateCoverPage() + generateMemoPage() + generateStatsPage();
+            // โหลดฟอนต์ THSarabunNew ให้เสร็จก่อนวัดความสูงแถว (ไม่งั้นแบ่งหน้าผิด)
+            if(document.fonts) {
+                try {
+                    await Promise.all([document.fonts.load('12pt THSarabunNew', 'ก'), document.fonts.load('bold 12pt THSarabunNew', 'ก')]);
+                    await document.fonts.ready;
+                } catch(e) { console.warn('font preload', e); }
+            }
+            container.innerHTML = '';
+            const summary = buildSummaryPages(container);   // ต้องวัดความสูงจริง จึงสร้างในคอนเทนเนอร์
+            const parts = [];
+            if(document.getElementById('optCover').checked) parts.push(generateCoverPage());
+            parts.push(generateMemoPage(summary.pageCount));
+            container.innerHTML = parts.join('') + summary.html
+                + (document.getElementById('optStats').checked ? generateStatsPage() : '');
+        }
+
+        // ตารางสรุปรวบยอด: แบ่งหน้าด้วยการวัดความสูงจริงของแต่ละแถว
+        function buildSummaryPages(container) {
+            const { month, semester, year, author, records } = reportData;
+            const colgroup = `<colgroup>
+                <col style="width:3%"><col style="width:9.5%"><col style="width:3.5%"><col style="width:13%"><col style="width:14%">
+                <col style="width:13%"><col style="width:17%"><col style="width:16%"><col style="width:11%">
+            </colgroup>`;
+            const thead = `<thead><tr>
+                <th>ที่</th><th>วัน/เดือน/ปี</th><th>คาบ</th><th>ครูผู้ลา/ไปราชการ<br><span class="small">(สาเหตุ)</span></th><th>วิชา / ชั้น</th>
+                <th>ครูผู้สอนแทน</th><th>ภาระงานที่มอบหมาย</th><th>นักเรียนที่ไม่เข้าเรียน</th><th>ลงนามครูผู้สอนแทน</th>
+            </tr></thead>`;
+
+            const rowHtml = (r, i) => {
+                const rep = r.report;
+                const subj = [r.subject && r.subject !== '-' ? r.subject : '', r.subjectName || ''].filter(Boolean).join(' ');
+                const gradeTxt = r.grade && r.grade !== '-' ? r.grade : '';
+                const subjCell = `<b>${esc(r.subject && r.subject !== '-' ? r.subject : '-')}</b> ${esc(gradeTxt)}${r.subjectName ? '<br><span class="small">' + esc(r.subjectName) + '</span>' : ''}`;
+                const dateCell = `${shortThaiDate(r.docDate)}${r.daySchedule ? '<br><span class="small">' + esc(r.daySchedule) + '</span>' : ''}`;
+                const absentCell = `${esc(r.absent)}<br><span class="small">(${esc(r.reason || '')})</span>`;
+                if(r.redirect) {
+                    const vis = [r.redirectCode, r.redirectName].filter(Boolean).join(' ');
+                    return `<tr class="redirect-row">
+                        <td>${i + 1}</td><td>${dateCell}</td><td>${esc(r.period)}</td><td class="text-left">${absentCell}</td><td>${subjCell}</td>
+                        <td class="text-left small">นักเรียนไปเรียน ${esc(vis || 'วิชาเพิ่มเติม')} กับ ${esc(r.sub)}</td>
+                        <td class="muted small">ไม่มีการสอนแทน</td><td class="muted small">—</td><td class="sign-cell"></td>
+                    </tr>`;
+                }
+                let work = '<span class="muted small">ยังไม่ได้รายงาน</span>';
+                let stu = '<span class="muted small">—</span>';
+                if(rep) {
+                    work = `<span class="small">${esc(rep.workload || '-').replace(/\n/g, '<br>')}</span>`;
+                    if(rep.note) work += `<br><span class="small muted">หมายเหตุ: ${esc(rep.note)}</span>`;
+                    const list = rep.absentStudents || [];
+                    stu = list.length === 0
+                        ? '<span class="small">มาครบทุกคน</span>'
+                        : `<span class="small"><b>ขาด ${list.length} คน</b><br>${list.map(x => esc((x.no ? x.no + ' ' : '') + x.name)).join(', ')}</span>`;
+                }
+                return `<tr>
+                    <td>${i + 1}</td><td>${dateCell}</td><td>${esc(r.period)}</td><td class="text-left">${absentCell}</td><td>${subjCell}</td>
+                    <td class="text-left">${esc(r.sub)}</td><td class="text-left">${work}</td><td class="text-left">${stu}</td><td class="sign-cell"></td>
+                </tr>`;
+            };
+
+            const subCount = records.filter(r => !r.redirect).length;
+            const redirCount = records.length - subCount;
+            const totalRow = `<tr class="total-row"><td colspan="9" class="text-left">
+                รวมทั้งสิ้น ${records.length} รายการ (สอนแทน ${subCount} คาบ${redirCount ? ' • ให้นักเรียนไปเรียนกับครูวิชาเพิ่มเติม ' + redirCount + ' คาบ' : ''})</td></tr>`;
+            const rowsAll = records.map((r, i) => rowHtml(r, i)).concat([totalRow]);
+
+            // ---- วัดและแบ่งหน้า ----
+            const box = document.createElement('div');
+            box.className = 'measure-box';
+            document.body.appendChild(box);   // ต้องอยู่ใน body ที่แสดงผลอยู่ จึงจะวัดความสูงได้
+
+            const pages = [];
+            const newPage = () => {
+                const p = document.createElement('div');
+                p.className = 'a4-paper a4-land';
+                p.innerHTML = `
+                    <div class="land-head">
+                        <div class="t1">ตารางสรุปการจัดสอนแทน ประจำเดือน${esc(month)} ภาคเรียนที่ ${esc(semester)} ปีการศึกษา ${esc(year)}</div>
+                        <div class="t2">โรงเรียนกระดุมทองวิทยา อำเภอกันทรารมย์ จังหวัดศรีสะเกษ</div>
+                    </div>
+                    <div class="land-page-no"></div>
+                    <table class="month-table">${colgroup}${thead}<tbody></tbody></table>`;
+                box.appendChild(p);
+                pages.push(p);
+                return p;
+            };
+            let page = newPage();
+            rowsAll.forEach(html => {
+                const tbody = page.querySelector('tbody');
+                tbody.insertAdjacentHTML('beforeend', html);
+                if(page.scrollHeight > page.clientHeight + 1 && tbody.children.length > 1) {
+                    const last = tbody.lastElementChild;
+                    tbody.removeChild(last);
+                    page = newPage();
+                    page.querySelector('tbody').appendChild(last);
+                }
+            });
+            // ช่องลงนามผู้จัดทำ ท้ายตาราง
+            const foot = document.createElement('div');
+            foot.className = 'land-foot-sign';
+            foot.innerHTML = `<div>ลงชื่อ........................................ผู้จัดทำรายงาน<br>(${esc(author)})<br>งานพัฒนากระบวนการเรียนรู้</div>`;
+            page.appendChild(foot);
+            if(page.scrollHeight > page.clientHeight + 1) { page.removeChild(foot); page = newPage(); page.querySelector('tbody').remove(); page.querySelector('table').remove(); page.appendChild(foot); }
+
+            pages.forEach((p, i) => { p.querySelector('.land-page-no').textContent = `หน้า ${i + 1}/${pages.length}`; });
+            const html = pages.map(p => p.outerHTML).join('');
+            document.body.removeChild(box);
+            return { html, pageCount: pages.length };
         }
 
         function generateCoverPage() {
@@ -687,7 +852,7 @@
             `;
         }
 
-        function generateMemoPage() {
+        function generateMemoPage(tablePages) {
             const { month, semester, year, author } = reportData;
             const today = new Date();
             const thaiMonths = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
@@ -711,7 +876,7 @@
                     
                     <div class="doc-content">ตามคำสั่งโรงเรียนกระดุมทองวิทยาที่ 39/2568 เรื่อง แต่งตั้งข้าราชการครูและบุคลากรทางการศึกษาปฏิบัติหน้าที่ตามพรรณนางาน ปีการศึกษา ${year} ได้กำหนดให้ผู้รับผิดชอบงานการพัฒนากระบวนการเรียนรู้กลุ่มบริหารงานวิชาการ มีหน้าที่จัดครูเข้าสอนแทน อย่างสม่ำเสมอ พร้อมสรุปรายงานการสอนแทน นั้น</div>
                     
-                    <div class="doc-content">บัดนี้ ข้าพเจ้า ${author} ผู้รับผิดชอบงานการพัฒนากระบวนการเรียนรู้กลุ่มบริหารงานวิชาการ ได้ดำเนินการสรุปข้อมูลการจัดสอนแทน ประจำเดือน${month} ภาคเรียนที่ ${semester} ปีการศึกษา ${year} จากระบบช่วยจัดสอนแทน โรงเรียนกระดุมทองวิทยา เสร็จสิ้นเรียบร้อยแล้ว รายละเอียดดังที่แนบมาพร้อมนี้</div>
+                    <div class="doc-content">บัดนี้ ข้าพเจ้า ${author} ผู้รับผิดชอบงานการพัฒนากระบวนการเรียนรู้กลุ่มบริหารงานวิชาการ ได้ดำเนินการสรุปข้อมูลการจัดสอนแทน ประจำเดือน${month} ภาคเรียนที่ ${semester} ปีการศึกษา ${year} จากระบบช่วยจัดสอนแทน โรงเรียนกระดุมทองวิทยา เสร็จสิ้นเรียบร้อยแล้ว รวม ${reportData.stats.totalRecords} รายการ ใน ${reportData.stats.totalDays} วัน รายละเอียดภาระงานที่มอบหมาย การเข้าเรียนของนักเรียน และการลงนามของครูผู้สอนแทน ดังตารางสรุปที่แนบมาพร้อมนี้ จำนวน ${tablePages || 1} หน้า</div>
                     
                     <div class="doc-closing">จึงเรียนมาเพื่อโปรดทราบ</div>
                     

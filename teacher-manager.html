@@ -6,8 +6,9 @@
     <title>ระบบจัดการข้อมูลครู - Teacher Management System</title>
     
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
@@ -438,9 +439,9 @@
         .sch-table th { padding: 10px 8px; color: #64748b; font-weight: 600; font-size: 0.95rem; border-bottom: none; background: white; position: sticky; top: 0; z-index: 10; border-radius: 8px; text-align: center;}
         .sch-table td { padding: 5px; text-align: center; border-bottom: none; vertical-align: top; }
         
-        .sch-cell { 
-            min-width: 110px; 
-            height: 110px; 
+        .sch-cell {
+            min-width: 138px;
+            min-height: 110px;
             background: white; 
             border: 2px solid #e2e8f0; 
             border-radius: 10px; 
@@ -513,6 +514,14 @@
             border-color: var(--primary);
             box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
         }
+        .type-row { display: flex; gap: 4px; width: 100%; }
+        .type-row .type-input { flex: 1 1 auto; min-width: 0; }
+        .type-row .group-input { flex: 0 0 46px; padding: 6px 2px; }
+        .type-row .type-input { padding: 6px 2px; }
+        /* แท็กประเภทวิชา: พื้นฐาน / เพิ่มเติม / กิจกรรม */
+        .sch-cell.type-elective.active { border-color: #d97706; background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); box-shadow: 0 4px 12px rgba(217,119,6,0.2); }
+        .sch-cell.type-activity.active { border-color: #059669; background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); box-shadow: 0 4px 12px rgba(5,150,105,0.2); }
+        .elective-badge { display:inline-block; margin-left:6px; padding:1px 8px; border-radius:20px; background:#fef3c7; color:#92400e; font-size:0.78rem; font-weight:600; }
 
         .modal-footer { margin-top: 20px; display: flex; justify-content: flex-end; gap: 15px; }
         .btn-save { background: var(--success); color: white; padding: 10px 30px; font-size: 1.1rem; }
@@ -732,7 +741,7 @@
         @media (max-width: 768px) {
             .modal-box { width: 95%; padding: 20px; }
             .sch-table { border-spacing: 4px; }
-            .sch-cell { min-width: 85px; height: 95px; padding: 5px; }
+            .sch-cell { min-width: 85px; min-height: 95px; padding: 5px; }
             .schedule-mini { grid-template-columns: repeat(5, 1fr); gap: 5px; }
             .day-col { padding: 6px 2px; }
             .period-count { font-size: 1rem; }
@@ -788,6 +797,16 @@
                     <input type="text" id="semesterInput" class="semester-input" placeholder="ระบุภาคเรียน" onchange="loadTeachers()">
                     <div class="semester-badge">ปัจจุบัน</div>
                 </div>
+
+                <button class="btn-icon" id="btnImportXlsx" onclick="document.getElementById('importXlsxFile').click()" title="นำเข้าตารางสอนจากไฟล์ Excel (.xlsx)" style="background:#dcfce7; color:#15803d;">
+                    <i class="fas fa-file-excel"></i>
+                </button>
+                <input type="file" id="importXlsxFile" accept=".xlsx,.xls" style="display: none;" onchange="importTeachersXlsx(event)">
+
+                <button class="btn-icon" id="btnImportRoster" onclick="showRosterImportHelp()" title="นำเข้ารายชื่อนักเรียน (ใช้ติ๊กนักเรียนขาดในหน้ารายงานครูสอนแทน)" style="background:#e0f2fe; color:#0369a1;">
+                    <i class="fas fa-user-graduate"></i>
+                </button>
+                <input type="file" id="importRosterFile" accept=".xlsx,.xls,.csv" style="display: none;" onchange="importStudentRoster(event)">
 
                 <button class="btn-icon" id="btnImport" onclick="document.getElementById('importFile').click()" title="นำเข้า CSV">
                     <i class="fas fa-file-import"></i>
@@ -1053,7 +1072,7 @@
                             <th>วัน / คาบ</th>
                             <th>1</th><th>2</th><th>3</th><th>4</th>
                             <th style="width:40px;"></th>
-                            <th>5</th><th>6</th><th>7</th>
+                            <th>5</th><th>6</th><th>7</th><th>8</th>
                         </tr>
                     </thead>
                     <tbody id="scheduleBody"></tbody>
@@ -1616,6 +1635,7 @@
                 });
 
                 const totalLoad = Object.values(t.schedule).flat().length;
+                const electiveCount = Object.values(t.teachingDetails || {}).filter(d => d && d.type === 'เพิ่มเติม').length;
                 const disabled = isSystemLocked ? 'disabled' : '';
 
                 const timeAgo = getTimeAgo(t.updated_at);
@@ -1628,7 +1648,7 @@
                             <h3>${t.name}</h3>
                             <span class="t-dept-badge">${t.department}</span>
                             <p style="margin-top: 5px; font-size: 0.85rem;">
-                                <i class="fas fa-clock"></i> ภาระงาน: ${totalLoad} คาบ/สัปดาห์
+                                <i class="fas fa-clock"></i> ภาระงาน: ${totalLoad} คาบ/สัปดาห์${electiveCount ? `<span class="elective-badge">เพิ่มเติม ${electiveCount} คาบ</span>` : ''}
                             </p>
                             <div class="${updateStatusClass}">
                                 <i class="fas fa-sync-alt"></i>
@@ -1670,20 +1690,30 @@
                 <option value="ม.5">ม.5</option>
                 <option value="ม.6">ม.6</option>
                 <option value="ม.1-6">ม.1-6</option>
+                <option value="ม.4-6">ม.4-6</option>
             `;
 
             tbody.innerHTML = days.map(day => {
                 let cells = '';
-                for(let p=1; p<=7; p++) {
+                for(let p=1; p<=8; p++) {
                     cells += `
                         <td>
                             <div class="sch-cell" id="cell_${day}_${p}">
                                 <input type="checkbox" class="cb-input" data-day="${day}" data-period="${p}" onchange="toggleCell(this)">
                                 <div class="details-inputs">
-                                    <input type="text" class="mini-input code-input" placeholder="รหัสวิชา">
+                                    <input type="text" class="mini-input code-input" placeholder="รหัสวิชา" oninput="autoTagType(this)">
+                                    <input type="text" class="mini-input name-input" placeholder="ชื่อวิชา">
                                     <select class="mini-select grade-input">
                                         ${gradeOptions}
                                     </select>
+                                    <div class="type-row">
+                                        <select class="mini-select type-input" onchange="onTypeChange(this)" title="ประเภทวิชา">
+                                            <option value="พื้นฐาน">พื้นฐาน</option>
+                                            <option value="เพิ่มเติม">เพิ่มเติม</option>
+                                            <option value="กิจกรรม">กิจกรรม</option>
+                                        </select>
+                                        <input type="text" class="mini-input group-input" placeholder="กลุ่ม" title="กลุ่มวิชาเพิ่มเติม (เช่น 1, 2)" maxlength="3">
+                                    </div>
                                 </div>
                             </div>
                         </td>
@@ -1699,6 +1729,34 @@
             }).join('');
         }
 
+        // ---------- แท็กประเภทวิชา (พื้นฐาน / เพิ่มเติม / กิจกรรม) ----------
+        // รหัสวิชา: ตัวอักษร + 5 หลัก เช่น ค32202 → หลักที่ 4 = 2 คือวิชาเพิ่มเติม, 1 คือวิชาพื้นฐาน
+        function inferTypeFromCode(code) {
+            const c = (code || '').trim();
+            if(/^[ก-ฮA-Za-z]\d{5}$/.test(c)) return c.charAt(3) === '2' ? 'เพิ่มเติม' : 'พื้นฐาน';
+            return '';
+        }
+        function autoTagType(codeInput) {
+            const cell = codeInput.closest('.sch-cell');
+            const t = inferTypeFromCode(codeInput.value);
+            if(t) {
+                cell.querySelector('.type-input').value = t;
+                refreshCellTypeStyle(cell);
+            }
+        }
+        function onTypeChange(sel) { refreshCellTypeStyle(sel.closest('.sch-cell')); }
+        function refreshCellTypeStyle(cell) {
+            const t = cell.querySelector('.type-input').value;
+            cell.classList.toggle('type-elective', t === 'เพิ่มเติม');
+            cell.classList.toggle('type-activity', t === 'กิจกรรม');
+        }
+        function setSelectValue(sel, value) {
+            if(value && !Array.from(sel.options).some(o => o.value === value)) {
+                sel.add(new Option(value, value));
+            }
+            sel.value = value || '';
+        }
+
         function toggleCell(checkbox) {
             const cell = checkbox.closest('.sch-cell');
             if(checkbox.checked) {
@@ -1706,8 +1764,12 @@
             } else {
                 cell.classList.remove('active');
                 cell.querySelector('.code-input').value = '';
+                cell.querySelector('.name-input').value = '';
                 cell.querySelector('.grade-input').value = '';
+                cell.querySelector('.type-input').value = 'พื้นฐาน';
+                cell.querySelector('.group-input').value = '';
             }
+            refreshCellTypeStyle(cell);
         }
 
         function openModal() {
@@ -1781,7 +1843,11 @@
                     const cell = document.getElementById(`cell_${day}_${p}`);
                     if(cell) {
                         cell.querySelector('.code-input').value = detail.code || '';
-                        cell.querySelector('.grade-input').value = detail.grade || '';
+                        cell.querySelector('.name-input').value = detail.name || '';
+                        setSelectValue(cell.querySelector('.grade-input'), detail.grade || '');
+                        cell.querySelector('.type-input').value = detail.type || inferTypeFromCode(detail.code) || 'พื้นฐาน';
+                        cell.querySelector('.group-input').value = detail.group || '';
+                        refreshCellTypeStyle(cell);
                     }
                 });
             }
@@ -1815,7 +1881,10 @@
                 const cell = cb.closest('.sch-cell');
                 const code = cell.querySelector('.code-input').value.trim();
                 const grade = cell.querySelector('.grade-input').value;
-                teachingDetails[`${day}_${p}`] = { code: code, grade: grade };
+                const name = cell.querySelector('.name-input').value.trim();
+                const type = cell.querySelector('.type-input').value || 'พื้นฐาน';
+                const group = cell.querySelector('.group-input').value.trim();
+                teachingDetails[`${day}_${p}`] = { code: code, grade: grade, name: name, type: type, group: group };
             });
 
             Object.keys(schedule).forEach(k => schedule[k].sort((a,b)=>a-b));
@@ -1952,9 +2021,9 @@
                                 code  = m[2].substring(0, dashIdx).trim();
                                 grade = m[2].substring(dashIdx + 1).trim();
                             }
-                            detailsObj[`${day}_${p}`] = { code, grade };
+                            detailsObj[`${day}_${p}`] = { code, grade, name: '', type: inferTypeFromCode(code) || 'พื้นฐาน', group: '' };
                         } else {
-                            detailsObj[`${day}_${p}`] = { code: '', grade: '' };
+                            detailsObj[`${day}_${p}`] = { code: '', grade: '', name: '', type: 'พื้นฐาน', group: '' };
                         }
                     });
                     return periods;
@@ -2009,6 +2078,267 @@
             };
             reader.readAsText(file);
             event.target.value = '';
+        }
+
+        // ==================== นำเข้าตารางสอนจากไฟล์ Excel (.xlsx) ====================
+        // รูปแบบไฟล์: 1 แถว = 1 คาบสอนของครู 1 คน
+        // คอลัมน์: ภาคเรียน | คำนำหน้า | ชื่อ-นามสกุล | กลุ่มสาระ | วัน | คาบ | รหัสวิชา | ชื่อวิชา / กิจกรรม | ชั้น | ประเภทวิชา | กลุ่ม (เพิ่มเติม)
+        const XLSX_HEADER_ALIASES = {
+            semester: ['ภาคเรียน'],
+            prefix:   ['คำนำหน้า'],
+            name:     ['ชื่อ-นามสกุล', 'ชื่อ นามสกุล', 'ชื่อ'],
+            dept:     ['กลุ่มสาระ'],
+            day:      ['วัน'],
+            period:   ['คาบ'],
+            code:     ['รหัสวิชา'],
+            subject:  ['ชื่อวิชา / กิจกรรม', 'ชื่อวิชา/กิจกรรม', 'ชื่อวิชา'],
+            grade:    ['ชั้น'],
+            type:     ['ประเภทวิชา', 'ประเภท'],
+            group:    ['กลุ่ม (เพิ่มเติม)', 'กลุ่ม']
+        };
+        const DAY_ALIASES = { 'จ.':'จันทร์','อ.':'อังคาร','พ.':'พุธ','พฤ.':'พฤหัสบดี','ศ.':'ศุกร์','พฤหัส':'พฤหัสบดี' };
+
+        function normName(s) { return String(s || '').replace(/\s+/g, ''); }
+
+        // อ่านไฟล์ตาราง (.xlsx/.xls/.csv) → { sheetName, rows: [ {header: value} ] }
+        function readTableFile(file, preferredSheet) {
+            return new Promise((resolve, reject) => {
+                const isCsv = /\.csv$/i.test(file.name);
+                const reader = new FileReader();
+                reader.onerror = () => reject(new Error('อ่านไฟล์ไม่สำเร็จ'));
+                reader.onload = (e) => {
+                    try {
+                        const wb = isCsv
+                            ? XLSX.read(e.target.result.replace(/^﻿/, ''), { type: 'string' })
+                            : XLSX.read(e.target.result, { type: 'array' });
+                        const sheetName = (preferredSheet && wb.SheetNames.includes(preferredSheet)) ? preferredSheet : wb.SheetNames[0];
+                        const rows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { defval: '', raw: true });
+                        resolve({ sheetName, rows });
+                    } catch(err) { reject(err); }
+                };
+                if(isCsv) reader.readAsText(file); else reader.readAsArrayBuffer(file);
+            });
+        }
+
+        function pickField(row, key) {
+            for(const alias of XLSX_HEADER_ALIASES[key]) {
+                for(const h of Object.keys(row)) {
+                    if(h.trim() === alias) return row[h];
+                }
+            }
+            return '';
+        }
+
+        async function importTeachersXlsx(event) {
+            const file = event.target.files[0];
+            event.target.value = '';
+            if(!file) return;
+            if(isSystemLocked) {
+                return Swal.fire('ระบบถูกล็อก', 'ไม่สามารถนำเข้าข้อมูลได้ในขณะนี้', 'warning');
+            }
+            if(typeof XLSX === 'undefined') {
+                return Swal.fire('โหลดตัวอ่าน Excel ไม่สำเร็จ', 'กรุณาตรวจสอบอินเทอร์เน็ตแล้วรีเฟรชหน้า', 'error');
+            }
+
+            try {
+                const { sheetName, rows } = await readTableFile(file, 'ตารางสอน');
+                if(rows.length === 0) return Swal.fire('ไฟล์ว่าง', `ไม่พบข้อมูลในชีต "${sheetName}"`, 'error');
+
+                const validDays = days;
+                const teachers = {};      // key = ชื่อเต็มไม่มีช่องว่าง
+                const errors = [];
+                let semester = '';
+
+                rows.forEach((row, i) => {
+                    const line = i + 2;
+                    const nameRaw = String(pickField(row, 'name')).trim();
+                    if(!nameRaw) return;   // แถวว่าง
+                    const prefix = String(pickField(row, 'prefix')).trim();
+                    let day = String(pickField(row, 'day')).trim();
+                    day = DAY_ALIASES[day] || day;
+                    const period = parseInt(pickField(row, 'period'));
+                    if(!validDays.includes(day)) { errors.push(`แถว ${line}: วัน "${day}" ไม่ถูกต้อง`); return; }
+                    if(isNaN(period) || period < 1 || period > 8) { errors.push(`แถว ${line}: คาบ "${pickField(row, 'period')}" ไม่ถูกต้อง (ต้อง 1-8)`); return; }
+
+                    const sem = String(pickField(row, 'semester')).trim();
+                    if(sem && !semester) semester = sem;
+
+                    const fullName = prefix + nameRaw;
+                    const key = normName(fullName);
+                    if(!teachers[key]) {
+                        teachers[key] = {
+                            name: fullName,
+                            department: String(pickField(row, 'dept')).trim(),
+                            schedule: { "จันทร์": [], "อังคาร": [], "พุธ": [], "พฤหัสบดี": [], "ศุกร์": [] },
+                            teachingDetails: {}
+                        };
+                    }
+                    const t = teachers[key];
+                    if(!t.department) t.department = String(pickField(row, 'dept')).trim();
+
+                    const code = String(pickField(row, 'code')).trim();
+                    const typeRaw = String(pickField(row, 'type')).trim();
+                    let type = ['พื้นฐาน', 'เพิ่มเติม', 'กิจกรรม'].includes(typeRaw)
+                        ? typeRaw
+                        : (inferTypeFromCode(code) || (code ? 'พื้นฐาน' : 'กิจกรรม'));
+                    const groupVal = pickField(row, 'group');
+
+                    const dKey = `${day}_${period}`;
+                    if(t.teachingDetails[dKey]) { errors.push(`แถว ${line}: ${fullName} มีคาบซ้ำ ${day} คาบ ${period} (ใช้แถวแรก)`); return; }
+                    t.schedule[day].push(period);
+                    t.teachingDetails[dKey] = {
+                        code: code,
+                        name: String(pickField(row, 'subject')).trim(),
+                        grade: String(pickField(row, 'grade')).trim(),
+                        type: type,
+                        group: groupVal === '' ? '' : String(groupVal).trim()
+                    };
+                });
+
+                const list = Object.values(teachers);
+                if(list.length === 0) return Swal.fire('ไม่พบข้อมูลครู', 'ตรวจสอบหัวคอลัมน์ในไฟล์ให้ตรงกับไฟล์ตัวอย่าง', 'error');
+                list.forEach(t => Object.keys(t.schedule).forEach(d => t.schedule[d].sort((a, b) => a - b)));
+
+                semester = semester || document.getElementById('semesterInput').value.trim();
+                if(!semester) return Swal.fire('ไม่ทราบภาคเรียน', 'กรุณาระบุภาคเรียนในช่องภาคเรียนก่อนนำเข้า', 'warning');
+
+                // ดึงครูที่มีอยู่แล้วในภาคเรียนนั้น เพื่อ "อัปเดต" แทนการสร้างซ้ำ
+                const existSnap = await db.collection("teachers").where("semester", "==", semester).get();
+                const existing = {};
+                existSnap.forEach(d => { existing[normName(d.data().name)] = { id: d.id, data: d.data() }; });
+
+                let nNew = 0, nUpd = 0;
+                const rowsHtml = list.map(t => {
+                    const hit = existing[normName(t.name)];
+                    hit ? nUpd++ : nNew++;
+                    const total = Object.values(t.schedule).flat().length;
+                    const elec = Object.values(t.teachingDetails).filter(d => d.type === 'เพิ่มเติม').length;
+                    const act = Object.values(t.teachingDetails).filter(d => d.type === 'กิจกรรม').length;
+                    return `<tr>
+                        <td style="text-align:left">${t.name}</td>
+                        <td>${hit ? (hit.data.department || t.department) : t.department}</td>
+                        <td>${total}</td><td>${elec}</td><td>${act}</td>
+                        <td style="color:${hit ? '#b45309' : '#047857'}; font-weight:600">${hit ? 'อัปเดต' : 'เพิ่มใหม่'}</td>
+                    </tr>`;
+                }).join('');
+
+                const confirm = await Swal.fire({
+                    title: `นำเข้าตารางสอน ภาคเรียน ${semester}`,
+                    width: 760,
+                    html: `<div style="text-align:left; font-size:0.92rem;">
+                        <p>พบครู <b>${list.length}</b> คน (เพิ่มใหม่ <b>${nNew}</b> • อัปเดตตารางเดิม <b>${nUpd}</b>)</p>
+                        <div style="max-height:300px; overflow:auto; margin-top:8px; border:1px solid #e2e8f0; border-radius:8px;">
+                        <table style="width:100%; border-collapse:collapse; font-size:0.88rem;">
+                            <thead><tr style="background:#f1f5f9;"><th style="padding:6px">ชื่อ</th><th>กลุ่มสาระ</th><th>คาบรวม</th><th>เพิ่มเติม</th><th>กิจกรรม</th><th>สถานะ</th></tr></thead>
+                            <tbody style="text-align:center">${rowsHtml}</tbody>
+                        </table></div>
+                        ${errors.length ? `<div style="margin-top:10px; color:#b91c1c; max-height:90px; overflow:auto;"><b>ข้ามบางแถว (${errors.length}):</b><br>${errors.slice(0, 10).join('<br>')}${errors.length > 10 ? '<br>...' : ''}</div>` : ''}
+                        <p style="margin-top:10px; color:#64748b;">ครูที่ "อัปเดต" จะถูกแทนที่ตารางสอนด้วยข้อมูลในไฟล์ (กลุ่มสาระเดิมคงไว้)</p>
+                    </div>`,
+                    showCancelButton: true,
+                    confirmButtonText: 'ยืนยันนำเข้า',
+                    cancelButtonText: 'ยกเลิก',
+                    confirmButtonColor: '#059669'
+                });
+                if(!confirm.isConfirmed) return;
+
+                Swal.fire({ title: 'กำลังบันทึก...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+                const ts = firebase.firestore.FieldValue.serverTimestamp();
+                const ops = list.map(t => {
+                    const hit = existing[normName(t.name)];
+                    if(hit) {
+                        return { ref: db.collection("teachers").doc(hit.id), type: 'update', payload: {
+                            department: hit.data.department || t.department,
+                            schedule: t.schedule, teachingDetails: t.teachingDetails,
+                            active: true, updated_at: ts
+                        }};
+                    }
+                    return { ref: db.collection("teachers").doc(), type: 'set', payload: {
+                        name: t.name, department: t.department || '-',
+                        schedule: t.schedule, teachingDetails: t.teachingDetails,
+                        semester: semester, active: true, created_at: ts, updated_at: ts
+                    }};
+                });
+                for(let i = 0; i < ops.length; i += 400) {
+                    const batch = db.batch();
+                    ops.slice(i, i + 400).forEach(op => op.type === 'update' ? batch.update(op.ref, op.payload) : batch.set(op.ref, op.payload));
+                    await batch.commit();
+                }
+
+                document.getElementById('semesterInput').value = semester;
+                await loadTeachers();
+                Swal.fire('เรียบร้อย', `นำเข้าสำเร็จ ${list.length} คน (เพิ่มใหม่ ${nNew}, อัปเดต ${nUpd})`, 'success');
+            } catch(err) {
+                console.error('Import xlsx error', err);
+                Swal.fire('นำเข้าไม่สำเร็จ', err.message || String(err), 'error');
+            }
+        }
+
+        // ==================== นำเข้ารายชื่อนักเรียน (สำหรับติ๊กนักเรียนขาดในหน้ารายงานครูสอนแทน) ====================
+        function showRosterImportHelp() {
+            Swal.fire({
+                title: 'นำเข้ารายชื่อนักเรียน',
+                html: `<div style="text-align:left; font-size:0.95rem; line-height:1.8;">
+                    ไฟล์ .xlsx หรือ .csv มี 3 คอลัมน์ (แถวแรกเป็นหัวตาราง):<br>
+                    <b>ชั้น</b> (เช่น ม.1) • <b>เลขที่</b> • <b>ชื่อ-นามสกุล</b> (รวมคำนำหน้า)<br>
+                    <span style="color:#64748b">ระบบจะแทนที่รายชื่อของชั้นที่อยู่ในไฟล์ (ปีการศึกษาตามภาคเรียนที่เลือกอยู่)</span>
+                </div>`,
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonText: 'เลือกไฟล์',
+                cancelButtonText: 'ยกเลิก'
+            }).then(r => { if(r.isConfirmed) document.getElementById('importRosterFile').click(); });
+        }
+
+        async function importStudentRoster(event) {
+            const file = event.target.files[0];
+            event.target.value = '';
+            if(!file) return;
+            if(isSystemLocked) return Swal.fire('ระบบถูกล็อก', 'ไม่สามารถนำเข้าข้อมูลได้ในขณะนี้', 'warning');
+            if(typeof XLSX === 'undefined') return Swal.fire('โหลดตัวอ่าน Excel ไม่สำเร็จ', 'กรุณารีเฟรชหน้า', 'error');
+
+            try {
+                const semester = document.getElementById('semesterInput').value.trim();
+                const year = (semester.split('/')[1] || '').trim();
+                if(!/^\d{4}$/.test(year)) return Swal.fire('ภาคเรียนไม่ถูกต้อง', 'กรุณาระบุภาคเรียนรูปแบบ 2/2569 ก่อน', 'warning');
+
+                const { rows } = await readTableFile(file, 'รายชื่อนักเรียน');
+                const byGrade = {};
+                rows.forEach(row => {
+                    const get = (...keys) => { for(const k of keys) for(const h of Object.keys(row)) if(h.trim() === k) return row[h]; return ''; };
+                    let grade = String(get('ชั้น')).trim();
+                    const name = String(get('ชื่อ-นามสกุล (รวมคำนำหน้า)', 'ชื่อ-นามสกุล', 'ชื่อ')).trim();
+                    if(!grade || !name || name.startsWith('(ตัวอย่าง)')) return;
+                    if(/^\d$/.test(grade)) grade = 'ม.' + grade;
+                    if(!byGrade[grade]) byGrade[grade] = [];
+                    const no = parseInt(get('เลขที่'));
+                    byGrade[grade].push({ no: isNaN(no) ? byGrade[grade].length + 1 : no, name });
+                });
+                const grades = Object.keys(byGrade).sort((a, b) => a.localeCompare(b, 'th'));
+                if(grades.length === 0) return Swal.fire('ไม่พบข้อมูล', 'ตรวจสอบหัวคอลัมน์: ชั้น / เลขที่ / ชื่อ-นามสกุล', 'error');
+
+                const confirm = await Swal.fire({
+                    title: `นำเข้ารายชื่อนักเรียน ปีการศึกษา ${year}`,
+                    html: grades.map(g => `${g}: <b>${byGrade[g].length}</b> คน`).join('<br>'),
+                    showCancelButton: true, confirmButtonText: 'ยืนยัน', cancelButtonText: 'ยกเลิก'
+                });
+                if(!confirm.isConfirmed) return;
+
+                const batch = db.batch();
+                grades.forEach(g => {
+                    byGrade[g].sort((a, b) => a.no - b.no);
+                    batch.set(db.collection("student_rosters").doc(`${year}_${g}`), {
+                        year: year, grade: g, students: byGrade[g],
+                        updated_at: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                });
+                await batch.commit();
+                Swal.fire('เรียบร้อย', `บันทึกรายชื่อนักเรียน ${grades.length} ชั้นแล้ว`, 'success');
+            } catch(err) {
+                console.error('Import roster error', err);
+                Swal.fire('นำเข้าไม่สำเร็จ', err.message || String(err), 'error');
+            }
         }
 
     </script>

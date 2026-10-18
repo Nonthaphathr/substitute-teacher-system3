@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>บันทึกภาระงานและนักเรียนที่ไม่เข้าเรียน - ครูสอนแทน</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #dc2626;
+            --ink: #1e293b;
+            --muted: #64748b;
+            --line: #e2e8f0;
+            --bg: #f1f5f9;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Sarabun', sans-serif; background: var(--bg); color: var(--ink); min-height: 100vh; padding-bottom: 60px; }
+
+        .topbar { background: linear-gradient(135deg, #1e3a8a, #2563eb); color: #fff; padding: 18px 16px 22px; }
+        .topbar .wrap { max-width: 720px; margin: 0 auto; }
+        .topbar .school { font-size: 0.85rem; opacity: .85; }
+        .topbar h1 { font-size: 1.35rem; font-weight: 700; margin-top: 4px; line-height: 1.35; }
+        .topbar .date { margin-top: 8px; display: inline-block; background: rgba(255,255,255,.18); border-radius: 20px; padding: 3px 14px; font-size: .95rem; }
+
+        .container { max-width: 720px; margin: -12px auto 0; padding: 0 14px; }
+        .steps { display: flex; gap: 6px; margin: 0 0 14px; }
+        .step { flex: 1; text-align: center; font-size: .78rem; color: var(--muted); padding-top: 8px; border-top: 4px solid var(--line); font-weight: 600; }
+        .step.active { color: var(--primary); border-top-color: var(--primary); }
+        .step.done { color: var(--success); border-top-color: var(--success); }
+
+        .card { background: #fff; border-radius: 16px; padding: 20px; box-shadow: 0 4px 18px rgba(15,23,42,.07); margin-bottom: 14px; }
+        .card h2 { font-size: 1.15rem; margin-bottom: 12px; color: var(--primary-dark); }
+        .screen { display: none; }
+        .screen.active { display: block; animation: fade .25s ease; }
+        @keyframes fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+        .guide-list { list-style: none; counter-reset: g; }
+        .guide-list li { counter-increment: g; display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px dashed var(--line); line-height: 1.6; }
+        .guide-list li:last-child { border-bottom: none; }
+        .guide-list li::before { content: counter(g); flex: 0 0 30px; height: 30px; border-radius: 50%; background: var(--primary); color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-top: 2px; }
+        .tip { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; border-radius: 10px; padding: 10px 14px; font-size: .9rem; margin-top: 12px; line-height: 1.6; }
+
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: none; border-radius: 12px; padding: 13px 22px; font-family: inherit; font-size: 1.05rem; font-weight: 600; cursor: pointer; transition: all .15s; }
+        .btn:active { transform: scale(.98); }
+        .btn-primary { background: var(--primary); color: #fff; width: 100%; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-success { background: var(--success); color: #fff; width: 100%; }
+        .btn-ghost { background: #e2e8f0; color: #334155; }
+        .btn[disabled] { opacity: .5; cursor: not-allowed; }
+
+        .pick-btn { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 10px; text-align: left; background: #fff; border: 2px solid var(--line); border-radius: 14px; padding: 14px 16px; margin-bottom: 10px; font-family: inherit; cursor: pointer; transition: all .15s; }
+        .pick-btn:hover { border-color: var(--primary); background: #eff6ff; }
+        .pick-btn .nm { font-weight: 700; font-size: 1.05rem; }
+        .pick-btn .sub { font-size: .85rem; color: var(--muted); margin-top: 2px; }
+        .badge { border-radius: 20px; padding: 3px 12px; font-size: .78rem; font-weight: 700; white-space: nowrap; }
+        .badge.ok { background: #d1fae5; color: #047857; }
+        .badge.wait { background: #fef3c7; color: #92400e; }
+
+        .p-card { border: 2px solid var(--line); border-radius: 14px; padding: 16px; margin-bottom: 16px; background: #fff; }
+        .p-head { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
+        .p-no { background: var(--primary); color: #fff; font-weight: 700; padding: 3px 12px; border-radius: 8px; }
+        .p-meta { font-size: .92rem; color: #334155; line-height: 1.5; }
+        label.fl { display: block; font-weight: 600; margin: 12px 0 6px; }
+        textarea, input[type=text] { width: 100%; border: 2px solid var(--line); border-radius: 10px; padding: 10px 12px; font-family: inherit; font-size: 1rem; }
+        textarea:focus, input[type=text]:focus { outline: none; border-color: var(--primary); }
+        textarea { min-height: 84px; resize: vertical; }
+
+        .seg { display: flex; gap: 8px; }
+        .seg label { flex: 1; border: 2px solid var(--line); border-radius: 10px; padding: 10px; text-align: center; cursor: pointer; font-weight: 600; font-size: .95rem; }
+        .seg input { display: none; }
+        .seg label.on-ok { border-color: var(--success); background: #ecfdf5; color: #047857; }
+        .seg label.on-ab { border-color: var(--danger); background: #fef2f2; color: #b91c1c; }
+
+        .roster { margin-top: 10px; }
+        .roster-tools { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+        .roster-tools input { flex: 1; }
+        .count-chip { background: #fee2e2; color: #b91c1c; font-weight: 700; padding: 4px 12px; border-radius: 20px; font-size: .85rem; white-space: nowrap; }
+        .roster-list { max-height: 300px; overflow-y: auto; border: 1px solid var(--line); border-radius: 10px; }
+        .stu { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-bottom: 1px solid #f1f5f9; cursor: pointer; }
+        .stu:last-child { border-bottom: none; }
+        .stu input { width: 22px; height: 22px; accent-color: var(--success); }
+        .stu.absent { background: #fef2f2; }
+        .stu.absent .no, .stu.absent span:last-child { color: #b91c1c; text-decoration: line-through; }
+        .stu .no { width: 34px; color: var(--muted); font-size: .88rem; }
+        .note-small { font-size: .85rem; color: var(--muted); margin-top: 6px; }
+
+        .done-icon { font-size: 3.4rem; text-align: center; }
+        .center { text-align: center; }
+        .err-box { text-align: center; padding: 40px 20px; color: var(--danger); }
+        .spinner { border: 4px solid #e2e8f0; border-top-color: var(--primary); border-radius: 50%; width: 38px; height: 38px; animation: spin 1s linear infinite; margin: 30px auto; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .footer { text-align: center; font-size: .78rem; color: #94a3b8; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="topbar">
+        <div class="wrap">
+            <div class="school">โรงเรียนกระดุมทองวิทยา • ระบบจัดสอนแทน</div>
+            <h1>บันทึกภาระงานและนักเรียนที่ไม่เข้าเรียน<br>(สำหรับครูผู้สอนแทน)</h1>
+            <div class="date" id="dateBadge">กำลังโหลด...</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div id="loading" class="card"><div class="spinner"></div><div class="center" style="color:var(--muted)">กำลังโหลดข้อมูลการสอนแทน...</div></div>
+        <div id="errorBox" class="card err-box" style="display:none"></div>
+
+        <div id="app" style="display:none">
+            <div class="steps" id="steps">
+                <div class="step active" data-s="1">1 อ่านคำแนะนำ</div>
+                <div class="step" data-s="2">2 เลือกชื่อ</div>
+                <div class="step" data-s="3">3 กรอกข้อมูล</div>
+                <div class="step" data-s="4">4 ส่งข้อมูล</div>
+            </div>
+
+            <!-- STEP 1: คำแนะนำ -->
+            <div class="screen active" id="screenIntro">
+                <div class="card">
+                    <h2>📖 คำแนะนำสำหรับครูผู้สอนแทน</h2>
+                    <ol class="guide-list">
+                        <li><div><b>เลือกชื่อของท่าน</b> จากรายชื่อครูที่ได้รับมอบหมายสอนแทนในวันนี้</div></li>
+                        <li><div><b>พิมพ์ภาระงาน</b> ที่มอบหมายให้นักเรียนในแต่ละคาบ เช่น “ทำใบงานหน้า 12–13 และส่งก่อนเลิกคาบ”</div></li>
+                        <li><div><b>เช็คชื่อนักเรียน</b> — ระบบติ๊ก “มาเรียน” ให้ทุกคนไว้แล้ว ให้ <u>เอาติ๊กออกเฉพาะนักเรียนที่ไม่เข้าเรียนในคาบนั้นของวันนี้</u></div></li>
+                        <li><div>กด <b>“ส่งข้อมูล”</b> ระบบจะบันทึกลงฐานข้อมูล และนำไปรวมในรายงานสรุปประจำเดือน</div></li>
+                    </ol>
+                    <div class="tip">💡 หากส่งแล้วต้องการแก้ไข สามารถเปิดลิงก์เดิม เลือกชื่อตัวเอง แล้วแก้ไขและส่งใหม่ได้ ข้อมูลเดิมจะถูกแทนที่</div>
+                    <div style="margin-top:16px"><button class="btn btn-primary" onclick="goStep(2)">รับทราบ เริ่มกรอกข้อมูล ▶</button></div>
+                </div>
+            </div>
+
+            <!-- STEP 2: เลือกชื่อ -->
+            <div class="screen" id="screenPick">
+                <div class="card">
+                    <h2>👤 เลือกชื่อของท่าน</h2>
+                    <div id="pickList"></div>
+                    <button class="btn btn-ghost" onclick="goStep(1)" style="margin-top:6px">◀ กลับไปอ่านคำแนะนำ</button>
+                </div>
+            </div>
+
+            <!-- STEP 3: กรอกข้อมูล -->
+            <div class="screen" id="screenForm">
+                <div class="card" style="padding-bottom:8px">
+                    <h2 id="formTitle">กรอกข้อมูล</h2>
+                    <div class="note-small" id="formSubtitle"></div>
+                </div>
+                <div id="formCards"></div>
+                <div class="card">
+                    <button class="btn btn-success" id="btnSubmit" onclick="submitReport()">📨 ส่งข้อมูล</button>
+                    <button class="btn btn-ghost" onclick="goStep(2)" style="margin-top:10px; width:100%">◀ กลับไปเลือกชื่อ</button>
+                </div>
+            </div>
+
+            <!-- STEP 4: สำเร็จ -->
+            <div class="screen" id="screenDone">
+                <div class="card center">
+                    <div class="done-icon">✅</div>
+                    <h2 style="margin-top:6px">ส่งข้อมูลเรียบร้อยแล้ว</h2>
+                    <p id="doneText" style="color:var(--muted); line-height:1.7; margin-top:6px"></p>
+                    <div style="margin-top:16px"><button class="btn btn-ghost" onclick="goStep(2)">กลับไปหน้าเลือกชื่อ</button></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">ระบบจัดสอนแทนออนไลน์ โรงเรียนกระดุมทองวิทยา</div>
+    </div>
+
+    <script>
+        // ==================== FIREBASE CONFIG ====================
+        const firebaseConfig = {
+            apiKey: "AIzaSyCF7qDDxp6NXk3y7wLiySasqoviGyCKNNw",
+            authDomain: "sornthan-fc0f1.firebaseapp.com",
+            projectId: "sornthan-fc0f1",
+            storageBucket: "sornthan-fc0f1.firebasestorage.app",
+            messagingSenderId: "915683105444",
+            appId: "1:915683105444:web:c1add040ea1afb344ae431"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        const THAI_MONTHS = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+        const docId = new URLSearchParams(location.search).get('id');
+        let docData = null;
+        let subRecords = [];          // เฉพาะรายการสอนแทนจริง (ไม่รวมการส่งนักเรียนไปเรียนกับครูวิชาเพิ่มเติม)
+        let currentSub = null;
+        const rosterCache = {};       // grade -> [{no,name}] | null
+
+        function esc(s) {
+            return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        }
+        function formatThaiDate(d) {
+            const p = (d || '').split('-');
+            if(p.length < 3) return d || '';
+            return `${parseInt(p[2])} ${THAI_MONTHS[parseInt(p[1]) - 1]} พ.ศ. ${parseInt(p[0]) + 543}`;
+        }
+        // ปีการศึกษา (พ.ศ.): ม.ค.-เม.ย. นับเป็นปีการศึกษาก่อนหน้า
+        function academicYearBE(docDate) {
+            const p = (docDate || '').split('-');
+            let y = parseInt(p[0]) + 543;
+            if(parseInt(p[1]) <= 4) y -= 1;
+            return y;
+        }
+        // ต้องตรงกับ reportKey() ใน index.html และ monthly-report.html
+        function reportKey(r) {
+            return `${r.period}|${r.sub}|${r.absent}`.replace(/[.\/\[\]*`~]/g, '_');
+        }
+        function shortName(full) { return String(full || '').replace(/^(นางสาว|นาง|นาย|ว่าที่ร้อยตรี)\s*/, ''); }
+
+        function goStep(n) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById({ 1: 'screenIntro', 2: 'screenPick', 3: 'screenForm', 4: 'screenDone' }[n]).classList.add('active');
+            document.querySelectorAll('#steps .step').forEach(el => {
+                const s = parseInt(el.dataset.s);
+                el.classList.toggle('active', s === n);
+                el.classList.toggle('done', s < n);
+            });
+            if(n === 2) renderPick();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        async function init() {
+            if(!docId) return showError('ลิงก์ไม่ถูกต้อง (ไม่พบรหัสเอกสาร) กรุณาเปิดลิงก์จากข้อความในกลุ่มไลน์อีกครั้ง');
+            try {
+                const snap = await db.collection('substitutions').doc(docId).get();
+                if(!snap.exists) return showError('ไม่พบข้อมูลการสอนแทนของลิงก์นี้ (อาจถูกลบไปแล้ว) กรุณาติดต่อผู้จัดสอนแทน');
+                docData = snap.data();
+                subRecords = (docData.records || []).filter(r => !r.redirect).sort((a, b) => a.period - b.period);
+                document.getElementById('dateBadge').textContent = `📅 ${formatThaiDate(docData.docDate)}${docData.daySchedule ? ' (วัน' + docData.daySchedule + ')' : ''}`;
+                document.getElementById('loading').style.display = 'none';
+                if(subRecords.length === 0) return showError('เอกสารนี้ไม่มีรายการที่ต้องสอนแทน');
+                document.getElementById('app').style.display = 'block';
+            } catch(e) {
+                console.error(e);
+                showError('โหลดข้อมูลไม่สำเร็จ: ' + e.message);
+            }
+        }
+        function showError(msg) {
+            document.getElementById('loading').style.display = 'none';
+            const box = document.getElementById('errorBox');
+            box.style.display = 'block';
+            box.innerHTML = '⚠️<br>' + esc(msg);
+        }
+
+        // ---------- STEP 2 ----------
+        function renderPick() {
+            const subs = [];
+            subRecords.forEach(r => { if(!subs.includes(r.sub)) subs.push(r.sub); });
+            document.getElementById('pickList').innerHTML = subs.map((name, i) => {
+                const mine = subRecords.filter(r => r.sub === name);
+                const sent = mine.filter(r => docData.reports && docData.reports[reportKey(r)]).length;
+                const all = sent === mine.length;
+                return `<button class="pick-btn" onclick="pickTeacher(${i})">
+                    <div><div class="nm">${esc(name)}</div>
+                    <div class="sub">สอนแทนคาบ ${mine.map(r => r.period).join(', ')}</div></div>
+                    <span class="badge ${all ? 'ok' : 'wait'}">${all ? '✓ ส่งแล้ว' : (sent ? 'ส่งแล้ว ' + sent + '/' + mine.length : 'ยังไม่ส่ง')}</span>
+                </button>`;
+            }).join('');
+            window._subs = subs;
+        }
+
+        async function pickTeacher(i) {
+            currentSub = window._subs[i];
+            const mine = subRecords.filter(r => r.sub === currentSub);
+            Swal.fire({ title: 'กำลังโหลดรายชื่อนักเรียน...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            const year = academicYearBE(docData.docDate);
+            const grades = [...new Set(mine.map(r => r.grade).filter(g => g && g !== '-'))];
+            await Promise.all(grades.map(async g => {
+                if(g in rosterCache) return;
+                try {
+                    const s = await db.collection('student_rosters').doc(`${year}_${g}`).get();
+                    rosterCache[g] = s.exists ? (s.data().students || []) : null;
+                } catch(e) { console.warn('roster', g, e); rosterCache[g] = null; }
+            }));
+            Swal.close();
+            renderForm(mine);
+            goStep(3);
+        }
+
+        // ---------- STEP 3 ----------
+        function renderForm(mine) {
+            document.getElementById('formTitle').textContent = '✍️ ' + currentSub;
+            document.getElementById('formSubtitle').textContent = `สอนแทน ${mine.length} คาบ — กรอกให้ครบทุกคาบแล้วกด “ส่งข้อมูล” ด้านล่าง`;
+            document.getElementById('formCards').innerHTML = mine.map((r, idx) => {
+                const key = reportKey(r);
+                const old = (docData.reports || {})[key] || null;
+                const roster = rosterCache[r.grade];
+                const subjLine = [r.subject && r.subject !== '-' ? r.subject : '', r.subjectName || ''].filter(Boolean).join(' ');
+                const absentNos = new Set(((old && old.absentStudents) || []).map(s => String(s.no)));
+
+                let rosterHtml;
+                if(roster && roster.length) {
+                    // ค่าเริ่มต้น: ติ๊ก "มาเรียน" ทุกคน — ครูเอาติ๊กออกเฉพาะนักเรียนที่ไม่เข้าเรียน
+                    rosterHtml = `
+                        <div class="roster-tools">
+                            <input type="text" placeholder="🔍 ค้นหาชื่อ / เลขที่" oninput="filterRoster(${idx}, this.value)">
+                            <span class="count-chip" id="cnt_${idx}">ขาด 0 คน</span>
+                        </div>
+                        <div class="roster-tools" style="margin-top:-2px">
+                            <button type="button" class="btn btn-ghost" style="padding:6px 12px; font-size:.85rem" onclick="setAllPresent(${idx}, true)">✅ ติ๊กมาทั้งหมด</button>
+                        </div>
+                        <div class="roster-list" id="roster_${idx}">
+                            ${roster.map(s => { const absent = absentNos.has(String(s.no)); return `
+                                <label class="stu ${absent ? 'absent' : ''}" data-q="${esc((s.no + ' ' + s.name).toLowerCase())}">
+                                    <input type="checkbox" data-no="${esc(s.no)}" data-name="${esc(s.name)}" ${absent ? '' : 'checked'} onchange="onStuChange(${idx}, this)">
+                                    <span class="no">${esc(s.no)}</span><span>${esc(s.name)}</span>
+                                </label>`; }).join('')}
+                        </div>
+                        <div class="note-small">✔ ติ๊ก = <b>มาเรียน</b> (ค่าเริ่มต้นมาครบทุกคน) • <b>เอาติ๊กออก</b> เฉพาะนักเรียนที่ <b>ไม่เข้าเรียนในคาบนี้</b></div>`;
+                } else {
+                    const typed = ((old && old.absentStudents) || []).map(s => s.name).join('\n');
+                    rosterHtml = `
+                        <div class="note-small" style="margin-bottom:6px">ยังไม่มีรายชื่อนักเรียน ${esc(r.grade)} ในระบบ — ถ้ามีนักเรียนขาด พิมพ์ชื่อ (1 คนต่อ 1 บรรทัด) ถ้ามาครบให้เว้นว่าง</div>
+                        <textarea id="manual_${idx}" placeholder="เช่น&#10;เด็กชายสมชาย ใจดี&#10;เด็กหญิงสมศรี รักเรียน" oninput="onManualChange(${idx})">${esc(typed)}</textarea>
+                        <span class="count-chip" id="cnt_${idx}" style="display:inline-block; margin-top:6px">ขาด 0 คน</span>`;
+                }
+
+                return `
+                <div class="p-card" data-idx="${idx}" data-key="${esc(key)}" data-has-roster="${roster && roster.length ? 1 : 0}">
+                    <div class="p-head">
+                        <span class="p-no">คาบ ${esc(r.period)}</span>
+                        <span class="p-meta">แทน <b>${esc(shortName(r.absent))}</b> (${esc(r.reason || '')})<br>
+                        ${subjLine ? 'วิชา ' + esc(subjLine) + ' • ' : ''}ชั้น ${esc(r.grade || '-')}</span>
+                    </div>
+                    <label class="fl">📝 ภาระงานที่มอบหมายให้นักเรียน <span style="color:var(--danger)">*</span></label>
+                    <textarea id="work_${idx}" placeholder="เช่น ทำใบงานเรื่อง... หน้า 12–13">${esc(old ? old.workload : '')}</textarea>
+
+                    <label class="fl">👥 เช็คการเข้าเรียนของนักเรียน</label>
+                    <div class="roster">${rosterHtml}</div>
+
+                    <label class="fl">หมายเหตุ (ถ้ามี)</label>
+                    <input type="text" id="note_${idx}" value="${esc(old ? old.note || '' : '')}" placeholder="เช่น นักเรียนมาสาย / ไม่มีปัญหา">
+                    ${old ? `<div class="note-small" style="color:var(--success)">✓ เคยส่งข้อมูลแล้ว — แก้ไขแล้วกดส่งใหม่ได้</div>` : ''}
+                </div>`;
+            }).join('');
+            mine.forEach((_, idx) => updateCount(idx));
+        }
+
+        function onStuChange(idx, cb) {
+            cb.closest('.stu').classList.toggle('absent', !cb.checked);
+            updateCount(idx);
+        }
+        function setAllPresent(idx, on) {
+            document.querySelectorAll(`#roster_${idx} input[type=checkbox]`).forEach(cb => { cb.checked = on; cb.closest('.stu').classList.toggle('absent', !on); });
+            updateCount(idx);
+        }
+        function onManualChange(idx) { updateCount(idx); }
+        function filterRoster(idx, q) {
+            q = q.trim().toLowerCase();
+            document.querySelectorAll(`#roster_${idx} .stu`).forEach(el => {
+                el.style.display = (!q || el.dataset.q.includes(q)) ? '' : 'none';
+            });
+        }
+        function getAbsentList(idx) {
+            const card = document.querySelector(`.p-card[data-idx="${idx}"]`);
+            if(card.dataset.hasRoster === '1') {
+                return Array.from(document.querySelectorAll(`#roster_${idx} input:not(:checked)`)).map(cb => ({ no: cb.dataset.no, name: cb.dataset.name }));
+            }
+            const t = (document.getElementById(`manual_${idx}`) || {}).value || '';
+            return t.split('\n').map(x => x.trim()).filter(Boolean).map((name, i) => ({ no: '', name }));
+        }
+        function updateCount(idx) {
+            const el = document.getElementById(`cnt_${idx}`);
+            if(el) el.textContent = `ขาด ${getAbsentList(idx).length} คน`;
+        }
+
+        // ---------- SUBMIT ----------
+        async function submitReport() {
+            const mine = subRecords.filter(r => r.sub === currentSub);
+            const payload = [];
+            for(let idx = 0; idx < mine.length; idx++) {
+                const r = mine[idx];
+                const work = document.getElementById(`work_${idx}`).value.trim();
+                if(!work) return fail(`กรุณาพิมพ์ภาระงานที่มอบหมาย — คาบ ${r.period}`);
+                const absent = getAbsentList(idx);
+                payload.push({ r, rep: {
+                    sub: r.sub, absent: r.absent, period: r.period,
+                    grade: r.grade || '', subject: r.subject || '', subjectName: r.subjectName || '',
+                    workload: work, attendance: absent.length ? 'absent' : 'all', absentStudents: absent, absentCount: absent.length,
+                    note: document.getElementById(`note_${idx}`).value.trim(),
+                    submittedAt: firebase.firestore.FieldValue.serverTimestamp()
+                }});
+            }
+
+            const confirm = await Swal.fire({
+                icon: 'question', title: 'ยืนยันการส่งข้อมูล',
+                html: `ส่งข้อมูลของ <b>${esc(currentSub)}</b> จำนวน ${payload.length} คาบ<br>
+                       <span style="color:#64748b; font-size:.9rem">รวมนักเรียนที่ไม่เข้าเรียน ${payload.reduce((s, p) => s + p.rep.absentCount, 0)} คน</span>`,
+                showCancelButton: true, confirmButtonText: 'ยืนยันส่ง', cancelButtonText: 'ตรวจสอบอีกครั้ง', confirmButtonColor: '#059669'
+            });
+            if(!confirm.isConfirmed) return;
+
+            const btn = document.getElementById('btnSubmit');
+            btn.disabled = true;
+            try {
+                const args = [];
+                payload.forEach(p => { args.push(new firebase.firestore.FieldPath('reports', reportKey(p.r)), p.rep); });
+                const ref = db.collection('substitutions').doc(docId);
+                await ref.update.apply(ref, args);
+
+                // อัปเดตข้อมูลในหน้า (ใช้เวลาปัจจุบันแทน serverTimestamp)
+                docData.reports = docData.reports || {};
+                payload.forEach(p => { docData.reports[reportKey(p.r)] = { ...p.rep, submittedAt: null }; });
+
+                document.getElementById('doneText').innerHTML =
+                    `บันทึกข้อมูลของ <b>${esc(currentSub)}</b> (${payload.length} คาบ) ลงฐานข้อมูลแล้ว<br>ขอบคุณที่ปฏิบัติหน้าที่สอนแทนครับ/ค่ะ`;
+                goStep(4);
+            } catch(e) {
+                console.error(e);
+                Swal.fire('ส่งข้อมูลไม่สำเร็จ', e.message || 'กรุณาลองใหม่อีกครั้ง', 'error');
+            } finally {
+                btn.disabled = false;
+            }
+        }
+        function fail(msg) { Swal.fire({ icon: 'warning', title: 'ข้อมูลไม่ครบ', text: msg, confirmButtonText: 'ตกลง' }); }
+
+        init();
+    </script>
+</body>
+</html>

@@ -395,6 +395,13 @@
             border: 1px solid #fb7185;
         }
         .candidate-opt.excluded-opt { background: #fffbeb; border-style: dashed; }
+        /* ตัวเลือก "ให้นักเรียนไปเรียนวิชาเพิ่มเติมกับครูที่สอนคาบเดียวกัน" */
+        .redirect-title { font-size: 0.82rem; font-weight: 700; color: #92400e; background: #fef3c7; border: 1px solid #fcd34d; border-radius: 6px; padding: 6px 10px; margin: 6px 0 6px; }
+        .candidate-opt.redirect-opt { background: #fffbeb; border-color: #fcd34d; }
+        .candidate-opt.redirect-opt:hover { background: #fef3c7; }
+        .candidate-opt.redirect-opt.selected { background: #fef3c7; border-color: #d97706; outline: 1px solid #d97706; }
+        .redirect-chip { display:inline-block; margin-left:6px; padding:1px 8px; border-radius:20px; background:#f59e0b; color:#fff; font-size:0.72rem; font-weight:700; }
+        .elective-chip { display:inline-block; margin-left:6px; padding:1px 8px; border-radius:20px; background:#fef3c7; color:#92400e; font-size:0.72rem; font-weight:700; border:1px solid #fcd34d; }
         .exclude-fallback-note {
             font-size: 0.8rem;
             color: #b45309;
@@ -1202,6 +1209,10 @@
                         <input type="checkbox" id="autoPreferSameDept" checked>
                         <label for="autoPreferSameDept">ให้ความสำคัญครูกลุ่มสาระเดียวกัน</label>
                     </div>
+                    <div class="auto-opt">
+                        <input type="checkbox" id="autoPreferRedirect" checked>
+                        <label for="autoPreferRedirect">วิชาเพิ่มเติม: ให้นักเรียนไปเรียนกับครูวิชาเพิ่มเติมคาบเดียวกันก่อน</label>
+                    </div>
                     <div style="flex-basis:100%; font-size:0.82rem; color:#4338ca;">
                         💡 ระบบจะกระจายภาระงานให้เท่ากัน หลีกเลี่ยงการจัดซ้ำคาบเด็ดขาด และไม่ให้ครูคนเดียวรับเกินโควตา — <strong>กรุณาตรวจสอบผลก่อนกดบันทึก</strong>
                     </div>
@@ -1244,9 +1255,6 @@
                 <div style="overflow: hidden; margin-top:15px; display:flex; justify-content:flex-end; gap:10px; flex-wrap: wrap;">
                     <button class="btn-summary" id="btnPrintSummary" onclick="prepareSummaryPreview()" disabled>
                         <i class="fas fa-file-alt"></i> พิมพ์ใบสรุป (Daily Report)
-                    </button>
-                    <button class="btn-print" id="btnPrintMemo" onclick="preparePreview()" disabled>
-                        <i class="fas fa-print"></i> พิมพ์บันทึกข้อความ (Memo)
                     </button>
                 </div>
             </div>
@@ -2250,17 +2258,14 @@
         }
 
         function updatePrintButtons() {
-            const btnMemo = document.getElementById('btnPrintMemo');
             const btnSummary = document.getElementById('btnPrintSummary');
             const saveStatus = document.getElementById('saveStatus');
             
             if(isSaved) {
-                btnMemo.disabled = false;
                 btnSummary.disabled = false;
                 saveStatus.innerHTML = '✅ บันทึกข้อมูลแล้ว สามารถพิมพ์เอกสารได้';
                 saveStatus.style.color = '#059669';
             } else {
-                btnMemo.disabled = true;
                 btnSummary.disabled = true;
                 saveStatus.innerHTML = '⚠️ กรุณาบันทึกข้อมูลก่อนพิมพ์เอกสาร';
                 saveStatus.style.color = '#64748b';
@@ -2276,12 +2281,16 @@
                 periodBlock.classList.remove('disabled');
                 // คืนค่าการเลือกเดิม (ถ้ามี) กลับเข้าสู่การนับภาระงาน
                 const radio = periodBlock.querySelector('input[type="radio"]:checked');
-                if(radio && !window.selectionTracker[key]) {
+                if(radio && radio.dataset.redirect === '1') {
+                    window.redirectTracker = window.redirectTracker || {};
+                    window.redirectTracker[key] = radio.value;
+                } else if(radio && !window.selectionTracker[key]) {
                     realtimeWorkload[radio.value] = (realtimeWorkload[radio.value] || 0) + 1;
                     window.selectionTracker[key] = radio.value;
                 }
             } else {
                 periodBlock.classList.add('disabled');
+                if(window.redirectTracker) delete window.redirectTracker[key];
                 // ถอดการเลือกออกจากการนับภาระงาน เพื่อไม่ให้ตรวจซ้ำคาบผิดพลาด
                 const prev = window.selectionTracker[key];
                 if(prev) {
@@ -2363,6 +2372,7 @@
                 const period = parseInt(opt.dataset.period);
                 const absent = opt.dataset.absent;
                 if(!name || isNaN(period)) return;
+                if(opt.dataset.redirect === '1') return;   // ตัวเลือกส่งนักเรียนไปเรียนด้วย ไม่ตรวจซ้ำคาบ
 
                 const conflicts = getConflicts(name, period, `${absent}_${period}`);
                 const note = opt.querySelector('.conflict-note');
@@ -2442,6 +2452,7 @@
             realtimeWorkload = {};
             dbPeriodMap = {};
             window.selectionTracker = {};
+            window.redirectTracker = {};
             isSaved = false;
             lastSavedDocId = "";
             updatePrintButtons();
@@ -2463,6 +2474,7 @@
 
                     const recs = data.records || [];
                     recs.forEach(r => {
+                        if(r.redirect) return;   // ให้นักเรียนไปเรียนกับครูวิชาเพิ่มเติม ไม่นับเป็นภาระสอนแทน/ไม่ใช่การซ้ำคาบ
                         workloadMap[r.sub] = (workloadMap[r.sub] || 0) + 1;
                         // เก็บว่าครูคนไหนถูกจัดสอนแทนคาบไหนไว้แล้วบ้าง (ใช้ตรวจซ้ำคาบ)
                         const p = parseInt(r.period);
@@ -2524,9 +2536,9 @@
                                    checked 
                                    onchange="togglePeriodSelection(this, '${absentName}', ${period})">
                             <span class="badge-p">คาบ ${period}</span>
-                            <input type="text" id="subj_${absentName}_${period}" placeholder="รหัสวิชา" value="${subjectCode}" 
-                                   style="width:100px; padding:5px; ${(subjectCode) ? 'background:#e0f2fe; border-color:#0284c7;' : ''}" 
-                                   title="${subjectCode ? '✅ ข้อมูลจากระบบ' : 'กรุณากรอก'}">
+                            <input type="text" id="subj_${absentName}_${period}" placeholder="รหัสวิชา" value="${subjectCode}" data-name="${(detail.name || '').replace(/"/g, '&quot;')}"
+                                   style="width:100px; padding:5px; ${(subjectCode) ? 'background:#e0f2fe; border-color:#0284c7;' : ''}"
+                                   title="${subjectCode ? '✅ ข้อมูลจากระบบ' + (detail.name ? ' — ' + detail.name : '') : 'กรุณากรอก'}">
                             <select id="grade_${absentName}_${period}" 
                                     style="width:80px; padding:5px; ${(gradeLevel) ? 'background:#e0f2fe; border-color:#0284c7;' : ''}">
                                 <option value="">ชั้น</option>
@@ -2538,9 +2550,42 @@
                                 <option value="ม.6" ${gradeLevel === 'ม.6' ? 'selected' : ''}>ม.6</option>
                             </select>
                             ${(subjectCode || gradeLevel) ? '<span style="color:green; font-size:0.8rem; margin-left:5px;">✓ Auto</span>' : ''}
+                            ${detail.type === 'เพิ่มเติม' ? `<span class="elective-chip">วิชาเพิ่มเติม${detail.group ? ' กลุ่ม ' + detail.group : ''}</span>` : ''}
                         </div>`;
-                    
-                    if(candidates.length === 0) html += `<div style="color:red">ไม่มีครูว่าง</div>`;
+
+                    // NEW: วิชาเพิ่มเติม → เสนอให้นักเรียนไปเรียนกับครูที่สอนวิชาเพิ่มเติมคาบเดียวกัน ระดับชั้นเดียวกัน
+                    const redirectTargets = findRedirectTargets(absentName, daySchedule, period, detail);
+                    if(redirectTargets.length > 0) {
+                        html += `<div class="redirect-title">🔀 ให้นักเรียนไปเรียนวิชาเพิ่มเติมกับครูที่สอนคาบเดียวกัน (${gradeLevel || 'ชั้นเดียวกัน'}) — ไม่ต้องจัดครูสอนแทน</div>`;
+                        redirectTargets.forEach(rt => {
+                            const rd = rt.detail;
+                            const rLabel = [rd.code, rd.name].filter(Boolean).join(' ') || 'วิชาเพิ่มเติม';
+                            const rGroup = rd.group ? ` (กลุ่ม ${rd.group})` : '';
+                            html += `
+                                <div class="candidate-opt redirect-opt"
+                                     data-teacher-name="${rt.teacher.name}"
+                                     data-absent="${absentName}"
+                                     data-period="${period}"
+                                     data-dept="${rt.teacher.department}"
+                                     data-redirect="1"
+                                     data-rcode="${(rd.code || '').replace(/"/g, '&quot;')}"
+                                     data-rname="${(rd.name || '').replace(/"/g, '&quot;')}"
+                                     data-rgroup="${rd.group || ''}"
+                                     onclick="selectRadio(this, '${rt.teacher.name}', '${absentName}', ${period})">
+                                    <input type="radio" name="rad_${absentName}_${period}" value="${rt.teacher.name}" data-dept="${rt.teacher.department}" data-redirect="1">
+                                    <div style="flex:1;">
+                                        <strong>${rt.teacher.name}</strong>
+                                        <span style="font-size:0.8rem; color:#64748b;">(${rt.teacher.department})</span>
+                                        <span class="redirect-chip">นักเรียนไปเรียนด้วย</span>
+                                        <div class="meta-info">📚 สอน ${rLabel}${rGroup} • ${rd.grade || ''} คาบ ${period}</div>
+                                    </div>
+                                </div>`;
+                        });
+                        if(candidates.length > 0) html += `<div style="font-size:0.78rem; color:#64748b; margin:6px 0 4px;">หรือเลือกครูสอนแทน:</div>`;
+                    }
+
+                    if(candidates.length === 0 && redirectTargets.length === 0) html += `<div style="color:red">ไม่มีครูว่าง</div>`;
+                    else if(candidates.length === 0) html += `<div style="color:#64748b; font-size:0.85rem;">ไม่มีครูว่างสำหรับสอนแทนในคาบนี้</div>`;
                     else {
                         // NEW: ถ้าเหลือแต่ครูที่ยกเว้น ให้ขึ้นหมายเหตุอธิบาย
                         if(candidates.length > 0 && candidates.every(c => isExcludedTeacher(c.name))) {
@@ -2626,7 +2671,7 @@
                         // คืนค่าการเลือกเดิมแบบ "เงียบ" เพื่อไม่ให้เด้ง popup เตือนซ้ำคาบรัวๆ ตอนเปิดแก้ไข
                         const radios = document.getElementsByName(`rad_${r.absent}_${r.period}`);
                         radios.forEach(rad => {
-                            if(rad.value === r.sub) {
+                            if(rad.value === r.sub && (rad.dataset.redirect === '1') === !!r.redirect) {
                                 const opt = rad.closest('.candidate-opt');
                                 if(opt) selectRadio(opt, r.sub, r.absent, parseInt(r.period), true);
                             }
@@ -2654,6 +2699,7 @@
                 });
                 realtimeWorkload = {};
                 window.selectionTracker = {};
+                window.redirectTracker = {};
                 isSaved = false;
                 updatePrintButtons();
                 updateAllBadges();
@@ -2768,15 +2814,24 @@
 
             const cfg = {
                 maxPerTeacher: Math.max(1, parseInt(document.getElementById('maxPerTeacher').value) || 2),
-                preferSameDept: document.getElementById('autoPreferSameDept').checked
+                preferSameDept: document.getElementById('autoPreferSameDept').checked,
+                preferRedirect: document.getElementById('autoPreferRedirect').checked
             };
 
             if(mode === 'all') clearAllSelections(true);
 
             // จัดคาบที่มี "ตัวเลือกน้อยที่สุด" ก่อน เพื่อลดโอกาสตันในภายหลัง
+            // (ตัวเลือก "ให้นักเรียนไปเรียนกับครูวิชาเพิ่มเติม" แยกออกจากตัวเลือกครูสอนแทนปกติ)
+            slots.forEach(s => {
+                s.redirectOptions = s.options.filter(o => o.dataset.redirect === '1');
+                s.options = s.options.filter(o => o.dataset.redirect !== '1');
+            });
             let queue = slots.slice();
             if(mode === 'fill') {
-                queue = queue.filter(s => !window.selectionTracker[`${s.absent}_${s.period}`]);
+                queue = queue.filter(s => {
+                    const k = `${s.absent}_${s.period}`;
+                    return !window.selectionTracker[k] && !(window.redirectTracker || {})[k];
+                });
             }
             queue.sort((a, b) => a.options.length - b.options.length);
 
@@ -2784,8 +2839,16 @@
             const failed = [];
             const overQuota = [];
             const usedExcluded = [];
+            const redirected = [];
 
             queue.forEach(slot => {
+                // วิชาเพิ่มเติม: ส่งนักเรียนไปเรียนกับครูวิชาเพิ่มเติมคาบเดียวกันก่อน (ไม่ต้องใช้ครูสอนแทน)
+                if(cfg.preferRedirect && slot.redirectOptions.length > 0) {
+                    const pick = slot.redirectOptions[Math.floor(Math.random() * slot.redirectOptions.length)];
+                    selectRadio(pick, pick.dataset.teacherName, slot.absent, slot.period, true);
+                    redirected.push({ slot, name: pick.dataset.teacherName });
+                    return;
+                }
                 if(slot.options.length === 0) {
                     failed.push({ slot, reason: 'ไม่มีครูว่างในคาบนี้' });
                     return;
@@ -2819,7 +2882,14 @@
 
             const uniqueOver = [...new Set(overQuota)];
             let html = `<div style="text-align:left; line-height:1.9; font-size:0.95rem;">
-                <div>✅ จัดสำเร็จ <strong style="color:#059669;">${assigned.length}</strong> คาบ</div>`;
+                <div>✅ จัดครูสอนแทนสำเร็จ <strong style="color:#059669;">${assigned.length}</strong> คาบ</div>`;
+
+            if(redirected.length > 0) {
+                html += `<div style="margin-top:8px; color:#92400e;">🔀 ให้นักเรียนวิชาเพิ่มเติมไปเรียนกับครูวิชาเพิ่มเติมคาบเดียวกัน <strong>${redirected.length}</strong> คาบ:</div>
+                         <ul style="padding-left:20px; color:#92400e;">
+                            ${redirected.map(f => `<li>${formatTeacherNameShort(f.slot.absent)} คาบ ${f.slot.period} → ไปเรียนกับ ${formatTeacherNameShort(f.name)}</li>`).join('')}
+                         </ul>`;
+            }
 
             if(failed.length > 0) {
                 html += `<div style="margin-top:8px;">⚠️ จัดไม่สำเร็จ <strong style="color:#b91c1c;">${failed.length}</strong> คาบ:</div>
@@ -2841,10 +2911,30 @@
                 icon: failed.length > 0 ? 'warning' : 'success',
                 title: '⚡ จัดอัตโนมัติเสร็จสิ้น',
                 html: html,
+                scrollbarPadding: false,
                 confirmButtonText: 'ตรวจสอบผล',
                 confirmButtonColor: '#4f46e5',
                 width: 600
             });
+        }
+
+        /**
+         * NEW: หาครูที่สอน "วิชาเพิ่มเติม" คาบเดียวกัน วันเดียวกัน ระดับชั้นเดียวกัน
+         * เพื่อให้นักเรียนของครูที่ลาไปเรียนด้วยแทนการจัดครูสอนแทน
+         * (ใช้เฉพาะเมื่อคาบของครูที่ลาถูกติดแท็ก "เพิ่มเติม" ในหน้าจัดการครู)
+         */
+        function findRedirectTargets(absentName, day, period, detail) {
+            if(!detail || detail.type !== 'เพิ่มเติม' || !detail.grade) return [];
+            const key = `${day}_${period}`;
+            const out = [];
+            teachersData.forEach(t => {
+                if(t.name === absentName) return;
+                if(selectedTeachers.includes(t.name)) return;   // ครูที่ลาด้วยกันในวันนี้
+                if(!(t.schedule && (t.schedule[day] || []).includes(period))) return;
+                const d = (t.teachingDetails || {})[key];
+                if(d && d.type === 'เพิ่มเติม' && d.grade === detail.grade) out.push({ teacher: t, detail: d });
+            });
+            return out;
         }
 
         function findCandidates(day, period, exclude) {
@@ -2887,15 +2977,27 @@
             const container = el.parentElement;
             const key = `${absentName}_${period}`;
             const previousTeacher = window.selectionTracker[key];
+            const isRedirect = el.dataset.redirect === '1';
+            window.redirectTracker = window.redirectTracker || {};
             container.querySelectorAll('.candidate-opt').forEach(x => x.classList.remove('selected'));
             el.classList.add('selected');
             el.querySelector('input').checked = true;
-            if(previousTeacher && previousTeacher !== teacherName) {
-                realtimeWorkload[previousTeacher] = Math.max(0, (realtimeWorkload[previousTeacher] || 0) - 1);
-            }
-            if(previousTeacher !== teacherName) {
-                realtimeWorkload[teacherName] = (realtimeWorkload[teacherName] || 0) + 1;
-                window.selectionTracker[key] = teacherName;
+            if(isRedirect) {
+                // ให้นักเรียนไปเรียนกับครูวิชาเพิ่มเติม: ไม่นับภาระสอนแทน และไม่ตรวจซ้ำคาบ
+                if(previousTeacher) {
+                    realtimeWorkload[previousTeacher] = Math.max(0, (realtimeWorkload[previousTeacher] || 0) - 1);
+                    delete window.selectionTracker[key];
+                }
+                window.redirectTracker[key] = teacherName;
+            } else {
+                delete window.redirectTracker[key];
+                if(previousTeacher && previousTeacher !== teacherName) {
+                    realtimeWorkload[previousTeacher] = Math.max(0, (realtimeWorkload[previousTeacher] || 0) - 1);
+                }
+                if(previousTeacher !== teacherName) {
+                    realtimeWorkload[teacherName] = (realtimeWorkload[teacherName] || 0) + 1;
+                    window.selectionTracker[key] = teacherName;
+                }
             }
             isSaved = false;
             updatePrintButtons();
@@ -2904,7 +3006,7 @@
             updateRealtimeSummary();
 
             // NEW: เตือนทันทีถ้าครูท่านนี้ถูกจัดสอนคาบนี้ไว้ที่อื่นแล้ว (เตือนแต่ยังเลือกได้)
-            if(!silent) {
+            if(!silent && !isRedirect) {
                 const conflicts = getConflicts(teacherName, period, key);
                 if(conflicts.length > 0) {
                     Swal.fire({
@@ -3011,17 +3113,28 @@
                     const radio = block.querySelector('input[type="radio"]:checked');
                     if(radio) {
                         isValid = true;
-                        const subj = document.getElementById(`subj_${absent}_${period}`).value || "-";
+                        const subjEl = document.getElementById(`subj_${absent}_${period}`);
+                        const subj = subjEl.value || "-";
                         const grade = document.getElementById(`grade_${absent}_${period}`).value || "-";
-                        data.push({
+                        const rec = {
                             absent: absent,
                             period: parseInt(period),
                             sub: radio.value,
                             dept: radio.dataset.dept,
                             subject: subj,
+                            subjectName: subjEl.dataset.name || '',
                             grade: grade,
                             reason: reason
-                        });
+                        };
+                        if(radio.dataset.redirect === '1') {
+                            // นักเรียนวิชาเพิ่มเติมไปเรียนกับครู radio.value (ไม่ใช่การสอนแทน)
+                            const opt = radio.closest('.candidate-opt');
+                            rec.redirect = true;
+                            rec.redirectCode = opt.dataset.rcode || '';
+                            rec.redirectName = opt.dataset.rname || '';
+                            rec.redirectGroup = opt.dataset.rgroup || '';
+                        }
+                        data.push(rec);
                     }
                 });
             });
@@ -3123,16 +3236,6 @@
             }
         }
 
-        async function preparePreview() {
-            if(!isSaved) {
-                return Swal.fire('เตือน', 'กรุณาบันทึกข้อมูลก่อนพิมพ์เอกสาร', 'warning');
-            }
-            
-            closeAllModals();
-            renderMemoPaper();
-            document.getElementById('previewModal').style.display = 'block';
-        }
-
         function prepareSummaryPreview() {
             if(!isSaved && !window.lastPreviewData) {
                 return Swal.fire('เตือน', 'กรุณาบันทึกข้อมูลก่อนพิมพ์เอกสาร', 'warning');
@@ -3141,125 +3244,6 @@
             closeAllModals();
             renderSummaryPaper();
             document.getElementById('previewModal').style.display = 'block';
-        }
-
-        function renderMemoPaper() {
-            const { data, scheduler, academicHead, deputyDirector, director, docDate } = window.lastPreviewData;
-            const container = document.getElementById('paperContainer');
-            container.innerHTML = '';
-            const thaiDateStr = formatThaiDate(docDate);
-            const grouped = {};
-            data.forEach(x => { if(!grouped[x.sub]) grouped[x.sub] = []; grouped[x.sub].push(x); });
-
-            for(const [subName, items] of Object.entries(grouped)) {
-                const subObj = teachersData.find(t => t.name === subName);
-                const subDept = subObj ? subObj.department : "";
-                items.sort((a,b) => a.period - b.period);
-                
-                const mainReason = items[0].reason || "ไปราชการ";
-                
-                let reasonText = "";
-                let actionText = "";
-                
-                if(mainReason === "ไปราชการ") {
-                    reasonText = "ได้รับมอบหมายให้ปฏิบัติราชการแทน";
-                    actionText = "ได้ดำเนินการสอนแทนดังกล่าว";
-                } else if(mainReason === "ลากิจ") {
-                    reasonText = "ครูผู้สอนลากิจ ได้รับมอบหมายให้สอนแทน";
-                    actionText = "ได้ดำเนินการสอนแทนดังกล่าว";
-                } else if(mainReason === "ลาป่วย") {
-                    reasonText = "ครูผู้สอนลาป่วย ได้รับมอบหมายให้สอนแทน";
-                    actionText = "ได้ดำเนินการสอนแทนดังกล่าว";
-                }
-                
-                let rows = items.map((it, idx) => `
-                    <tr>
-                        <td>${idx + 1}</td>
-                        <td class="text-left">${it.absent}</td>
-                        <td>${it.reason}</td>
-                        <td>${it.period}</td>
-                        <td>${it.subject}</td>
-                        <td>${it.grade}</td>
-                        <td></td>
-                        <td></td>
-                    </tr>`).join('');
-
-                container.innerHTML += `
-                <div class="a4-paper memo-layout">
-                    <div class="doc-header">
-                        <img src="https://nonthaphathr.github.io/uploadimg/kruda.png" class="garuda" crossorigin="anonymous">
-                        <div class="doc-code">วก.กทว.303</div>
-                        <div class="doc-title">บันทึกข้อความ</div>
-                    </div>
-                    <div class="doc-meta"><b>ส่วนราชการ</b>&nbsp;&nbsp;โรงเรียนกระดุมทองวิทยา ตำบลหนองหัวช้าง อำเภอกันทรารมย์ จังหวัดศรีสะเกษ</div>
-                    <div class="doc-meta doc-meta-row">
-                        <span class="doc-ref"><b>ที่</b>&nbsp;&nbsp;ศก 51008.08/............</span>
-                        <span class="doc-date"><b>วันที่</b>&nbsp;&nbsp;${thaiDateStr}</span>
-                    </div>
-                    <div class="doc-meta"><b>เรื่อง</b>&nbsp;&nbsp;รายงานผลการสอนแทน</div>
-                    <hr class="doc-line">
-                    <div class="doc-to">เรียน&nbsp;&nbsp;ผู้อำนวยการโรงเรียนกระดุมทองวิทยา</div>
-                    <div class="doc-content">ตามที่ข้าพเจ้า ${subName} ตำแหน่ง ครู กลุ่มสาระการเรียนรู้${subDept} ${reasonText} เมื่อวันที่ ${thaiDateStr} ตามความทราบแล้วนั้น</div>
-                    <div class="doc-content">บัดนี้ ข้าพเจ้า${actionText}เสร็จสิ้นเรียบร้อยแล้ว จึงขอรายงานผลการสอนแทนดังต่อไปนี้</div>
-                    <table class="doc-table">
-                        <colgroup>
-                            <col style="width:4%">
-                            <col style="width:20%">
-                            <col style="width:13%">
-                            <col style="width:6%">
-                            <col style="width:12%">
-                            <col style="width:6%">
-                            <col style="width:22%">
-                            <col style="width:17%">
-                        </colgroup>
-                        <thead>
-                            <tr>
-                                <th rowspan="2">ที่</th>
-                                <th rowspan="2">ปฏิบัติราชการแทน</th>
-                                <th rowspan="2">สาเหตุ</th>
-                                <th colspan="4">การสอนแทน</th>
-                                <th rowspan="2">หมายเหตุ</th>
-                            </tr>
-                            <tr>
-                                <th>คาบ</th>
-                                <th>วิชา</th>
-                                <th>ชั้น</th>
-                                <th>กิจกรรม</th>
-                            </tr>
-                        </thead>
-                        <tbody>${rows}</tbody>
-                    </table>
-                    <div class="doc-closing">จึงเรียนมาเพื่อโปรดทราบ</div>
-                    <table class="sign-table">
-                        <tr>
-                            <td>
-                                ลงชื่อ........................................ครูผู้สอนแทน<br>
-                                <span class="sub-teacher-name">(${subName})</span>
-                            </td>
-                            <td>
-                                ลงชื่อ........................................หัวหน้ากลุ่มบริหารงานวิชาการ<br>
-                                <span class="academic-head-name">(${academicHead})</span>
-                            </td>
-                        </tr>
-                        <tr style="height:12px;"><td></td><td></td></tr>
-                        <tr>
-                            <td>
-                                <div class="checkbox-text">(&nbsp;&nbsp;&nbsp;) รับทราบ</div>
-                                ลงชื่อ........................................<br>
-                                (${deputyDirector})<br>
-                                รองผู้อำนวยการโรงเรียนกระดุมทองวิทยา
-                            </td>
-                            <td>
-                                <div class="checkbox-text">(&nbsp;&nbsp;&nbsp;) รับทราบ</div>
-                                ลงชื่อ........................................<br>
-                                (${director})<br>
-                                ผู้อำนวยการโรงเรียนกระดุมทองวิทยา
-                            </td>
-                        </tr>
-                    </table>
-                    <div class="footer-system">พิมพ์จากระบบจัดสอนแทนออนไลน์ โดย ครูนนทพัทธ์ หิรัญเรือง</div>
-                </div>`;
-            }
         }
 
         function renderSummaryPaper() {
@@ -3273,7 +3257,9 @@
             let rows = sorted.map((it, idx) => `
                 <tr>
                     <td>${idx+1}</td>
-                    <td class="text-left">${formatTeacherNameFull(it.sub)}</td>
+                    <td class="text-left">${it.redirect
+                        ? `<span style="font-size:0.9em">ให้นักเรียนไปเรียนวิชา${[it.redirectCode, it.redirectName].filter(Boolean).join(' ') || 'เพิ่มเติม'} กับ</span><br>${formatTeacherNameFull(it.sub)}`
+                        : formatTeacherNameFull(it.sub)}</td>
                     <td class="text-left">${formatTeacherNameFull(it.absent)}</td>
                     <td>${it.period}</td>
                     <td>${it.subject}/${it.grade}</td>
@@ -3571,9 +3557,6 @@
                             </div>
                         </div>
                         <div class="btn-action-group">
-                            <button onclick="showHistoryPDF('${d.id}', 'memo')" class="btn-sm" style="background:#3b82f6; color:white;">
-                                🖨️ พิมพ์บันทึกข้อความ
-                            </button>
                             <button onclick="showHistoryPDF('${d.id}', 'summary')" class="btn-sm" style="background:#d97706; color:white;">
                                 📄 พิมพ์ใบสรุป
                             </button>
@@ -3589,7 +3572,9 @@
                         </div>
                     </div>
                     <ul style="margin-top:10px; padding-left:20px; font-size:0.9rem;">
-                        ${d.records.map(r => `<li>คาบ ${r.period}: <strong>${formatTeacherNameShort(r.sub)}</strong> แทน ${formatTeacherNameShort(r.absent)} (${r.reason})</li>`).join('')}
+                        ${d.records.map(r => r.redirect
+                            ? `<li>คาบ ${r.period}: 🔀 นักเรียนของ ${formatTeacherNameShort(r.absent)} (${r.reason}) ไปเรียนวิชาเพิ่มเติมกับ <strong>${formatTeacherNameShort(r.sub)}</strong></li>`
+                            : `<li>คาบ ${r.period}: <strong>${formatTeacherNameShort(r.sub)}</strong> แทน ${formatTeacherNameShort(r.absent)} (${r.reason})${reportMark(d, r)}</li>`).join('')}
                     </ul>
                 </div>`;
             }).join('');
@@ -3603,6 +3588,18 @@
             } else {
                 moreBox.innerHTML = '<span style="color:#94a3b8; font-size:0.85rem;">— แสดงครบทุกรายการแล้ว —</span>';
             }
+        }
+
+        // คีย์ของรายงานจากครูสอนแทน (ต้องตรงกับ sub-report.html และ monthly-report.html)
+        function reportKey(r) {
+            return `${r.period}|${r.sub}|${r.absent}`.replace(/[.\/\[\]*`~]/g, '_');
+        }
+        // แสดงสถานะว่าครูสอนแทนส่งรายงานภาระงาน/นักเรียนขาดแล้วหรือยัง
+        function reportMark(d, r) {
+            const rep = d.reports && d.reports[reportKey(r)];
+            if(!rep) return ' <span style="color:#b45309; font-size:0.8rem;">⏳ รอรายงานจากครู</span>';
+            const n = rep.absentCount || 0;
+            return ` <span style="color:#059669; font-size:0.8rem;">✅ ส่งรายงานแล้ว${n ? ' (นักเรียนขาด ' + n + ' คน)' : ''}</span>`;
         }
 
         function showMoreHistory() {
@@ -3634,11 +3631,7 @@
             
             closeAllModals();
             
-            if(type === 'summary') {
-                renderSummaryPaper();
-            } else {
-                renderMemoPaper();
-            }
+            renderSummaryPaper();
             document.getElementById('previewModal').style.display = 'block';
         }
 
@@ -3760,8 +3753,12 @@
             const daySchedule = record.daySchedule || 'จันทร์';
             const dateStr = formatThaiDate(record.docDate);
             const currentUrl = window.location.href.split('#')[0] + '#history';
+            // ลิงก์หน้ารายงานสำหรับครูสอนแทน (sub-report.html?id=รหัสเอกสาร)
+            const reportUrl = new URL('sub-report.html?id=' + encodeURIComponent(record.id), window.location.href).href;
 
-            const sortedRecords = [...record.records].sort((a,b) => a.period - b.period);
+            const allRecords = [...record.records].sort((a,b) => a.period - b.period);
+            const sortedRecords = allRecords.filter(r => !r.redirect);
+            const redirectRecords = allRecords.filter(r => r.redirect);
 
             const teacherPeriodCount = {};
             sortedRecords.forEach(r => {
@@ -3810,6 +3807,18 @@
                 text += `\n`; // เว้นบรรทัดว่างแยกครูแต่ละคนให้ชัดเจน
             });
 
+            if(redirectRecords.length > 0) {
+                text += `🔀 วิชาเพิ่มเติม: ให้นักเรียนไปเรียนร่วมกับครูผู้สอนวิชาเพิ่มเติมคาบเดียวกัน\n`;
+                redirectRecords.forEach(r => {
+                    const vis = [r.redirectCode, r.redirectName].filter(Boolean).join(' ');
+                    text += `   • คาบ ${r.period} นักเรียน ${r.grade || '-'}${r.redirectGroup ? ' กลุ่ม ' + r.redirectGroup : ''} ของ ${formatTeacherNameShort(r.absent)} ไปเรียนกับ ${formatTeacherNameShort(r.sub)}${vis ? ' (' + vis + ')' : ''}\n`;
+                });
+                text += `\n`;
+            }
+
+            if(sortedRecords.length > 0) {
+                text += `------------------------------\n📝 ครูผู้สอนแทน กรุณาคลิกลิงก์เพื่อบันทึกภาระงานที่มอบหมาย และเลือกนักเรียนที่ไม่เข้าเรียน:\n${reportUrl}\n\n`;
+            }
             text += `------------------------------\n🔗 คลิกลิงก์ระบบ:\n${currentUrl}`;
             return text;
         }
@@ -3844,7 +3853,12 @@
                 text += `🏫 ห้อง ${g}\n`;
                 list.forEach(r => {
                     const subName = formatTeacherNameShort(r.sub);
-                    text += `   • คาบ ${r.period} วิชา ${r.subject || '-'} : ${subName} สอนแทน\n`;
+                    if(r.redirect) {
+                        const vis = [r.redirectCode, r.redirectName].filter(Boolean).join(' ');
+                        text += `   • คาบ ${r.period} วิชา ${r.subject || '-'} : ให้ไปเรียน${vis ? 'วิชา ' + vis + ' ' : ''}กับ ${subName}\n`;
+                    } else {
+                        text += `   • คาบ ${r.period} วิชา ${r.subject || '-'} : ${subName} สอนแทน\n`;
+                    }
                 });
                 text += `\n`; // เว้นบรรทัดว่างแยกห้องแต่ละห้องให้ชัดเจน
             });
@@ -3993,7 +4007,7 @@
                     
                     d.records.forEach(r => {
                         allRecords.push(r);
-                        subTeacherCount[r.sub] = (subTeacherCount[r.sub] || 0) + 1;
+                        if(!r.redirect) subTeacherCount[r.sub] = (subTeacherCount[r.sub] || 0) + 1;
                         absentTeacherCount[r.absent] = (absentTeacherCount[r.absent] || 0) + 1;
                         if(r.subject && r.subject !== '-') {
                             subjectCount[r.subject] = (subjectCount[r.subject] || 0) + 1;
