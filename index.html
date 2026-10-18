@@ -1869,8 +1869,20 @@
             initializeRouting();
             
             const currentSemester = getCurrentSemesterBE();
-            const savedSemester = localStorage.getItem('selectedSemester') || currentSemester;
             const semesterSelectEl = document.getElementById('semesterSelect');
+            // ค่าเริ่มต้น = ภาคเรียนล่าสุดที่มีข้อมูลครูในฐานข้อมูลเสมอ (ไม่ใช้ค่าที่จำไว้ครั้งก่อน)
+            let savedSemester = currentSemester;
+            try {
+                const semSnap = await db.collection("teachers").where("active", "==", true).get();
+                const semSet = new Set();
+                semSnap.forEach(d => { const v = d.data().semester; if(/^\d+\/\d{4}$/.test(String(v || ''))) semSet.add(String(v)); });
+                const semKey = v => { const [t, y] = v.split('/').map(Number); return y * 10 + t; };
+                const latest = [...semSet].sort((x, y) => semKey(y) - semKey(x))[0];
+                if(latest) savedSemester = latest;
+                console.log('📚 Semesters in DB:', [...semSet], '→ latest:', latest);
+            } catch(e) {
+                console.warn('หาภาคเรียนล่าสุดไม่ได้ ใช้ค่าตามวันที่แทน', e);
+            }
             if(![...semesterSelectEl.options].some(o => o.value === savedSemester)) {
                 // เผื่อกรณีอนาคตที่ค่าที่คำนวณได้ยังไม่มีใน <option> ให้เพิ่มเข้าไปอัตโนมัติ
                 const opt = document.createElement('option');
@@ -2518,7 +2530,11 @@
                     </div>
                     <div style="padding:15px;">`;
 
+                // หลักปฏิบัติ: คาบกิจกรรม (ยกเว้นแนะแนว) ไม่ต้องจัดสอนแทน
+                const skippedActs = [];
                 periods.sort((a,b)=>a-b).forEach(period => {
+                    const _d = teachingDetails[`${daySchedule}_${period}`] || {};
+                    if(isNoSubActivity(_d)) { skippedActs.push(`คาบ ${period} ${_d.name || 'กิจกรรม'}`); return; }
                     const candidates = findCandidates(daySchedule, period, selectedTeachers);
                     
                     const detailKey = `${daySchedule}_${period}`;
@@ -2649,6 +2665,7 @@
                     }
                     html += `</div>`;
                 });
+                if(skippedActs.length) html += `<div style="margin-top:8px; padding:8px 12px; background:#f1f5f9; border-radius:8px; color:#64748b; font-size:0.85rem;">⏭️ ไม่ต้องจัดสอนแทน (คาบกิจกรรม): ${skippedActs.join(' • ')}</div>`;
                 html += `</div></div>`;
                 container.innerHTML += html;
             });
@@ -3749,10 +3766,15 @@
         }
 
         // ข้อความแจ้งครู: จัดกลุ่มตามครูผู้สอนแทนแต่ละคน แยกช่วงว่างชัดเจน
+        // คาบกิจกรรม (ยกเว้นแนะแนว) ไม่ต้องจัดสอนแทน
+        function isNoSubActivity(detail) {
+            if(!detail) return false;
+            return detail.type === 'กิจกรรม' && !/แนะแนว/.test(detail.name || '');
+        }
+
         function buildTeacherCopyText(record, teachersScheduleMap) {
             const daySchedule = record.daySchedule || 'จันทร์';
             const dateStr = formatThaiDate(record.docDate);
-            const currentUrl = window.location.href.split('#')[0] + '#history';
             // ลิงก์หน้ารายงานสำหรับครูสอนแทน (sub-report.html?id=รหัสเอกสาร)
             const reportUrl = new URL('sub-report.html?id=' + encodeURIComponent(record.id), window.location.href).href;
 
@@ -3819,8 +3841,7 @@
             if(sortedRecords.length > 0) {
                 text += `------------------------------\n📝 ครูผู้สอนแทน กรุณาคลิกลิงก์เพื่อบันทึกภาระงานที่มอบหมาย และเลือกนักเรียนที่ไม่เข้าเรียน:\n${reportUrl}\n\n`;
             }
-            text += `------------------------------\n🔗 คลิกลิงก์ระบบ:\n${currentUrl}`;
-            return text;
+            return text.replace(/\s+$/, '');
         }
 
         // ข้อความแจ้งนักเรียน: จัดกลุ่มตามห้องเรียน เลือกได้ทั้งแบบรวมทุกห้องหรือรายห้อง
