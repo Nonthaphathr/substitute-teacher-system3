@@ -733,11 +733,18 @@
         }
 
         // ตารางสรุปรวบยอด: แบ่งหน้าด้วยการวัดความสูงจริงของแต่ละแถว
+        // ชื่อครูไม่ตกบรรทัด: บังคับบรรทัดเดียว และลดขนาดตัวอักษรเฉพาะชื่อที่ยาวมาก
+        function nameNoWrap(name) {
+            const n = String(name || '');
+            const len = n.length;
+            const size = len <= 24 ? '' : (len <= 28 ? 'font-size:10.5pt;' : 'font-size:9.5pt;');
+            return `<span style="white-space:nowrap;${size}">${esc(n)}</span>`;
+        }
         function buildSummaryPages(container) {
             const { month, semester, year, author, records } = reportData;
             const colgroup = `<colgroup>
-                <col style="width:3%"><col style="width:9.5%"><col style="width:3.5%"><col style="width:13%"><col style="width:14%">
-                <col style="width:13%"><col style="width:17%"><col style="width:16%"><col style="width:11%">
+                <col style="width:3%"><col style="width:8.5%"><col style="width:3.5%"><col style="width:15.5%"><col style="width:11.5%">
+                <col style="width:15.5%"><col style="width:16%"><col style="width:16%"><col style="width:10.5%">
             </colgroup>`;
             const thead = `<thead><tr>
                 <th>ที่</th><th>วัน/เดือน/ปี</th><th>คาบ</th><th>ครูผู้ลา/ไปราชการ<br><span class="small">(สาเหตุ)</span></th><th>วิชา / ชั้น</th>
@@ -750,7 +757,7 @@
                 const gradeTxt = r.grade && r.grade !== '-' ? r.grade : '';
                 const subjCell = `<b>${esc(r.subject && r.subject !== '-' ? r.subject : '-')}</b> ${esc(gradeTxt)}${r.subjectName ? '<br><span class="small">' + esc(r.subjectName) + '</span>' : ''}`;
                 const dateCell = `${shortThaiDate(r.docDate)}${r.daySchedule ? '<br><span class="small">' + esc(r.daySchedule) + '</span>' : ''}`;
-                const absentCell = `${esc(r.absent)}<br><span class="small">(${esc(r.reason || '')})</span>`;
+                const absentCell = `${nameNoWrap(r.absent)}<br><span class="small">(${esc(r.reason || '')})</span>`;
                 if(r.redirect) {
                     const vis = [r.redirectCode, r.redirectName].filter(Boolean).join(' ');
                     return `<tr class="redirect-row">
@@ -771,7 +778,7 @@
                 }
                 return `<tr>
                     <td>${i + 1}</td><td>${dateCell}</td><td>${esc(r.period)}</td><td class="text-left">${absentCell}</td><td>${subjCell}</td>
-                    <td class="text-left">${esc(r.sub)}</td><td class="text-left">${work}</td><td class="text-left">${stu}</td><td class="sign-cell"></td>
+                    <td class="text-left">${nameNoWrap(r.sub)}</td><td class="text-left">${work}</td><td class="text-left">${stu}</td><td class="sign-cell"></td>
                 </tr>`;
             };
 
