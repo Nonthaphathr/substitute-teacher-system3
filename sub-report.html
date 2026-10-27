@@ -31,6 +31,7 @@
         .topbar .school { font-size: 0.85rem; opacity: .85; }
         .topbar h1 { font-size: 1.35rem; font-weight: 700; margin-top: 4px; line-height: 1.35; }
         .topbar .date { margin-top: 8px; display: inline-block; background: rgba(255,255,255,.18); border-radius: 20px; padding: 3px 14px; font-size: .95rem; }
+        .admin-banner { background: #fef3c7; color: #92400e; border-bottom: 2px solid #fcd34d; text-align: center; padding: 7px 12px; font-weight: 700; font-size: .92rem; }
 
         .container { max-width: 720px; margin: -12px auto 0; padding: 0 14px; }
         .steps { display: flex; gap: 6px; margin: 0 0 14px; }
@@ -56,6 +57,7 @@
         .btn-primary:hover { background: var(--primary-dark); }
         .btn-success { background: var(--success); color: #fff; width: 100%; }
         .btn-ghost { background: #e2e8f0; color: #334155; }
+        .btn-sm { padding: 6px 12px; font-size: .85rem; border-radius: 9px; }
         .btn[disabled] { opacity: .5; cursor: not-allowed; }
 
         .pick-btn { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 10px; text-align: left; background: #fff; border: 2px solid var(--line); border-radius: 14px; padding: 14px 16px; margin-bottom: 10px; font-family: inherit; cursor: pointer; transition: all .15s; }
@@ -67,23 +69,36 @@
         .badge.wait { background: #fef3c7; color: #92400e; }
 
         .p-card { border: 2px solid var(--line); border-radius: 14px; padding: 16px; margin-bottom: 16px; background: #fff; }
+        .p-card.sent { border-color: #a7f3d0; background: #f0fdf4; }
         .p-head { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
         .p-no { background: var(--primary); color: #fff; font-weight: 700; padding: 3px 12px; border-radius: 8px; }
+        .p-date { background: #e0e7ff; color: #3730a3; font-weight: 700; padding: 3px 12px; border-radius: 8px; font-size: .88rem; }
         .p-meta { font-size: .92rem; color: #334155; line-height: 1.5; }
+        .sent-sum { display: flex; justify-content: space-between; align-items: center; gap: 8px; color: #047857; font-weight: 600; font-size: .92rem; }
         label.fl { display: block; font-weight: 600; margin: 12px 0 6px; }
-        textarea, input[type=text] { width: 100%; border: 2px solid var(--line); border-radius: 10px; padding: 10px 12px; font-family: inherit; font-size: 1rem; }
-        textarea:focus, input[type=text]:focus { outline: none; border-color: var(--primary); }
+        textarea, input[type=text], select { width: 100%; border: 2px solid var(--line); border-radius: 10px; padding: 10px 12px; font-family: inherit; font-size: 1rem; background: #fff; }
+        textarea:focus, input[type=text]:focus, select:focus { outline: none; border-color: var(--primary); }
         textarea { min-height: 84px; resize: vertical; }
+        .tpl-row { margin-bottom: 6px; }
+        .tpl-row select { font-size: .92rem; padding: 7px 10px; color: var(--primary-dark); border-style: dashed; }
+        .tpl-all { display: flex; gap: 8px; align-items: center; margin-top: 10px; }
+        .tpl-all select { flex: 1; font-size: .92rem; padding: 7px 10px; }
+
+        .elec-switch { display: flex; align-items: center; gap: 10px; background: #fffbeb; border: 1px solid #fcd34d; border-radius: 10px; padding: 8px 12px; margin: 8px 0; font-size: .92rem; font-weight: 600; color: #92400e; cursor: pointer; }
+        .elec-switch input { width: 20px; height: 20px; accent-color: var(--warning); }
+        .stage-tabs { display: flex; gap: 6px; margin-bottom: 8px; }
+        .stage-tab { flex: 1; border: 2px solid var(--line); background: #fff; border-radius: 10px; padding: 8px 6px; font-family: inherit; font-weight: 700; font-size: .85rem; color: var(--muted); cursor: pointer; line-height: 1.35; }
+        .stage-tab.on { border-color: var(--warning); background: #fffbeb; color: #92400e; }
+        .stage-tab.on.s2 { border-color: var(--success); background: #ecfdf5; color: #047857; }
+        .chip-ok { background: #fef3c7; color: #92400e; font-weight: 700; padding: 4px 12px; border-radius: 20px; font-size: .85rem; white-space: nowrap; }
 
         .seg { display: flex; gap: 8px; }
         .seg label { flex: 1; border: 2px solid var(--line); border-radius: 10px; padding: 10px; text-align: center; cursor: pointer; font-weight: 600; font-size: .95rem; }
         .seg input { display: none; }
-        .seg label.on-ok { border-color: var(--success); background: #ecfdf5; color: #047857; }
-        .seg label.on-ab { border-color: var(--danger); background: #fef2f2; color: #b91c1c; }
 
         .roster { margin-top: 10px; }
-        .roster-tools { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
-        .roster-tools input { flex: 1; }
+        .roster-tools { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
+        .roster-tools input { flex: 1; min-width: 140px; }
         .count-chip { background: #fee2e2; color: #b91c1c; font-weight: 700; padding: 4px 12px; border-radius: 20px; font-size: .85rem; white-space: nowrap; }
         .roster-list { max-height: 300px; overflow-y: auto; border: 1px solid var(--line); border-radius: 10px; }
         .stu { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-bottom: 1px solid #f1f5f9; cursor: pointer; }
@@ -91,8 +106,11 @@
         .stu input { width: 22px; height: 22px; accent-color: var(--success); }
         .stu.absent { background: #fef2f2; }
         .stu.absent .no, .stu.absent span:last-child { color: #b91c1c; text-decoration: line-through; }
+        .stu.member { background: #fffbeb; }
+        .stu.member input { accent-color: var(--warning); }
         .stu .no { width: 34px; color: var(--muted); font-size: .88rem; }
         .note-small { font-size: .85rem; color: var(--muted); margin-top: 6px; }
+        .empty-members { text-align: center; padding: 18px 10px; color: var(--muted); border: 2px dashed var(--line); border-radius: 10px; }
 
         .done-icon { font-size: 3.4rem; text-align: center; }
         .center { text-align: center; }
@@ -103,10 +121,11 @@
     </style>
 </head>
 <body>
+    <div id="adminBanner" class="admin-banner" style="display:none">🛠️ โหมดผู้จัดสอนแทน — บันทึกข้อมูลแทนครูผู้สอนแทน (ย้อนหลัง)</div>
     <div class="topbar">
         <div class="wrap">
             <div class="school">โรงเรียนกระดุมทองวิทยา • ระบบจัดสอนแทน</div>
-            <h1>บันทึกภาระงานและนักเรียนที่ไม่เข้าเรียน<br>(สำหรับครูผู้สอนแทน)</h1>
+            <h1 id="mainTitle">บันทึกภาระงานและนักเรียนที่ไม่เข้าเรียน<br>(สำหรับครูผู้สอนแทน)</h1>
             <div class="date" id="dateBadge">กำลังโหลด...</div>
         </div>
     </div>
@@ -127,13 +146,8 @@
             <div class="screen active" id="screenIntro">
                 <div class="card">
                     <h2>📖 คำแนะนำสำหรับครูผู้สอนแทน</h2>
-                    <ol class="guide-list">
-                        <li><div><b>เลือกชื่อของท่าน</b> จากรายชื่อครูที่ได้รับมอบหมายสอนแทนในวันนี้</div></li>
-                        <li><div><b>พิมพ์ภาระงาน</b> ที่มอบหมายให้นักเรียนในแต่ละคาบ เช่น “ทำใบงานหน้า 12–13 และส่งก่อนเลิกคาบ”</div></li>
-                        <li><div><b>เช็คชื่อนักเรียน</b> — ระบบติ๊ก “มาเรียน” ให้ทุกคนไว้แล้ว ให้ <u>เอาติ๊กออกเฉพาะนักเรียนที่ไม่เข้าเรียนในคาบนั้นของวันนี้</u></div></li>
-                        <li><div>กด <b>“ส่งข้อมูล”</b> ระบบจะบันทึกลงฐานข้อมูล และนำไปรวมในรายงานสรุปประจำเดือน</div></li>
-                    </ol>
-                    <div class="tip">💡 หากส่งแล้วต้องการแก้ไข สามารถเปิดลิงก์เดิม เลือกชื่อตัวเอง แล้วแก้ไขและส่งใหม่ได้ ข้อมูลเดิมจะถูกแทนที่</div>
+                    <ol class="guide-list" id="guideList"></ol>
+                    <div class="tip" id="guideTip"></div>
                     <div style="margin-top:16px"><button class="btn btn-primary" onclick="goStep(2)">รับทราบ เริ่มกรอกข้อมูล ▶</button></div>
                 </div>
             </div>
@@ -143,15 +157,19 @@
                 <div class="card">
                     <h2>👤 เลือกชื่อของท่าน</h2>
                     <div id="pickList"></div>
-                    <button class="btn btn-ghost" onclick="goStep(1)" style="margin-top:6px">◀ กลับไปอ่านคำแนะนำ</button>
+                    <button class="btn btn-ghost" id="btnBackIntro" onclick="goStep(1)" style="margin-top:6px">◀ กลับไปอ่านคำแนะนำ</button>
                 </div>
             </div>
 
             <!-- STEP 3: กรอกข้อมูล -->
             <div class="screen" id="screenForm">
-                <div class="card" style="padding-bottom:8px">
+                <div class="card" style="padding-bottom:14px">
                     <h2 id="formTitle">กรอกข้อมูล</h2>
                     <div class="note-small" id="formSubtitle"></div>
+                    <div class="tpl-all" id="tplAllBox" style="display:none">
+                        <select id="tplAll"></select>
+                        <button type="button" class="btn btn-ghost btn-sm" onclick="applyTplAll()">ใส่ในทุกคาบที่ยังว่าง</button>
+                    </div>
                 </div>
                 <div id="formCards"></div>
                 <div class="card">
@@ -166,7 +184,10 @@
                     <div class="done-icon">✅</div>
                     <h2 style="margin-top:6px">ส่งข้อมูลเรียบร้อยแล้ว</h2>
                     <p id="doneText" style="color:var(--muted); line-height:1.7; margin-top:6px"></p>
-                    <div style="margin-top:16px"><button class="btn btn-ghost" onclick="goStep(2)">กลับไปหน้าเลือกชื่อ</button></div>
+                    <div style="margin-top:16px">
+                        <button class="btn btn-ghost" onclick="goStep(2)">กลับไปหน้าเลือกชื่อ</button>
+                        <button class="btn btn-ghost" id="btnCloseEmbed" style="display:none" onclick="closeEmbed()">✖ ปิดหน้าต่าง</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -187,20 +208,52 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
+        /*
+         * โหมดการเปิดหน้านี้
+         *   ?id=รหัสเอกสาร                       → ลิงก์ของวันนั้นวันเดียว (แบบเดิม)
+         *   ?from=YYYY-MM-DD&to=YYYY-MM-DD      → ลิงก์ติดตามย้อนหลังตามห้วงเวลา (ครูลงเฉพาะคาบที่ยังไม่ลง)
+         *   &t=ชื่อครู / &sub=ชื่อครู            → เลือกชื่อครูให้อัตโนมัติ
+         *   &admin=1                            → โหมดผู้จัดสอนแทนบันทึกแทนครู (ย้อนหลัง)
+         *   &embed=1                            → เปิดในหน้าต่างย่อยของหน้าตั้งค่า
+         */
+        const params = new URLSearchParams(location.search);
+        const docId = params.get('id');
+        const qFrom = params.get('from') || '';
+        const qTo = params.get('to') || '';
+        const RANGE = !docId && /^\d{4}-\d{2}-\d{2}$/.test(qFrom) && /^\d{4}-\d{2}-\d{2}$/.test(qTo);
+        const ADMIN = params.get('admin') === '1';
+        const EMBED = params.get('embed') === '1';
+        const LENIENT = RANGE || ADMIN;     // อนุญาตให้ข้ามคาบที่ยังไม่กรอก
+        let presetSub = params.get('sub') || params.get('t') || '';
+
         const THAI_MONTHS = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
-        const docId = new URLSearchParams(location.search).get('id');
-        let docData = null;
-        let subRecords = [];          // เฉพาะรายการสอนแทนจริง (ไม่รวมการส่งนักเรียนไปเรียนกับครูวิชาเพิ่มเติม)
+        const DEFAULT_TEMPLATES = [
+            { id: 'd1', title: 'ใบงาน/แบบฝึกหัด', text: 'ให้นักเรียนทำใบงาน/แบบฝึกหัดวิชา {วิชา} ชั้น {ชั้น} ตามที่ครูประจำวิชามอบหมาย และส่งก่อนหมดคาบ' },
+            { id: 'd2', title: 'ศึกษาค้นคว้า/อ่านหนังสือ', text: 'ให้นักเรียนศึกษาค้นคว้าและสรุปความรู้เรื่องที่เรียนในวิชา {วิชา} ลงสมุด' },
+            { id: 'd3', title: 'ทบทวนบทเรียน', text: 'ให้นักเรียนทบทวนบทเรียนวิชา {วิชา} และทำแบบทดสอบท้ายบทตามที่ครูประจำวิชากำหนด' }
+        ];
+        let templates = DEFAULT_TEMPLATES.slice();
+
+        let docsMap = {};             // docId -> ข้อมูลเอกสาร
+        let items = [];               // ทุกคาบสอนแทนจริง (ไม่รวมการส่งนักเรียนไปเรียนกับครูวิชาเพิ่มเติม)
         let currentSub = null;
-        const rosterCache = {};       // grade -> [{no,name}] | null
+        let currentItems = [];
+        let cardState = {};
+        const rosterCache = {};       // `${ปีการศึกษา}_${ชั้น}` -> [{no,name}] | null
 
         function esc(s) {
             return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
         }
+        function $(id) { return document.getElementById(id); }
         function formatThaiDate(d) {
             const p = (d || '').split('-');
             if(p.length < 3) return d || '';
             return `${parseInt(p[2])} ${THAI_MONTHS[parseInt(p[1]) - 1]} พ.ศ. ${parseInt(p[0]) + 543}`;
+        }
+        function formatThaiDateShort(d) {
+            const p = (d || '').split('-');
+            if(p.length < 3) return d || '';
+            return `${parseInt(p[2])} ${THAI_MONTHS[parseInt(p[1]) - 1].slice(0, 3)}${THAI_MONTHS[parseInt(p[1]) - 1].length > 5 ? '.' : ''} ${String(parseInt(p[0]) + 543).slice(2)}`;
         }
         // ปีการศึกษา (พ.ศ.): ม.ค.-เม.ย. นับเป็นปีการศึกษาก่อนหน้า
         function academicYearBE(docDate) {
@@ -214,38 +267,126 @@
             return `${r.period}|${r.sub}|${r.absent}`.replace(/[.\/\[\]*`~]/g, '_');
         }
         function shortName(full) { return String(full || '').replace(/^(นางสาว|นาง|นาย|ว่าที่ร้อยตรี)\s*/, ''); }
+        // วิชาเพิ่มเติม: ใช้ค่า subjectType ที่บันทึกตอนจัดสอนแทน ถ้าไม่มี (ข้อมูลเก่า) เดาจากรหัสวิชา เช่น ท22201 (หลักที่ 4 = 2)
+        function isElectiveRec(r) {
+            if(r.subjectType) return r.subjectType === 'เพิ่มเติม';
+            const c = String(r.subject || '').trim();
+            return /^[ก-ฮA-Za-z]\d{5}$/.test(c) && c.charAt(3) === '2';
+        }
+        function getOld(it) { return ((docsMap[it.docId] || {}).reports || {})[it.key] || null; }
+        function subjLineOf(r) { return [r.subject && r.subject !== '-' ? r.subject : '', r.subjectName || ''].filter(Boolean).join(' '); }
+
+        // ---------- TEMPLATE ภาระงาน (เก็บที่ app_settings/workload_templates; ถ้าอ่านไม่ได้ใช้ค่าในเครื่อง/ค่าเริ่มต้น) ----------
+        async function loadTemplates() {
+            try {
+                const s = await db.collection('app_settings').doc('workload_templates').get();
+                if(s.exists && Array.isArray(s.data().items) && s.data().items.length) { templates = s.data().items; return; }
+            } catch(e) { console.warn('templates', e); }
+            try {
+                const local = JSON.parse(localStorage.getItem('subrep_templates') || 'null');
+                if(Array.isArray(local) && local.length) templates = local;
+            } catch(e) {}
+        }
+        function fillTpl(text, it) {
+            const r = it.r;
+            return String(text || '')
+                .replace(/\{วิชา\}/g, subjLineOf(r) || 'ที่รับผิดชอบ')
+                .replace(/\{ชั้น\}/g, r.grade && r.grade !== '-' ? r.grade : '')
+                .replace(/\{คาบ\}/g, r.period)
+                .replace(/\{ครูที่ลา\}/g, shortName(r.absent))
+                .replace(/\{วันที่\}/g, formatThaiDate(it.docDate))
+                .replace(/ +/g, ' ').replace(/ชั้น \s*(ตาม|และ)/g, '$1');
+        }
+        function tplOptionsHtml(first) {
+            return `<option value="">${first}</option>` + templates.map((t, i) => `<option value="${i}">${esc(t.title)}</option>`).join('');
+        }
 
         function goStep(n) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById({ 1: 'screenIntro', 2: 'screenPick', 3: 'screenForm', 4: 'screenDone' }[n]).classList.add('active');
+            $({ 1: 'screenIntro', 2: 'screenPick', 3: 'screenForm', 4: 'screenDone' }[n]).classList.add('active');
             document.querySelectorAll('#steps .step').forEach(el => {
                 const s = parseInt(el.dataset.s);
                 el.classList.toggle('active', s === n);
                 el.classList.toggle('done', s < n);
             });
-            if(n === 2) renderPick();
+            if(n === 2) {
+                renderPick();
+                // ลิงก์ที่ระบุชื่อครูมาด้วย (&t= / &sub=) ให้เข้าฟอร์มของครูคนนั้นทันที (ทำครั้งเดียว)
+                if(presetSub) {
+                    const name = presetSub; presetSub = '';
+                    const idx = (window._subs || []).indexOf(name);
+                    if(idx >= 0) return pickTeacher(idx);
+                }
+            }
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
+        function buildGuide() {
+            const li = [];
+            if(ADMIN) {
+                li.push('<b>เลือกชื่อครูผู้สอนแทน</b> ที่ต้องการบันทึกข้อมูลแทน');
+            } else {
+                li.push(RANGE
+                    ? '<b>เลือกชื่อของท่าน</b> ระบบจะแสดงคาบสอนแทนในห้วงเวลาที่กำหนด โดยคาบที่ <u>ยังไม่ได้ลงข้อมูล</u> จะอยู่ด้านบน'
+                    : '<b>เลือกชื่อของท่าน</b> จากรายชื่อครูที่ได้รับมอบหมายสอนแทนในวันนี้');
+            }
+            li.push('<b>พิมพ์ภาระงาน</b> ที่มอบหมายให้นักเรียนในแต่ละคาบ (หรือเลือก “ข้อความสำเร็จรูป” แล้วแก้ไขต่อได้) เช่น “ทำใบงานหน้า 12–13 และส่งก่อนเลิกคาบ”');
+            li.push('<b>เช็คชื่อนักเรียน</b> — ระบบติ๊ก “มาเรียน” ให้ทุกคนไว้แล้ว ให้ <u>เอาติ๊กออกเฉพาะนักเรียนที่ไม่เข้าเรียนในคาบนั้น</u>');
+            li.push('<b>วิชาเพิ่มเติม</b> — ทำ 2 ขั้น: <b>① ติ๊กนักเรียนที่เรียนวิชานี้</b> (เด็กในวิชาเพิ่มเติมที่ถูกจัดสอนแทน) แล้ว <b>② เช็คชื่อมา/ขาด</b> เฉพาะนักเรียนกลุ่มนั้น');
+            li.push(RANGE || ADMIN
+                ? 'กด <b>“ส่งข้อมูล”</b> ได้ทีละหลายคาบ คาบที่ยังไม่กรอกภาระงานจะถูกข้ามไว้ก่อน และกลับมาลงภายหลังได้'
+                : 'กด <b>“ส่งข้อมูล”</b> ระบบจะบันทึกลงฐานข้อมูล และนำไปรวมในรายงานสรุปประจำเดือน');
+            $('guideList').innerHTML = li.map(x => `<li><div>${x}</div></li>`).join('');
+            $('guideTip').innerHTML = RANGE
+                ? '💡 ลิงก์นี้ใช้ลงข้อมูลย้อนหลังได้ตลอดช่วงที่กำหนด คาบที่ส่งแล้วจะแสดงเป็นสีเขียว กด “แก้ไข” หากต้องการแก้และส่งใหม่'
+                : '💡 หากส่งแล้วต้องการแก้ไข สามารถเปิดลิงก์เดิม เลือกชื่อตัวเอง แล้วแก้ไขและส่งใหม่ได้ ข้อมูลเดิมจะถูกแทนที่';
+        }
+
         async function init() {
-            if(!docId) return showError('ลิงก์ไม่ถูกต้อง (ไม่พบรหัสเอกสาร) กรุณาเปิดลิงก์จากข้อความในกลุ่มไลน์อีกครั้ง');
+            if(!docId && !RANGE) return showError('ลิงก์ไม่ถูกต้อง (ไม่พบรหัสเอกสารหรือห้วงเวลา) กรุณาเปิดลิงก์จากข้อความในกลุ่มไลน์อีกครั้ง');
             try {
-                const snap = await db.collection('substitutions').doc(docId).get();
-                if(!snap.exists) return showError('ไม่พบข้อมูลการสอนแทนของลิงก์นี้ (อาจถูกลบไปแล้ว) กรุณาติดต่อผู้จัดสอนแทน');
-                docData = snap.data();
-                subRecords = (docData.records || []).filter(r => !r.redirect).sort((a, b) => a.period - b.period);
-                document.getElementById('dateBadge').textContent = `📅 ${formatThaiDate(docData.docDate)}${docData.daySchedule ? ' (วัน' + docData.daySchedule + ')' : ''}`;
-                document.getElementById('loading').style.display = 'none';
-                if(subRecords.length === 0) return showError('เอกสารนี้ไม่มีรายการที่ต้องสอนแทน');
-                document.getElementById('app').style.display = 'block';
+                if(RANGE) {
+                    const snap = await db.collection('substitutions').where('docDate', '>=', qFrom).where('docDate', '<=', qTo).get();
+                    snap.forEach(d => { docsMap[d.id] = d.data(); });
+                } else {
+                    const snap = await db.collection('substitutions').doc(docId).get();
+                    if(!snap.exists) return showError('ไม่พบข้อมูลการสอนแทนของลิงก์นี้ (อาจถูกลบไปแล้ว) กรุณาติดต่อผู้จัดสอนแทน');
+                    docsMap[docId] = snap.data();
+                }
+                items = [];
+                Object.keys(docsMap).forEach(id => {
+                    const d = docsMap[id];
+                    (d.records || []).forEach(r => {
+                        if(r.redirect) return;
+                        items.push({ docId: id, docDate: d.docDate || '', daySchedule: d.daySchedule || '', r, key: reportKey(r) });
+                    });
+                });
+                items.sort((a, b) => a.docDate === b.docDate ? a.r.period - b.r.period : (a.docDate < b.docDate ? -1 : 1));
+
+                if(RANGE) {
+                    $('mainTitle').innerHTML = 'ลงข้อมูลย้อนหลัง: ภาระงานและนักเรียนที่ไม่เข้าเรียน<br>(สำหรับครูผู้สอนแทน)';
+                    $('dateBadge').textContent = `📅 ${formatThaiDate(qFrom)} – ${formatThaiDate(qTo)}`;
+                } else {
+                    const d = docsMap[docId];
+                    $('dateBadge').textContent = `📅 ${formatThaiDate(d.docDate)}${d.daySchedule ? ' (วัน' + d.daySchedule + ')' : ''}`;
+                }
+                if(ADMIN) $('adminBanner').style.display = 'block';
+                if(EMBED) $('btnCloseEmbed').style.display = 'inline-flex';
+                $('loading').style.display = 'none';
+                if(items.length === 0) return showError(RANGE ? 'ไม่พบรายการสอนแทนในห้วงเวลาที่กำหนด' : 'เอกสารนี้ไม่มีรายการที่ต้องสอนแทน');
+
+                await loadTemplates();
+                buildGuide();
+                $('app').style.display = 'block';
+                if(ADMIN) { $('btnBackIntro').style.display = 'none'; goStep(2); }
             } catch(e) {
                 console.error(e);
                 showError('โหลดข้อมูลไม่สำเร็จ: ' + e.message);
             }
         }
         function showError(msg) {
-            document.getElementById('loading').style.display = 'none';
-            const box = document.getElementById('errorBox');
+            $('loading').style.display = 'none';
+            const box = $('errorBox');
             box.style.display = 'block';
             box.innerHTML = '⚠️<br>' + esc(msg);
         }
@@ -253,165 +394,383 @@
         // ---------- STEP 2 ----------
         function renderPick() {
             const subs = [];
-            subRecords.forEach(r => { if(!subs.includes(r.sub)) subs.push(r.sub); });
-            document.getElementById('pickList').innerHTML = subs.map((name, i) => {
-                const mine = subRecords.filter(r => r.sub === name);
-                const sent = mine.filter(r => docData.reports && docData.reports[reportKey(r)]).length;
-                const all = sent === mine.length;
+            items.forEach(it => { if(!subs.includes(it.r.sub)) subs.push(it.r.sub); });
+            // ครูที่ยังมีคาบค้าง อยู่ด้านบน
+            const info = subs.map(name => {
+                const mine = items.filter(it => it.r.sub === name);
+                const sent = mine.filter(it => getOld(it)).length;
+                return { name, mine, sent, pending: mine.length - sent };
+            });
+            if(RANGE || ADMIN) info.sort((a, b) => (b.pending > 0) - (a.pending > 0));
+            window._subs = info.map(x => x.name);
+            $('pickList').innerHTML = info.map((x, i) => {
+                const all = x.pending === 0;
+                const subTxt = (RANGE || ADMIN)
+                    ? `สอนแทน ${x.mine.length} คาบ${x.pending ? ' • <b style="color:#b45309">ค้างลง ' + x.pending + ' คาบ</b>' : ''}`
+                    : `สอนแทนคาบ ${x.mine.map(it => it.r.period).join(', ')}`;
                 return `<button class="pick-btn" onclick="pickTeacher(${i})">
-                    <div><div class="nm">${esc(name)}</div>
-                    <div class="sub">สอนแทนคาบ ${mine.map(r => r.period).join(', ')}</div></div>
-                    <span class="badge ${all ? 'ok' : 'wait'}">${all ? '✓ ส่งแล้ว' : (sent ? 'ส่งแล้ว ' + sent + '/' + mine.length : 'ยังไม่ส่ง')}</span>
+                    <div><div class="nm">${esc(x.name)}</div>
+                    <div class="sub">${subTxt}</div></div>
+                    <span class="badge ${all ? 'ok' : 'wait'}">${all ? '✓ ส่งแล้ว' : (x.sent ? 'ส่งแล้ว ' + x.sent + '/' + x.mine.length : 'ยังไม่ส่ง')}</span>
                 </button>`;
             }).join('');
-            window._subs = subs;
+        }
+
+        function rosterOf(it) {
+            const g = it.r.grade;
+            if(!g || g === '-') return null;
+            return rosterCache[`${academicYearBE(it.docDate)}_${g}`] || null;
         }
 
         async function pickTeacher(i) {
             currentSub = window._subs[i];
-            const mine = subRecords.filter(r => r.sub === currentSub);
+            currentItems = items.filter(it => it.r.sub === currentSub);
             Swal.fire({ title: 'กำลังโหลดรายชื่อนักเรียน...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-            const year = academicYearBE(docData.docDate);
-            const grades = [...new Set(mine.map(r => r.grade).filter(g => g && g !== '-'))];
-            await Promise.all(grades.map(async g => {
-                if(g in rosterCache) return;
+            const need = new Set();
+            currentItems.forEach(it => { if(it.r.grade && it.r.grade !== '-') need.add(`${academicYearBE(it.docDate)}_${it.r.grade}`); });
+            await Promise.all([...need].map(async k => {
+                if(k in rosterCache) return;
                 try {
-                    const s = await db.collection('student_rosters').doc(`${year}_${g}`).get();
-                    rosterCache[g] = s.exists ? (s.data().students || []) : null;
-                } catch(e) { console.warn('roster', g, e); rosterCache[g] = null; }
+                    const s = await db.collection('student_rosters').doc(k).get();
+                    rosterCache[k] = s.exists ? (s.data().students || []) : null;
+                } catch(e) { console.warn('roster', k, e); rosterCache[k] = null; }
             }));
             Swal.close();
-            renderForm(mine);
+            renderForm();
             goStep(3);
         }
 
         // ---------- STEP 3 ----------
-        function renderForm(mine) {
-            document.getElementById('formTitle').textContent = '✍️ ' + currentSub;
-            document.getElementById('formSubtitle').textContent = `สอนแทน ${mine.length} คาบ — กรอกให้ครบทุกคาบแล้วกด “ส่งข้อมูล” ด้านล่าง`;
-            document.getElementById('formCards').innerHTML = mine.map((r, idx) => {
-                const key = reportKey(r);
-                const old = (docData.reports || {})[key] || null;
-                const roster = rosterCache[r.grade];
-                const subjLine = [r.subject && r.subject !== '-' ? r.subject : '', r.subjectName || ''].filter(Boolean).join(' ');
-                const absentNos = new Set(((old && old.absentStudents) || []).map(s => String(s.no)));
-
-                let rosterHtml;
-                if(roster && roster.length) {
-                    // ค่าเริ่มต้น: ติ๊ก "มาเรียน" ทุกคน — ครูเอาติ๊กออกเฉพาะนักเรียนที่ไม่เข้าเรียน
-                    rosterHtml = `
-                        <div class="roster-tools">
-                            <input type="text" placeholder="🔍 ค้นหาชื่อ / เลขที่" oninput="filterRoster(${idx}, this.value)">
-                            <span class="count-chip" id="cnt_${idx}">ขาด 0 คน</span>
-                        </div>
-                        <div class="roster-tools" style="margin-top:-2px">
-                            <button type="button" class="btn btn-ghost" style="padding:6px 12px; font-size:.85rem" onclick="setAllPresent(${idx}, true)">✅ ติ๊กมาทั้งหมด</button>
-                        </div>
-                        <div class="roster-list" id="roster_${idx}">
-                            ${roster.map(s => { const absent = absentNos.has(String(s.no)); return `
-                                <label class="stu ${absent ? 'absent' : ''}" data-q="${esc((s.no + ' ' + s.name).toLowerCase())}">
-                                    <input type="checkbox" data-no="${esc(s.no)}" data-name="${esc(s.name)}" ${absent ? '' : 'checked'} onchange="onStuChange(${idx}, this)">
-                                    <span class="no">${esc(s.no)}</span><span>${esc(s.name)}</span>
-                                </label>`; }).join('')}
-                        </div>
-                        <div class="note-small">✔ ติ๊ก = <b>มาเรียน</b> (ค่าเริ่มต้นมาครบทุกคน) • <b>เอาติ๊กออก</b> เฉพาะนักเรียนที่ <b>ไม่เข้าเรียนในคาบนี้</b></div>`;
-                } else {
-                    const typed = ((old && old.absentStudents) || []).map(s => s.name).join('\n');
-                    rosterHtml = `
-                        <div class="note-small" style="margin-bottom:6px">ยังไม่มีรายชื่อนักเรียน ${esc(r.grade)} ในระบบ — ถ้ามีนักเรียนขาด พิมพ์ชื่อ (1 คนต่อ 1 บรรทัด) ถ้ามาครบให้เว้นว่าง</div>
-                        <textarea id="manual_${idx}" placeholder="เช่น&#10;เด็กชายสมชาย ใจดี&#10;เด็กหญิงสมศรี รักเรียน" oninput="onManualChange(${idx})">${esc(typed)}</textarea>
-                        <span class="count-chip" id="cnt_${idx}" style="display:inline-block; margin-top:6px">ขาด 0 คน</span>`;
-                }
-
-                return `
-                <div class="p-card" data-idx="${idx}" data-key="${esc(key)}" data-has-roster="${roster && roster.length ? 1 : 0}">
-                    <div class="p-head">
-                        <span class="p-no">คาบ ${esc(r.period)}</span>
-                        <span class="p-meta">แทน <b>${esc(shortName(r.absent))}</b> (${esc(r.reason || '')})<br>
-                        ${subjLine ? 'วิชา ' + esc(subjLine) + ' • ' : ''}ชั้น ${esc(r.grade || '-')}</span>
-                    </div>
-                    <label class="fl">📝 ภาระงานที่มอบหมายให้นักเรียน <span style="color:var(--danger)">*</span></label>
-                    <textarea id="work_${idx}" placeholder="เช่น ทำใบงานเรื่อง... หน้า 12–13">${esc(old ? old.workload : '')}</textarea>
-
-                    <label class="fl">👥 เช็คการเข้าเรียนของนักเรียน</label>
-                    <div class="roster">${rosterHtml}</div>
-
-                    <label class="fl">หมายเหตุ (ถ้ามี)</label>
-                    <input type="text" id="note_${idx}" value="${esc(old ? old.note || '' : '')}" placeholder="เช่น นักเรียนมาสาย / ไม่มีปัญหา">
-                    ${old ? `<div class="note-small" style="color:var(--success)">✓ เคยส่งข้อมูลแล้ว — แก้ไขแล้วกดส่งใหม่ได้</div>` : ''}
-                </div>`;
-            }).join('');
-            mine.forEach((_, idx) => updateCount(idx));
+        function memKey(it) {
+            return `subrep_mem|${academicYearBE(it.docDate)}|${it.r.grade}|${it.r.subject}|${it.r.group || ''}`;
+        }
+        function initState(it, idx) {
+            const old = getOld(it), roster = rosterOf(it);
+            const detected = isElectiveRec(it.r);
+            const elective = old ? (old.isElective != null ? !!old.isElective : detected) : detected;
+            const members = new Set(), absent = new Set();
+            let recalled = false;
+            if(old) {
+                (old.electiveStudents || []).forEach(s => members.add(String(s.no)));
+                (old.absentStudents || []).forEach(s => absent.add(String(s.no)));
+            } else if(elective && roster) {
+                // จำรายชื่อนักเรียนวิชานี้จากครั้งก่อน (รหัสวิชา+ชั้นเดียวกัน) เพื่อไม่ต้องติ๊กใหม่ทุกคาบ
+                try {
+                    const mem = JSON.parse(localStorage.getItem(memKey(it)) || 'null');
+                    if(Array.isArray(mem)) mem.forEach(n => { if(roster.some(s => String(s.no) === String(n))) members.add(String(n)); });
+                    recalled = members.size > 0;
+                } catch(e) {}
+            }
+            cardState[idx] = { elective, members, absent, stage: (elective && members.size) ? 2 : 1, dirty: false, roster, recalled, open: !LENIENT || !old };
         }
 
-        function onStuChange(idx, cb) {
+        function renderForm() {
+            cardState = {};
+            const mine = currentItems;
+            $('formTitle').textContent = '✍️ ' + currentSub;
+            const pend = mine.filter(it => !getOld(it)).length;
+            $('formSubtitle').textContent = (RANGE || ADMIN)
+                ? `สอนแทน ${mine.length} คาบ (ยังไม่ส่ง ${pend} คาบ) — กรอกเท่าที่พร้อมแล้วกด “ส่งข้อมูล” ได้ คาบที่เว้นว่างจะถูกข้ามไว้`
+                : `สอนแทน ${mine.length} คาบ — กรอกให้ครบทุกคาบแล้วกด “ส่งข้อมูล” ด้านล่าง`;
+            $('tplAllBox').style.display = templates.length ? 'flex' : 'none';
+            $('tplAll').innerHTML = tplOptionsHtml('📋 เลือกข้อความสำเร็จรูป...');
+
+            $('formCards').innerHTML = mine.map((it, idx) => {
+                initState(it, idx);
+                const st = cardState[idx], r = it.r, old = getOld(it);
+                const subjLine = subjLineOf(r);
+                const dateChip = (RANGE || ADMIN) ? `<span class="p-date">📅 ${esc(formatThaiDateShort(it.docDate))}${it.daySchedule ? ' (' + esc(it.daySchedule) + ')' : ''}</span>` : '';
+                const elecSwitch = (st.roster && st.roster.length) ? `
+                    <label class="elec-switch"><input type="checkbox" id="elecOn_${idx}" ${st.elective ? 'checked' : ''} onchange="toggleElective(${idx}, this.checked)">
+                    <span>🟡 วิชาเพิ่มเติม (สอนเฉพาะนักเรียนบางกลุ่มในระดับชั้น) — เช็คชื่อ 2 ขั้น</span></label>` : '';
+                return `
+                <div class="p-card ${st.open ? '' : 'sent'}" data-idx="${idx}" id="card_${idx}">
+                    <div class="p-head">
+                        ${dateChip}<span class="p-no">คาบ ${esc(r.period)}</span>
+                        <span class="p-meta">แทน <b>${esc(shortName(r.absent))}</b> (${esc(r.reason || '')})<br>
+                        ${subjLine ? 'วิชา ' + esc(subjLine) + ' • ' : ''}ชั้น ${esc(r.grade || '-')}${r.group ? ' กลุ่ม ' + esc(r.group) : ''}</span>
+                    </div>
+                    ${st.open ? '' : `<div class="sent-sum" id="sum_${idx}"><span>✓ ส่งแล้ว${old && old.absentCount ? ' (นักเรียนขาด ' + old.absentCount + ' คน)' : ''}</span><button type="button" class="btn btn-ghost btn-sm" onclick="openCard(${idx})">✏️ แก้ไข</button></div>`}
+                    <div id="body_${idx}" style="${st.open ? '' : 'display:none'}">
+                        <label class="fl">📝 ภาระงานที่มอบหมายให้นักเรียน <span style="color:var(--danger)">*</span></label>
+                        ${templates.length ? `<div class="tpl-row"><select id="tplSel_${idx}" onchange="applyTpl(${idx}, this)">${tplOptionsHtml('📋 ดึงข้อความสำเร็จรูป...')}</select></div>` : ''}
+                        <textarea id="work_${idx}" oninput="cardState[${idx}].dirty = true" placeholder="เช่น ทำใบงานเรื่อง... หน้า 12–13">${esc(old ? old.workload : '')}</textarea>
+
+                        <label class="fl">👥 เช็คการเข้าเรียนของนักเรียน</label>
+                        ${elecSwitch}
+                        <div class="roster" id="rosterBox_${idx}"></div>
+
+                        <label class="fl">หมายเหตุ (ถ้ามี)</label>
+                        <input type="text" id="note_${idx}" oninput="cardState[${idx}].dirty = true" value="${esc(old ? old.note || '' : '')}" placeholder="เช่น นักเรียนมาสาย / ไม่มีปัญหา">
+                        ${old ? `<div class="note-small" style="color:var(--success)">✓ เคยส่งข้อมูลแล้ว — แก้ไขแล้วกดส่งใหม่ได้</div>` : ''}
+                    </div>
+                </div>`;
+            }).join('');
+            mine.forEach((_, idx) => renderRosterBox(idx));
+        }
+
+        function openCard(idx) {
+            const st = cardState[idx];
+            st.open = true;
+            $('body_' + idx).style.display = '';
+            const sum = $('sum_' + idx); if(sum) sum.style.display = 'none';
+            $('card_' + idx).classList.remove('sent');
+        }
+
+        // ---------- เทมเพลตภาระงาน ----------
+        function insertWork(idx, text) {
+            const ta = $('work_' + idx);
+            ta.value = ta.value.trim() ? ta.value.replace(/\s+$/, '') + '\n' + text : text;
+            cardState[idx].dirty = true;
+        }
+        function applyTpl(idx, sel) {
+            if(sel.value === '') return;
+            insertWork(idx, fillTpl(templates[parseInt(sel.value)].text, currentItems[idx]));
+            sel.value = '';
+        }
+        function applyTplAll() {
+            const v = $('tplAll').value;
+            if(v === '') return Swal.fire({ icon: 'info', title: 'เลือกข้อความสำเร็จรูปก่อน', timer: 1500, showConfirmButton: false });
+            let n = 0;
+            currentItems.forEach((it, idx) => {
+                if(!cardState[idx].open) return;
+                const ta = $('work_' + idx);
+                if(ta.value.trim()) return;
+                ta.value = fillTpl(templates[parseInt(v)].text, it);
+                cardState[idx].dirty = true; n++;
+            });
+            Swal.fire({ icon: 'success', title: `ใส่ข้อความให้ ${n} คาบ`, timer: 1300, showConfirmButton: false });
+        }
+
+        // ---------- รายชื่อนักเรียน / เช็คชื่อ ----------
+        function stuRow(idx, s, cls, checked, handler) {
+            return `<label class="stu ${cls}" data-q="${esc((s.no + ' ' + s.name).toLowerCase())}">
+                <input type="checkbox" data-no="${esc(s.no)}" ${checked ? 'checked' : ''} onchange="${handler}(${idx}, this)">
+                <span class="no">${esc(s.no)}</span><span>${esc(s.name)}</span></label>`;
+        }
+        function renderRosterBox(idx) {
+            const st = cardState[idx], box = $('rosterBox_' + idx), it = currentItems[idx];
+            const roster = st.roster;
+            if(!roster || !roster.length) {
+                const old = getOld(it);
+                const typed = ((old && old.absentStudents) || []).map(s => s.name).join('\n');
+                box.innerHTML = `
+                    <div class="note-small" style="margin-bottom:6px">ยังไม่มีรายชื่อนักเรียน ${esc(it.r.grade)} ในระบบ — ถ้ามีนักเรียนขาด พิมพ์ชื่อ (1 คนต่อ 1 บรรทัด) ถ้ามาครบให้เว้นว่าง</div>
+                    <textarea id="manual_${idx}" placeholder="เช่น&#10;เด็กชายสมชาย ใจดี&#10;เด็กหญิงสมศรี รักเรียน" oninput="onManualChange(${idx})">${esc(typed)}</textarea>
+                    <span class="count-chip" id="cnt_${idx}" style="display:inline-block; margin-top:6px">ขาด 0 คน</span>`;
+                updateCount(idx);
+                return;
+            }
+            const sr = (s, cls, checked, handler) => stuRow(idx, s, cls, checked, handler);
+            let h = '';
+            if(!st.elective) {
+                h = `
+                    <div class="roster-tools">
+                        <input type="text" placeholder="🔍 ค้นหาชื่อ / เลขที่" oninput="filterRoster(${idx}, this.value)">
+                        <span class="count-chip" id="cnt_${idx}">ขาด 0 คน</span>
+                    </div>
+                    <div class="roster-tools" style="margin-top:-2px">
+                        <button type="button" class="btn btn-ghost btn-sm" onclick="setAllPresent(${idx})">✅ ติ๊กมาทั้งหมด</button>
+                    </div>
+                    <div class="roster-list" id="roster_${idx}">
+                        ${roster.map(s => sr(s, st.absent.has(String(s.no)) ? 'absent' : '', !st.absent.has(String(s.no)), 'onPresentChange')).join('')}
+                    </div>
+                    <div class="note-small">✔ ติ๊ก = <b>มาเรียน</b> (ค่าเริ่มต้นมาครบทุกคน) • <b>เอาติ๊กออก</b> เฉพาะนักเรียนที่ <b>ไม่เข้าเรียนในคาบนี้</b></div>`;
+            } else {
+                h = `<div class="stage-tabs">
+                        <button type="button" class="stage-tab ${st.stage === 1 ? 'on' : ''}" onclick="setStage(${idx}, 1)">① เลือกนักเรียนวิชานี้<br><span id="memTab_${idx}">(${st.members.size} คน)</span></button>
+                        <button type="button" class="stage-tab s2 ${st.stage === 2 ? 'on' : ''}" onclick="setStage(${idx}, 2)">② เช็คชื่อ มา/ขาด<br><span>(เฉพาะกลุ่มที่เลือก)</span></button>
+                     </div>`;
+                if(st.stage === 1) {
+                    h += `
+                    <div class="roster-tools">
+                        <input type="text" placeholder="🔍 ค้นหาชื่อ / เลขที่" oninput="filterRoster(${idx}, this.value)">
+                        <span class="chip-ok" id="cnt_${idx}">เรียนวิชานี้ ${st.members.size} คน</span>
+                    </div>
+                    <div class="roster-tools" style="margin-top:-2px">
+                        <button type="button" class="btn btn-ghost btn-sm" onclick="setAllMembers(${idx}, true)">เลือกทั้งหมด</button>
+                        <button type="button" class="btn btn-ghost btn-sm" onclick="setAllMembers(${idx}, false)">ล้างที่เลือก</button>
+                    </div>
+                    <div class="roster-list" id="roster_${idx}">
+                        ${roster.map(s => sr(s, st.members.has(String(s.no)) ? 'member' : '', st.members.has(String(s.no)), 'onMemberChange')).join('')}
+                    </div>
+                    <div class="note-small">${st.recalled ? '↺ ดึงรายชื่อที่เคยเลือกไว้ล่าสุดมาให้แล้ว (แก้ไขได้) • ' : ''}ติ๊กเฉพาะ <b>นักเรียนที่ลงเรียนวิชานี้</b> (เด็กในวิชาเพิ่มเติมที่ถูกจัดสอนแทน) — คนที่ไม่ติ๊กจะไม่ถูกนับว่าขาด</div>
+                    <div style="margin-top:8px"><button type="button" class="btn btn-primary btn-sm" style="width:100%" onclick="setStage(${idx}, 2)">ต่อไป: ② เช็คชื่อ มา/ขาด ▶</button></div>`;
+                } else {
+                    const mem = roster.filter(s => st.members.has(String(s.no)));
+                    if(!mem.length) {
+                        h += `<div class="empty-members">ยังไม่ได้เลือกนักเรียนวิชานี้<br><button type="button" class="btn btn-ghost btn-sm" style="margin-top:8px" onclick="setStage(${idx}, 1)">◀ กลับไปขั้น ① เลือกนักเรียน</button></div>
+                              <span class="count-chip" id="cnt_${idx}" style="display:none">ขาด 0 คน</span>`;
+                    } else {
+                        h += `
+                        <div class="roster-tools">
+                            <input type="text" placeholder="🔍 ค้นหาชื่อ / เลขที่" oninput="filterRoster(${idx}, this.value)">
+                            <span class="count-chip" id="cnt_${idx}">ขาด 0 จาก ${mem.length} คน</span>
+                        </div>
+                        <div class="roster-tools" style="margin-top:-2px">
+                            <button type="button" class="btn btn-ghost btn-sm" onclick="setAllPresent(${idx})">✅ ติ๊กมาทั้งหมด</button>
+                            <button type="button" class="btn btn-ghost btn-sm" onclick="setStage(${idx}, 1)">◀ แก้รายชื่อนักเรียนวิชานี้</button>
+                        </div>
+                        <div class="roster-list" id="roster_${idx}">
+                            ${mem.map(s => sr(s, st.absent.has(String(s.no)) ? 'absent' : '', !st.absent.has(String(s.no)), 'onPresentChange')).join('')}
+                        </div>
+                        <div class="note-small">✔ ติ๊ก = <b>มาเรียน</b> • <b>เอาติ๊กออก</b> เฉพาะนักเรียนที่ <b>ไม่เข้าเรียนในคาบนี้</b></div>`;
+                    }
+                }
+            }
+            box.innerHTML = h;
+            updateCount(idx);
+        }
+
+        function toggleElective(idx, on) {
+            const st = cardState[idx];
+            st.elective = on; st.dirty = true;
+            st.stage = (on && st.members.size) ? 2 : 1;
+            renderRosterBox(idx);
+        }
+        function setStage(idx, n) {
+            cardState[idx].stage = n;
+            renderRosterBox(idx);
+        }
+        function onMemberChange(idx, cb) {
+            const st = cardState[idx], no = cb.dataset.no;
+            if(cb.checked) st.members.add(no); else { st.members.delete(no); st.absent.delete(no); }
+            st.dirty = true;
+            cb.closest('.stu').classList.toggle('member', cb.checked);
+            updateCount(idx);
+        }
+        function setAllMembers(idx, on) {
+            const st = cardState[idx];
+            st.members.clear();
+            if(on) st.roster.forEach(s => st.members.add(String(s.no)));
+            else st.absent.clear();
+            st.dirty = true;
+            renderRosterBox(idx);
+        }
+        function onPresentChange(idx, cb) {
+            const st = cardState[idx], no = cb.dataset.no;
+            if(cb.checked) st.absent.delete(no); else st.absent.add(no);
+            st.dirty = true;
             cb.closest('.stu').classList.toggle('absent', !cb.checked);
             updateCount(idx);
         }
-        function setAllPresent(idx, on) {
-            document.querySelectorAll(`#roster_${idx} input[type=checkbox]`).forEach(cb => { cb.checked = on; cb.closest('.stu').classList.toggle('absent', !on); });
-            updateCount(idx);
+        function setAllPresent(idx) {
+            cardState[idx].absent.clear();
+            cardState[idx].dirty = true;
+            renderRosterBox(idx);
         }
-        function onManualChange(idx) { updateCount(idx); }
+        function onManualChange(idx) { cardState[idx].dirty = true; updateCount(idx); }
         function filterRoster(idx, q) {
             q = q.trim().toLowerCase();
             document.querySelectorAll(`#roster_${idx} .stu`).forEach(el => {
                 el.style.display = (!q || el.dataset.q.includes(q)) ? '' : 'none';
             });
         }
+        // นักเรียนที่เป็นสมาชิกวิชา (เฉพาะวิชาเพิ่มเติมที่มีรายชื่อ)
+        function getMembers(idx) {
+            const st = cardState[idx];
+            if(!st.elective || !st.roster || !st.roster.length) return [];
+            return st.roster.filter(s => st.members.has(String(s.no))).map(s => ({ no: s.no, name: s.name }));
+        }
         function getAbsentList(idx) {
-            const card = document.querySelector(`.p-card[data-idx="${idx}"]`);
-            if(card.dataset.hasRoster === '1') {
-                return Array.from(document.querySelectorAll(`#roster_${idx} input:not(:checked)`)).map(cb => ({ no: cb.dataset.no, name: cb.dataset.name }));
+            const st = cardState[idx];
+            if(st.roster && st.roster.length) {
+                return st.roster
+                    .filter(s => st.absent.has(String(s.no)) && (!st.elective || st.members.has(String(s.no))))
+                    .map(s => ({ no: s.no, name: s.name }));
             }
-            const t = (document.getElementById(`manual_${idx}`) || {}).value || '';
-            return t.split('\n').map(x => x.trim()).filter(Boolean).map((name, i) => ({ no: '', name }));
+            const t = ($('manual_' + idx) || {}).value || '';
+            return t.split('\n').map(x => x.trim()).filter(Boolean).map(name => ({ no: '', name }));
         }
         function updateCount(idx) {
-            const el = document.getElementById(`cnt_${idx}`);
-            if(el) el.textContent = `ขาด ${getAbsentList(idx).length} คน`;
+            const st = cardState[idx], el = $('cnt_' + idx);
+            if(!el) return;
+            if(st.elective && st.roster && st.roster.length) {
+                if(st.stage === 1) {
+                    el.textContent = `เรียนวิชานี้ ${st.members.size} คน`;
+                    const tab = $('memTab_' + idx); if(tab) tab.textContent = `(${st.members.size} คน)`;
+                } else {
+                    el.textContent = `ขาด ${getAbsentList(idx).length} จาก ${st.members.size} คน`;
+                }
+            } else {
+                el.textContent = `ขาด ${getAbsentList(idx).length} คน`;
+            }
         }
 
         // ---------- SUBMIT ----------
         async function submitReport() {
-            const mine = subRecords.filter(r => r.sub === currentSub);
             const payload = [];
-            for(let idx = 0; idx < mine.length; idx++) {
-                const r = mine[idx];
-                const work = document.getElementById(`work_${idx}`).value.trim();
-                if(!work) return fail(`กรุณาพิมพ์ภาระงานที่มอบหมาย — คาบ ${r.period}`);
+            let skipped = 0;
+            for(let idx = 0; idx < currentItems.length; idx++) {
+                const it = currentItems[idx], r = it.r, st = cardState[idx];
+                if(!st.open) continue;
+                const label = `${(RANGE || ADMIN) ? formatThaiDateShort(it.docDate) + ' ' : ''}คาบ ${r.period}`;
+                const work = $('work_' + idx).value.trim();
+                const note = $('note_' + idx).value.trim();
+                if(!work) {
+                    if(LENIENT && !st.dirty && !note) { skipped++; continue; }
+                    return fail(`กรุณาพิมพ์ภาระงานที่มอบหมาย — ${label}`);
+                }
+                const hasRoster = st.roster && st.roster.length;
+                if(st.elective && hasRoster && st.members.size === 0) {
+                    return fail(`${label}: วิชาเพิ่มเติม — กรุณาเลือกนักเรียนที่เรียนวิชานี้ในขั้น ① ก่อน`);
+                }
                 const absent = getAbsentList(idx);
-                payload.push({ r, rep: {
+                const members = getMembers(idx);
+                const rep = {
                     sub: r.sub, absent: r.absent, period: r.period,
                     grade: r.grade || '', subject: r.subject || '', subjectName: r.subjectName || '',
                     workload: work, attendance: absent.length ? 'absent' : 'all', absentStudents: absent, absentCount: absent.length,
-                    note: document.getElementById(`note_${idx}`).value.trim(),
+                    isElective: !!(st.elective && hasRoster),
+                    note: note,
+                    entryMode: ADMIN ? 'admin' : (RANGE ? 'backlog' : 'teacher'),
                     submittedAt: firebase.firestore.FieldValue.serverTimestamp()
-                }});
+                };
+                if(rep.isElective) { rep.electiveStudents = members; rep.electiveCount = members.length; }
+                payload.push({ it, rep });
             }
+            if(!payload.length) return fail('ยังไม่มีคาบที่กรอกภาระงาน — กรุณากรอกอย่างน้อย 1 คาบ');
 
             const confirm = await Swal.fire({
                 icon: 'question', title: 'ยืนยันการส่งข้อมูล',
-                html: `ส่งข้อมูลของ <b>${esc(currentSub)}</b> จำนวน ${payload.length} คาบ<br>
-                       <span style="color:#64748b; font-size:.9rem">รวมนักเรียนที่ไม่เข้าเรียน ${payload.reduce((s, p) => s + p.rep.absentCount, 0)} คน</span>`,
+                html: `${ADMIN ? 'บันทึกแทน' : 'ส่งข้อมูลของ'} <b>${esc(currentSub)}</b> จำนวน ${payload.length} คาบ<br>
+                       <span style="color:#64748b; font-size:.9rem">รวมนักเรียนที่ไม่เข้าเรียน ${payload.reduce((s, p) => s + p.rep.absentCount, 0)} คน${skipped ? '<br>ข้ามคาบที่ยังไม่กรอก ' + skipped + ' คาบ (กลับมาลงภายหลังได้)' : ''}</span>`,
                 showCancelButton: true, confirmButtonText: 'ยืนยันส่ง', cancelButtonText: 'ตรวจสอบอีกครั้ง', confirmButtonColor: '#059669'
             });
             if(!confirm.isConfirmed) return;
 
-            const btn = document.getElementById('btnSubmit');
+            const btn = $('btnSubmit');
             btn.disabled = true;
             try {
-                const args = [];
-                payload.forEach(p => { args.push(new firebase.firestore.FieldPath('reports', reportKey(p.r)), p.rep); });
-                const ref = db.collection('substitutions').doc(docId);
-                await ref.update.apply(ref, args);
+                // รวมคาบตามเอกสาร แล้วอัปเดตทีละเอกสาร (ใช้ batch เพื่อให้สำเร็จพร้อมกัน)
+                const byDoc = {};
+                payload.forEach(p => { (byDoc[p.it.docId] = byDoc[p.it.docId] || []).push(p); });
+                const docIds = Object.keys(byDoc);
+                for(let i = 0; i < docIds.length; i += 400) {
+                    const batch = db.batch();
+                    docIds.slice(i, i + 400).forEach(id => {
+                        const args = [];
+                        byDoc[id].forEach(p => { args.push(new firebase.firestore.FieldPath('reports', p.it.key), p.rep); });
+                        batch.update.apply(batch, [db.collection('substitutions').doc(id)].concat(args));
+                    });
+                    await batch.commit();
+                }
 
-                // อัปเดตข้อมูลในหน้า (ใช้เวลาปัจจุบันแทน serverTimestamp)
-                docData.reports = docData.reports || {};
-                payload.forEach(p => { docData.reports[reportKey(p.r)] = { ...p.rep, submittedAt: null }; });
+                // อัปเดตข้อมูลในหน้า (ใช้เวลาปัจจุบันแทน serverTimestamp) + จำรายชื่อนักเรียนวิชาเพิ่มเติม
+                payload.forEach(p => {
+                    const d = docsMap[p.it.docId];
+                    d.reports = d.reports || {};
+                    d.reports[p.it.key] = { ...p.rep, submittedAt: null };
+                    if(p.rep.isElective) {
+                        try { localStorage.setItem(memKey(p.it), JSON.stringify(p.rep.electiveStudents.map(s => String(s.no)))); } catch(e) {}
+                    }
+                });
 
-                document.getElementById('doneText').innerHTML =
-                    `บันทึกข้อมูลของ <b>${esc(currentSub)}</b> (${payload.length} คาบ) ลงฐานข้อมูลแล้ว<br>ขอบคุณที่ปฏิบัติหน้าที่สอนแทนครับ/ค่ะ`;
+                $('doneText').innerHTML =
+                    `${ADMIN ? 'บันทึกแทน' : 'บันทึกข้อมูลของ'} <b>${esc(currentSub)}</b> (${payload.length} คาบ) ลงฐานข้อมูลแล้ว${skipped ? '<br>ยังเหลือคาบที่ข้ามไว้ ' + skipped + ' คาบ' : ''}<br>${ADMIN ? '' : 'ขอบคุณที่ปฏิบัติหน้าที่สอนแทนครับ/ค่ะ'}`;
+                if(EMBED && window.parent !== window) {
+                    try { window.parent.postMessage({ type: 'subreport-saved', docIds }, '*'); } catch(e) {}
+                }
                 goStep(4);
             } catch(e) {
                 console.error(e);
@@ -421,6 +780,9 @@
             }
         }
         function fail(msg) { Swal.fire({ icon: 'warning', title: 'ข้อมูลไม่ครบ', text: msg, confirmButtonText: 'ตกลง' }); }
+        function closeEmbed() {
+            try { window.parent.postMessage({ type: 'subreport-close' }, '*'); } catch(e) {}
+        }
 
         init();
     </script>

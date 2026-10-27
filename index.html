@@ -112,6 +112,39 @@
 
         .page-section { display: none; padding: 25px; animation: fadeIn 0.4s ease-out; overflow: visible; }
         .page-section.active { display: block; }
+
+        /* ===== เมนูตั้งค่า ===== */
+        .st-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
+        .st-tab { border: 2px solid #e2e8f0; background: #fff; border-radius: 10px; padding: 9px 16px; font-family: inherit; font-weight: 700; font-size: .95rem; color: #475569; cursor: pointer; }
+        .st-tab.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+        .st-pane { display: none; }
+        .st-pane.active { display: block; }
+        .st-filter { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; margin-bottom: 14px; }
+        .st-filter label { display: block; font-size: .82rem; font-weight: 700; color: #475569; margin-bottom: 3px; }
+        .st-filter input, .st-filter select, .st-input { padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: .95rem; background: #fff; }
+        .st-btn { border: none; border-radius: 8px; padding: 9px 16px; font-family: inherit; font-weight: 700; font-size: .92rem; cursor: pointer; background: var(--primary); color: #fff; }
+        .st-btn.gray { background: #64748b; }
+        .st-btn.green { background: #059669; }
+        .st-btn.red { background: #dc2626; }
+        .st-btn.sm { padding: 5px 10px; font-size: .82rem; }
+        .st-note { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e3a8a; border-radius: 10px; padding: 10px 14px; font-size: .9rem; line-height: 1.7; margin-bottom: 14px; }
+        .st-table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+        .st-table th { background: #f1f5f9; padding: 9px 10px; text-align: left; border-bottom: 2px solid #e2e8f0; white-space: nowrap; }
+        .st-table td { padding: 8px 10px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+        .st-pill { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: .78rem; font-weight: 700; }
+        .st-pill.ok { background: #d1fae5; color: #047857; }
+        .st-pill.wait { background: #fef3c7; color: #92400e; }
+        .st-bar { height: 8px; background: #e2e8f0; border-radius: 6px; overflow: hidden; min-width: 90px; }
+        .st-bar > i { display: block; height: 100%; background: #059669; }
+        .st-linkbox { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0 16px; }
+        .st-linkbox input { flex: 1; min-width: 240px; }
+        .st-tpl { border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-bottom: 10px; background: #f8fafc; }
+        .st-tpl .st-input { width: 100%; margin-bottom: 6px; }
+        .st-tpl textarea.st-input { min-height: 70px; resize: vertical; }
+        .st-overlay { display: none; position: fixed; inset: 0; z-index: 2000; background: rgba(15,23,42,.7); }
+        .st-overlay .st-frame { background: #fff; width: min(820px, 96%); height: 94%; margin: 2% auto; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; }
+        .st-overlay .st-frame-bar { background: var(--primary); color: #fff; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; gap: 8px; font-weight: 700; }
+        .st-overlay iframe { flex: 1; border: 0; width: 100%; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         .control-group { background: #f8fafc; padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #e2e8f0; position: relative; }
@@ -1068,6 +1101,7 @@
                 </button>
             </a>
             <button class="nav-btn" onclick="switchTab('dashboard')">📊 ดูสถิติ</button>
+            <button class="nav-btn" onclick="switchTab('settings')">⚙️ ตั้งค่า</button>
         </div>
 
         <!-- Allocation Tab -->
@@ -1489,6 +1523,83 @@
                 </div>
             </div>
         </div>
+
+        <!-- Settings Tab -->
+        <div id="settings" class="page-section">
+            <h2 style="color: var(--primary); margin-bottom: 14px;">⚙️ ตั้งค่า / เครื่องมือผู้จัดสอนแทน</h2>
+            <div class="st-tabs">
+                <button class="st-tab active" data-st="backfill" onclick="switchSettingsTab('backfill')">📝 บันทึกใบงาน/เช็คชื่อแทนครู (ย้อนหลัง)</button>
+                <button class="st-tab" data-st="link" onclick="switchSettingsTab('link')">🔗 ออกลิงก์ติดตามการลงข้อมูล</button>
+                <button class="st-tab" data-st="tpl" onclick="switchSettingsTab('tpl')">📋 ข้อความสำเร็จรูปภาระงาน</button>
+            </div>
+
+            <!-- 1) บันทึกย้อนหลังแทนครู -->
+            <div id="st-backfill" class="st-pane active">
+                <div class="st-note">เลือกช่วงวันที่ → กด “ค้นหา” → กด <b>✍️ บันทึกแทนครู</b> ที่แถวของครูผู้สอนแทน ระบบจะเปิดหน้าฟอร์มเดียวกับที่ครูใช้ (ระบุภาระงาน + เช็คชื่อ/วิชาเพิ่มเติม 2 ขั้น) และมีปุ่มดึงข้อความสำเร็จรูปให้</div>
+                <div class="st-filter">
+                    <div><label>ตั้งแต่วันที่</label><input type="date" id="bfFrom"></div>
+                    <div><label>ถึงวันที่</label><input type="date" id="bfTo"></div>
+                    <div><label>ครูผู้สอนแทน</label><select id="bfTeacher" onchange="renderBackfill()"><option value="">ทั้งหมด</option></select></div>
+                    <div><label>สถานะ</label>
+                        <select id="bfStatus" onchange="renderBackfill()">
+                            <option value="pending">ยังไม่ครบ (ค้างลง)</option>
+                            <option value="all">ทั้งหมด</option>
+                        </select>
+                    </div>
+                    <button class="st-btn" onclick="loadBackfill()">🔍 ค้นหา</button>
+                </div>
+                <div id="bfSummary" style="margin-bottom:8px; color:#475569; font-weight:600;"></div>
+                <div style="overflow-x:auto;"><table class="st-table"><thead><tr><th>วันที่</th><th>ครูผู้สอนแทน</th><th>คาบ</th><th>สถานะ</th><th></th></tr></thead><tbody id="bfBody"><tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:20px;">กด “ค้นหา” เพื่อแสดงรายการ</td></tr></tbody></table></div>
+            </div>
+
+            <!-- 2) ออกลิงก์ติดตาม -->
+            <div id="st-link" class="st-pane">
+                <div class="st-note">เลือกห้วงเวลา → กด “สร้างลิงก์” แล้วส่งลิงก์ให้ครูทางไลน์ ครูกดเข้าลิงก์ เลือกชื่อตัวเอง จะเห็น <b>เฉพาะคาบสอนแทนในช่วงนั้นที่ยังไม่ลง</b> และลงข้อมูลย้อนหลังได้ทีเดียวหลายคาบ ตารางด้านล่างแสดงความคืบหน้าของแต่ละท่าน</div>
+                <div class="st-filter">
+                    <div><label>ตั้งแต่วันที่</label><input type="date" id="lkFrom"></div>
+                    <div><label>ถึงวันที่</label><input type="date" id="lkTo"></div>
+                    <div><label>ช่วงเวลาด่วน</label>
+                        <select onchange="setLinkPreset(this.value); this.value='';">
+                            <option value="">เลือก...</option>
+                            <option value="7">7 วันล่าสุด</option>
+                            <option value="30">30 วันล่าสุด</option>
+                            <option value="month">เดือนนี้</option>
+                            <option value="lastmonth">เดือนที่แล้ว</option>
+                        </select>
+                    </div>
+                    <button class="st-btn green" onclick="generateTrackLink()">🔗 สร้างลิงก์ + ตรวจความคืบหน้า</button>
+                </div>
+                <div id="lkResult" style="display:none;">
+                    <div class="st-linkbox">
+                        <input type="text" id="lkUrl" class="st-input" readonly onclick="this.select()">
+                        <button class="st-btn" onclick="copyTrackLink()">📋 คัดลอกลิงก์</button>
+                        <button class="st-btn gray" onclick="copyTrackLineText()">💬 คัดลอกข้อความแจ้งไลน์</button>
+                        <button class="st-btn gray" onclick="window.open(document.getElementById('lkUrl').value, '_blank')">เปิดดู</button>
+                    </div>
+                    <div id="lkSummary" style="margin-bottom:8px; color:#475569; font-weight:600;"></div>
+                    <div style="overflow-x:auto;"><table class="st-table"><thead><tr><th>ครูผู้สอนแทน</th><th>ส่งแล้ว / ทั้งหมด</th><th style="min-width:110px">ความคืบหน้า</th><th>ค้างลง</th><th></th></tr></thead><tbody id="lkBody"></tbody></table></div>
+                </div>
+            </div>
+
+            <!-- 3) Template -->
+            <div id="st-tpl" class="st-pane">
+                <div class="st-note">ข้อความสำเร็จรูปจะปรากฏเป็นตัวเลือก “ดึงข้อความสำเร็จรูป” ในช่องภาระงาน (ทั้งหน้าครู และหน้าที่ผู้จัดสอนแทนบันทึกแทน) ใช้ตัวแปรได้: <code>{วิชา}</code> <code>{ชั้น}</code> <code>{คาบ}</code> <code>{ครูที่ลา}</code> <code>{วันที่}</code> — ระบบจะแทนค่าให้ตามคาบนั้น ๆ</div>
+                <div id="tplList"></div>
+                <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
+                    <button class="st-btn gray" onclick="addTplRow()">➕ เพิ่มข้อความ</button>
+                    <button class="st-btn green" onclick="saveTemplates()">💾 บันทึก</button>
+                    <button class="st-btn red" onclick="resetTemplates()">↺ คืนค่าเริ่มต้น</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- กรอบเปิดฟอร์มบันทึกแทนครู (ฝัง sub-report.html โหมดผู้จัดสอนแทน) -->
+    <div id="subReportOverlay" class="st-overlay">
+        <div class="st-frame">
+            <div class="st-frame-bar"><span id="subReportTitle">บันทึกแทนครูผู้สอนแทน</span><button class="st-btn gray sm" onclick="closeSubReport()">✖ ปิด</button></div>
+            <iframe id="subReportFrame" title="บันทึกแทนครู"></iframe>
+        </div>
     </div>
 
     <!-- Preview Modal -->
@@ -1610,6 +1721,272 @@
             if(id === 'history') loadHistory();
             if(id === 'dashboard') loadStatistics();
             if(id === 'scheduleViewer') loadScheduleViewer();
+            if(id === 'settings') initSettings();
+        }
+
+        // ============================================
+        // SETTINGS: บันทึกย้อนหลังแทนครู / ลิงก์ติดตาม / ข้อความสำเร็จรูป
+        // ============================================
+        const DEFAULT_WORKLOAD_TEMPLATES = [
+            { id: 'd1', title: 'ใบงาน/แบบฝึกหัด', text: 'ให้นักเรียนทำใบงาน/แบบฝึกหัดวิชา {วิชา} ชั้น {ชั้น} ตามที่ครูประจำวิชามอบหมาย และส่งก่อนหมดคาบ' },
+            { id: 'd2', title: 'ศึกษาค้นคว้า/อ่านหนังสือ', text: 'ให้นักเรียนศึกษาค้นคว้าและสรุปความรู้เรื่องที่เรียนในวิชา {วิชา} ลงสมุด' },
+            { id: 'd3', title: 'ทบทวนบทเรียน', text: 'ให้นักเรียนทบทวนบทเรียนวิชา {วิชา} และทำแบบทดสอบท้ายบทตามที่ครูประจำวิชากำหนด' }
+        ];
+        let stTemplates = [];
+        let stBackfillRows = [];       // [{docId, docDate, daySchedule, sub, periods:[], sent, total}]
+        let stSettingsReady = false;
+        let stBackfillDirty = false;
+
+        function stEsc(s) {
+            return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        }
+        function stIso(d) {
+            const z = n => String(n).padStart(2, '0');
+            return `${d.getFullYear()}-${z(d.getMonth() + 1)}-${z(d.getDate())}`;
+        }
+        function stThaiDate(iso) {
+            const M = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+            const p = (iso || '').split('-');
+            return p.length < 3 ? (iso || '') : `${parseInt(p[2])} ${M[parseInt(p[1]) - 1]} ${parseInt(p[0]) + 543}`;
+        }
+        function stReportKey(r) { return `${r.period}|${r.sub}|${r.absent}`.replace(/[.\/\[\]*`~]/g, '_'); }
+
+        function initSettings() {
+            if(!stSettingsReady) {
+                stSettingsReady = true;
+                const today = new Date(), past = new Date(); past.setDate(past.getDate() - 30);
+                document.getElementById('bfFrom').value = stIso(past);
+                document.getElementById('bfTo').value = stIso(today);
+                document.getElementById('lkFrom').value = stIso(new Date(today.getFullYear(), today.getMonth(), 1));
+                document.getElementById('lkTo').value = stIso(today);
+                loadTemplatesAdmin();
+                window.addEventListener('message', e => {
+                    if(!e.data) return;
+                    if(e.data.type === 'subreport-saved') { stBackfillDirty = true; historyLoaded = false; }
+                    if(e.data.type === 'subreport-close') closeSubReport();
+                });
+            }
+        }
+        function switchSettingsTab(t) {
+            document.querySelectorAll('.st-tab').forEach(b => b.classList.toggle('active', b.dataset.st === t));
+            document.querySelectorAll('.st-pane').forEach(p => p.classList.toggle('active', p.id === 'st-' + t));
+        }
+
+        // ---------- ดึงเอกสารตามห้วงเวลา ----------
+        async function stFetchRange(from, to) {
+            const snap = await db.collection('substitutions').where('docDate', '>=', from).where('docDate', '<=', to).get();
+            const docs = [];
+            snap.forEach(d => docs.push({ id: d.id, ...d.data() }));
+            return docs;
+        }
+        // รวมเป็นแถว (เอกสาร × ครูผู้สอนแทน) เฉพาะคาบสอนแทนจริง (ไม่รวม redirect)
+        function stBuildRows(docs) {
+            const rows = [];
+            docs.forEach(d => {
+                const bySub = {};
+                (d.records || []).forEach(r => {
+                    if(r.redirect) return;
+                    (bySub[r.sub] = bySub[r.sub] || []).push(r);
+                });
+                Object.keys(bySub).forEach(sub => {
+                    const rs = bySub[sub].sort((a, b) => a.period - b.period);
+                    const sent = rs.filter(r => d.reports && d.reports[stReportKey(r)]).length;
+                    rows.push({ docId: d.id, docDate: d.docDate || '', daySchedule: d.daySchedule || '', sub, periods: rs.map(r => r.period), sent, total: rs.length });
+                });
+            });
+            rows.sort((a, b) => a.docDate === b.docDate ? a.sub.localeCompare(b.sub, 'th') : (a.docDate < b.docDate ? 1 : -1));
+            return rows;
+        }
+
+        // ---------- 1) บันทึกย้อนหลังแทนครู ----------
+        async function loadBackfill() {
+            const from = document.getElementById('bfFrom').value, to = document.getElementById('bfTo').value;
+            if(!from || !to) return Swal.fire('เลือกช่วงวันที่ก่อน', '', 'warning');
+            if(from > to) return Swal.fire('ช่วงวันที่ไม่ถูกต้อง', 'วันเริ่มต้องไม่เกินวันสิ้นสุด', 'warning');
+            document.getElementById('bfBody').innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">🔄 กำลังโหลด...</td></tr>';
+            try {
+                stBackfillRows = stBuildRows(await stFetchRange(from, to));
+                const sel = document.getElementById('bfTeacher');
+                const keep = sel.value;
+                const names = [...new Set(stBackfillRows.map(r => r.sub))].sort((a, b) => a.localeCompare(b, 'th'));
+                sel.innerHTML = '<option value="">ทั้งหมด</option>' + names.map(n => `<option value="${stEsc(n)}">${stEsc(formatTeacherNameShort(n))}</option>`).join('');
+                if(names.includes(keep)) sel.value = keep;
+                stBackfillDirty = false;
+                renderBackfill();
+            } catch(e) {
+                console.error(e);
+                document.getElementById('bfBody').innerHTML = '<tr><td colspan="5" style="color:red; text-align:center; padding:20px;">โหลดข้อมูลไม่สำเร็จ</td></tr>';
+            }
+        }
+        function renderBackfill() {
+            const t = document.getElementById('bfTeacher').value, st = document.getElementById('bfStatus').value;
+            const rows = stBackfillRows.filter(r => (!t || r.sub === t) && (st === 'all' || r.sent < r.total));
+            const pend = stBackfillRows.filter(r => r.sent < r.total).length;
+            document.getElementById('bfSummary').textContent = `พบ ${rows.length} รายการ • ค้างลงทั้งหมด ${pend} รายการ (จาก ${stBackfillRows.length})`;
+            if(!rows.length) {
+                document.getElementById('bfBody').innerHTML = '<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:20px;">ไม่มีรายการ</td></tr>';
+                return;
+            }
+            document.getElementById('bfBody').innerHTML = rows.map(r => {
+                const idx = stBackfillRows.indexOf(r);
+                const done = r.sent === r.total;
+                return `<tr>
+                    <td style="white-space:nowrap">${stThaiDate(r.docDate)}${r.daySchedule ? ' <span style="color:#94a3b8">(' + stEsc(r.daySchedule) + ')</span>' : ''}</td>
+                    <td>${stEsc(formatTeacherNameShort(r.sub))}</td>
+                    <td>${r.periods.join(', ')}</td>
+                    <td><span class="st-pill ${done ? 'ok' : 'wait'}">${done ? '✓ ครบ' : 'ส่งแล้ว ' + r.sent + '/' + r.total}</span></td>
+                    <td style="text-align:right"><button class="st-btn sm ${done ? 'gray' : ''}" onclick="openSubReport(${idx})">${done ? '✏️ ดู/แก้ไข' : '✍️ บันทึกแทนครู'}</button></td>
+                </tr>`;
+            }).join('');
+        }
+        function openSubReportUrl(query, title) {
+            document.getElementById('subReportTitle').textContent = title;
+            document.getElementById('subReportFrame').src = 'sub-report.html?' + query + '&admin=1&embed=1';
+            document.getElementById('subReportOverlay').style.display = 'block';
+        }
+        function openSubReport(idx) {
+            const r = stBackfillRows[idx];
+            openSubReportUrl(`id=${encodeURIComponent(r.docId)}&sub=${encodeURIComponent(r.sub)}`, `บันทึกแทน ${formatTeacherNameShort(r.sub)} • ${stThaiDate(r.docDate)}`);
+        }
+        function closeSubReport() {
+            document.getElementById('subReportOverlay').style.display = 'none';
+            document.getElementById('subReportFrame').src = 'about:blank';
+            if(stBackfillDirty) {
+                if(stBackfillRows.length) loadBackfill();
+                if(document.getElementById('lkResult').style.display !== 'none') generateTrackLink(true);
+            }
+        }
+
+        // ---------- 2) ออกลิงก์ติดตาม ----------
+        function setLinkPreset(v) {
+            if(!v) return;
+            const today = new Date(); let from = new Date(), to = new Date();
+            if(v === '7' || v === '30') from.setDate(today.getDate() - (parseInt(v) - 1));
+            else if(v === 'month') from = new Date(today.getFullYear(), today.getMonth(), 1);
+            else if(v === 'lastmonth') { from = new Date(today.getFullYear(), today.getMonth() - 1, 1); to = new Date(today.getFullYear(), today.getMonth(), 0); }
+            document.getElementById('lkFrom').value = stIso(from);
+            document.getElementById('lkTo').value = stIso(to);
+        }
+        function trackUrl(from, to, teacher) {
+            return new URL(`sub-report.html?from=${from}&to=${to}${teacher ? '&t=' + encodeURIComponent(teacher) : ''}`, window.location.href).href;
+        }
+        let stLinkRows = [];
+        async function generateTrackLink(silent) {
+            const from = document.getElementById('lkFrom').value, to = document.getElementById('lkTo').value;
+            if(!from || !to) return Swal.fire('เลือกช่วงวันที่ก่อน', '', 'warning');
+            if(from > to) return Swal.fire('ช่วงวันที่ไม่ถูกต้อง', 'วันเริ่มต้องไม่เกินวันสิ้นสุด', 'warning');
+            if(!silent) Swal.fire({ title: 'กำลังตรวจข้อมูล...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            try {
+                const rows = stBuildRows(await stFetchRange(from, to));
+                const byTeacher = {};
+                rows.forEach(r => {
+                    const t = byTeacher[r.sub] = byTeacher[r.sub] || { sub: r.sub, sent: 0, total: 0 };
+                    t.sent += r.sent; t.total += r.total;
+                });
+                stLinkRows = Object.values(byTeacher).sort((a, b) => (b.total - b.sent) - (a.total - a.sent) || a.sub.localeCompare(b.sub, 'th'));
+                if(!silent) Swal.close();
+                document.getElementById('lkUrl').value = trackUrl(from, to);
+                document.getElementById('lkResult').style.display = 'block';
+                const total = stLinkRows.reduce((s, t) => s + t.total, 0), sent = stLinkRows.reduce((s, t) => s + t.sent, 0);
+                document.getElementById('lkSummary').textContent = total
+                    ? `ช่วง ${stThaiDate(from)} – ${stThaiDate(to)} • ส่งแล้ว ${sent}/${total} คาบ (ค้าง ${total - sent}) • ครู ${stLinkRows.length} ท่าน`
+                    : `ช่วง ${stThaiDate(from)} – ${stThaiDate(to)} • ไม่พบรายการสอนแทนในช่วงนี้`;
+                document.getElementById('lkBody').innerHTML = stLinkRows.map((t, i) => {
+                    const pct = t.total ? Math.round(t.sent * 100 / t.total) : 0, pend = t.total - t.sent;
+                    return `<tr>
+                        <td>${stEsc(formatTeacherNameShort(t.sub))}</td>
+                        <td>${t.sent} / ${t.total}</td>
+                        <td><div class="st-bar"><i style="width:${pct}%"></i></div></td>
+                        <td>${pend ? '<span class="st-pill wait">ค้าง ' + pend + '</span>' : '<span class="st-pill ok">✓ ครบ</span>'}</td>
+                        <td style="text-align:right; white-space:nowrap">
+                            <button class="st-btn gray sm" onclick="copyTeacherLink(${i})">📋 ลิงก์เฉพาะท่าน</button>
+                            ${pend ? `<button class="st-btn sm" onclick="openRangeAsAdmin(${i})">✍️ บันทึกแทน</button>` : ''}
+                        </td>
+                    </tr>`;
+                }).join('');
+            } catch(e) {
+                console.error(e);
+                if(!silent) Swal.fire('เกิดข้อผิดพลาด', 'โหลดข้อมูลไม่สำเร็จ', 'error');
+            }
+        }
+        function stCopy(text, okMsg) {
+            const done = () => Swal.fire({ icon: 'success', title: okMsg, timer: 1300, showConfirmButton: false });
+            if(navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(done).catch(() => stFallbackCopy(text, done));
+            } else stFallbackCopy(text, done);
+        }
+        function stFallbackCopy(text, done) {
+            const ta = document.createElement('textarea');
+            ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+            document.body.appendChild(ta); ta.select();
+            try { document.execCommand('copy'); done(); } catch(e) { Swal.fire('คัดลอกไม่สำเร็จ', 'กรุณาคัดลอกด้วยตนเอง', 'error'); }
+            document.body.removeChild(ta);
+        }
+        function copyTrackLink() { stCopy(document.getElementById('lkUrl').value, 'คัดลอกลิงก์แล้ว'); }
+        function copyTeacherLink(i) {
+            const from = document.getElementById('lkFrom').value, to = document.getElementById('lkTo').value;
+            stCopy(trackUrl(from, to, stLinkRows[i].sub), 'คัดลอกลิงก์เฉพาะท่านแล้ว');
+        }
+        function copyTrackLineText() {
+            const from = document.getElementById('lkFrom').value, to = document.getElementById('lkTo').value;
+            const pending = stLinkRows.filter(t => t.total > t.sent);
+            let text = `📢 แจ้งครูผู้สอนแทน\nขอความอนุเคราะห์ลงข้อมูล "ภาระงาน และเช็คชื่อนักเรียน" ในคาบที่สอนแทน\n📅 ช่วงวันที่ ${stThaiDate(from)} – ${stThaiDate(to)}\n\n🔗 ${trackUrl(from, to)}\n\n(กดลิงก์ → เลือกชื่อตัวเอง → ระบบแสดงเฉพาะคาบที่ยังไม่ได้ลง สามารถลงย้อนหลังได้ทีเดียวหลายคาบ)`;
+            if(pending.length) text += `\n\n⏳ ยังค้างลง:\n` + pending.map(t => `• ${formatTeacherNameShort(t.sub)} (${t.total - t.sent} คาบ)`).join('\n');
+            stCopy(text, 'คัดลอกข้อความแล้ว');
+        }
+        function openRangeAsAdmin(i) {
+            const from = document.getElementById('lkFrom').value, to = document.getElementById('lkTo').value;
+            openSubReportUrl(`from=${from}&to=${to}&sub=${encodeURIComponent(stLinkRows[i].sub)}`, `บันทึกแทน ${formatTeacherNameShort(stLinkRows[i].sub)} • ${stThaiDate(from)} – ${stThaiDate(to)}`);
+        }
+
+        // ---------- 3) ข้อความสำเร็จรูปภาระงาน ----------
+        async function loadTemplatesAdmin() {
+            stTemplates = DEFAULT_WORKLOAD_TEMPLATES.map(t => ({ ...t }));
+            try {
+                const s = await db.collection('app_settings').doc('workload_templates').get();
+                if(s.exists && Array.isArray(s.data().items) && s.data().items.length) stTemplates = s.data().items;
+                else throw new Error('no-doc');
+            } catch(e) {
+                try {
+                    const local = JSON.parse(localStorage.getItem('subrep_templates') || 'null');
+                    if(Array.isArray(local) && local.length) stTemplates = local;
+                } catch(_) {}
+            }
+            renderTplList();
+        }
+        function renderTplList() {
+            document.getElementById('tplList').innerHTML = stTemplates.map((t, i) => `
+                <div class="st-tpl">
+                    <input type="text" class="st-input" id="tplTitle_${i}" value="${stEsc(t.title)}" placeholder="ชื่อที่แสดงในตัวเลือก (สั้น ๆ)" style="font-weight:700">
+                    <textarea class="st-input" id="tplText_${i}" placeholder="ข้อความภาระงาน เช่น ให้นักเรียนทำใบงาน...">${stEsc(t.text)}</textarea>
+                    <button class="st-btn red sm" onclick="removeTplRow(${i})">🗑 ลบ</button>
+                </div>`).join('') || '<div style="color:#94a3b8; padding:10px;">ยังไม่มีข้อความสำเร็จรูป</div>';
+        }
+        function readTplInputs() {
+            return stTemplates.map((t, i) => ({
+                id: t.id || ('t' + Date.now() + i),
+                title: (document.getElementById('tplTitle_' + i) || { value: t.title }).value.trim(),
+                text: (document.getElementById('tplText_' + i) || { value: t.text }).value.trim()
+            }));
+        }
+        function addTplRow() { stTemplates = readTplInputs(); stTemplates.push({ id: 't' + Date.now(), title: '', text: '' }); renderTplList(); }
+        function removeTplRow(i) { stTemplates = readTplInputs(); stTemplates.splice(i, 1); renderTplList(); }
+        function resetTemplates() {
+            Swal.fire({ title: 'คืนค่าเริ่มต้น?', text: 'ข้อความที่แก้ไว้จะถูกแทนที่ (กด “บันทึก” จึงจะมีผล)', icon: 'warning', showCancelButton: true, confirmButtonText: 'คืนค่า', cancelButtonText: 'ยกเลิก' })
+                .then(r => { if(r.isConfirmed) { stTemplates = DEFAULT_WORKLOAD_TEMPLATES.map(t => ({ ...t })); renderTplList(); } });
+        }
+        async function saveTemplates() {
+            const items = readTplInputs().filter(t => t.title && t.text);
+            if(!items.length) return Swal.fire('ต้องมีอย่างน้อย 1 ข้อความ', 'กรอกทั้งชื่อและข้อความ', 'warning');
+            stTemplates = items; renderTplList();
+            try { localStorage.setItem('subrep_templates', JSON.stringify(items)); } catch(_) {}
+            try {
+                await db.collection('app_settings').doc('workload_templates').set({ items, updated_at: firebase.firestore.FieldValue.serverTimestamp() });
+                Swal.fire({ icon: 'success', title: 'บันทึกแล้ว', text: 'ครูจะเห็นข้อความสำเร็จรูปชุดใหม่ทันที', timer: 1800, showConfirmButton: false });
+            } catch(e) {
+                console.error(e);
+                Swal.fire('บันทึกลงฐานข้อมูลไม่สำเร็จ', 'บันทึกไว้ในเครื่องนี้เท่านั้น — ตรวจสอบ Firestore Rules ให้เขียน collection "app_settings" ได้ (' + (e.message || e) + ')', 'warning');
+            }
         }
 
         // ============================================
@@ -1869,20 +2246,8 @@
             initializeRouting();
             
             const currentSemester = getCurrentSemesterBE();
+            const savedSemester = localStorage.getItem('selectedSemester') || currentSemester;
             const semesterSelectEl = document.getElementById('semesterSelect');
-            // ค่าเริ่มต้น = ภาคเรียนล่าสุดที่มีข้อมูลครูในฐานข้อมูลเสมอ (ไม่ใช้ค่าที่จำไว้ครั้งก่อน)
-            let savedSemester = currentSemester;
-            try {
-                const semSnap = await db.collection("teachers").where("active", "==", true).get();
-                const semSet = new Set();
-                semSnap.forEach(d => { const v = d.data().semester; if(/^\d+\/\d{4}$/.test(String(v || ''))) semSet.add(String(v)); });
-                const semKey = v => { const [t, y] = v.split('/').map(Number); return y * 10 + t; };
-                const latest = [...semSet].sort((x, y) => semKey(y) - semKey(x))[0];
-                if(latest) savedSemester = latest;
-                console.log('📚 Semesters in DB:', [...semSet], '→ latest:', latest);
-            } catch(e) {
-                console.warn('หาภาคเรียนล่าสุดไม่ได้ ใช้ค่าตามวันที่แทน', e);
-            }
             if(![...semesterSelectEl.options].some(o => o.value === savedSemester)) {
                 // เผื่อกรณีอนาคตที่ค่าที่คำนวณได้ยังไม่มีใน <option> ให้เพิ่มเข้าไปอัตโนมัติ
                 const opt = document.createElement('option');
@@ -2530,11 +2895,7 @@
                     </div>
                     <div style="padding:15px;">`;
 
-                // หลักปฏิบัติ: คาบกิจกรรม (ยกเว้นแนะแนว) ไม่ต้องจัดสอนแทน
-                const skippedActs = [];
                 periods.sort((a,b)=>a-b).forEach(period => {
-                    const _d = teachingDetails[`${daySchedule}_${period}`] || {};
-                    if(isNoSubActivity(_d)) { skippedActs.push(`คาบ ${period} ${_d.name || 'กิจกรรม'}`); return; }
                     const candidates = findCandidates(daySchedule, period, selectedTeachers);
                     
                     const detailKey = `${daySchedule}_${period}`;
@@ -2552,7 +2913,7 @@
                                    checked 
                                    onchange="togglePeriodSelection(this, '${absentName}', ${period})">
                             <span class="badge-p">คาบ ${period}</span>
-                            <input type="text" id="subj_${absentName}_${period}" placeholder="รหัสวิชา" value="${subjectCode}" data-name="${(detail.name || '').replace(/"/g, '&quot;')}"
+                            <input type="text" id="subj_${absentName}_${period}" placeholder="รหัสวิชา" value="${subjectCode}" data-name="${(detail.name || '').replace(/"/g, '&quot;')}" data-type="${detail.type || ''}" data-group="${(detail.group || '').replace(/"/g, '&quot;')}"
                                    style="width:100px; padding:5px; ${(subjectCode) ? 'background:#e0f2fe; border-color:#0284c7;' : ''}"
                                    title="${subjectCode ? '✅ ข้อมูลจากระบบ' + (detail.name ? ' — ' + detail.name : '') : 'กรุณากรอก'}">
                             <select id="grade_${absentName}_${period}" 
@@ -2665,7 +3026,6 @@
                     }
                     html += `</div>`;
                 });
-                if(skippedActs.length) html += `<div style="margin-top:8px; padding:8px 12px; background:#f1f5f9; border-radius:8px; color:#64748b; font-size:0.85rem;">⏭️ ไม่ต้องจัดสอนแทน (คาบกิจกรรม): ${skippedActs.join(' • ')}</div>`;
                 html += `</div></div>`;
                 container.innerHTML += html;
             });
@@ -3143,6 +3503,9 @@
                             grade: grade,
                             reason: reason
                         };
+                        // วิชาเพิ่มเติม: เก็บประเภท/กลุ่มไว้ ให้หน้าครูสอนแทนเช็คชื่อ 2 ขั้น (เลือกนักเรียนวิชานี้ → มา/ขาด)
+                        if(subjEl.dataset.type) rec.subjectType = subjEl.dataset.type;
+                        if(subjEl.dataset.group) rec.group = subjEl.dataset.group;
                         if(radio.dataset.redirect === '1') {
                             // นักเรียนวิชาเพิ่มเติมไปเรียนกับครู radio.value (ไม่ใช่การสอนแทน)
                             const opt = radio.closest('.candidate-opt');
@@ -3616,7 +3979,8 @@
             const rep = d.reports && d.reports[reportKey(r)];
             if(!rep) return ' <span style="color:#b45309; font-size:0.8rem;">⏳ รอรายงานจากครู</span>';
             const n = rep.absentCount || 0;
-            return ` <span style="color:#059669; font-size:0.8rem;">✅ ส่งรายงานแล้ว${n ? ' (นักเรียนขาด ' + n + ' คน)' : ''}</span>`;
+            const elec = rep.isElective ? ` วิชาเพิ่มเติม ${rep.electiveCount || 0} คน${n ? ' ขาด ' + n : ''}` : (n ? ' นักเรียนขาด ' + n + ' คน' : '');
+            return ` <span style="color:#059669; font-size:0.8rem;">✅ ส่งรายงานแล้ว${elec ? ' (' + elec.trim() + ')' : ''}</span>`;
         }
 
         function showMoreHistory() {
@@ -3766,15 +4130,10 @@
         }
 
         // ข้อความแจ้งครู: จัดกลุ่มตามครูผู้สอนแทนแต่ละคน แยกช่วงว่างชัดเจน
-        // คาบกิจกรรม (ยกเว้นแนะแนว) ไม่ต้องจัดสอนแทน
-        function isNoSubActivity(detail) {
-            if(!detail) return false;
-            return detail.type === 'กิจกรรม' && !/แนะแนว/.test(detail.name || '');
-        }
-
         function buildTeacherCopyText(record, teachersScheduleMap) {
             const daySchedule = record.daySchedule || 'จันทร์';
             const dateStr = formatThaiDate(record.docDate);
+            const currentUrl = window.location.href.split('#')[0] + '#history';
             // ลิงก์หน้ารายงานสำหรับครูสอนแทน (sub-report.html?id=รหัสเอกสาร)
             const reportUrl = new URL('sub-report.html?id=' + encodeURIComponent(record.id), window.location.href).href;
 
@@ -3841,7 +4200,8 @@
             if(sortedRecords.length > 0) {
                 text += `------------------------------\n📝 ครูผู้สอนแทน กรุณาคลิกลิงก์เพื่อบันทึกภาระงานที่มอบหมาย และเลือกนักเรียนที่ไม่เข้าเรียน:\n${reportUrl}\n\n`;
             }
-            return text.replace(/\s+$/, '');
+            text += `------------------------------\n🔗 คลิกลิงก์ระบบ:\n${currentUrl}`;
+            return text;
         }
 
         // ข้อความแจ้งนักเรียน: จัดกลุ่มตามห้องเรียน เลือกได้ทั้งแบบรวมทุกห้องหรือรายห้อง
