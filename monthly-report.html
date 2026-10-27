@@ -733,18 +733,26 @@
         }
 
         // ตารางสรุปรวบยอด: แบ่งหน้าด้วยการวัดความสูงจริงของแต่ละแถว
-        // ชื่อครูไม่ตกบรรทัด: บังคับบรรทัดเดียว และลดขนาดตัวอักษรเฉพาะชื่อที่ยาวมาก
+        // ชื่อครูไม่ตกบรรทัด: บังคับบรรทัดเดียว แล้วย่อขนาดตัวอักษรตามความกว้างจริงของช่อง (ดู fitNames)
         function nameNoWrap(name) {
-            const n = String(name || '');
-            const len = n.length;
-            const size = len <= 24 ? '' : (len <= 28 ? 'font-size:10.5pt;' : 'font-size:9.5pt;');
-            return `<span style="white-space:nowrap;${size}">${esc(n)}</span>`;
+            return `<span class="nm" style="white-space:nowrap;">${esc(String(name || ''))}</span>`;
+        }
+        function fitNames(root) {
+            root.querySelectorAll('span.nm').forEach(sp => {
+                const td = sp.parentElement, cs = getComputedStyle(td);
+                const avail = td.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - 1;
+                let fs = parseFloat(getComputedStyle(sp).fontSize), guard = 0;
+                while(sp.getBoundingClientRect().width > avail && fs > 9 && guard++ < 40) {
+                    fs -= 0.5;
+                    sp.style.fontSize = fs + 'px';
+                }
+            });
         }
         function buildSummaryPages(container) {
             const { month, semester, year, author, records } = reportData;
             const colgroup = `<colgroup>
-                <col style="width:3%"><col style="width:8.5%"><col style="width:3.5%"><col style="width:15.5%"><col style="width:11.5%">
-                <col style="width:15.5%"><col style="width:16%"><col style="width:16%"><col style="width:10.5%">
+                <col style="width:3%"><col style="width:8%"><col style="width:3.5%"><col style="width:17%"><col style="width:11%">
+                <col style="width:17%"><col style="width:15%"><col style="width:15.5%"><col style="width:9.5%">
             </colgroup>`;
             const thead = `<thead><tr>
                 <th>ที่</th><th>วัน/เดือน/ปี</th><th>คาบ</th><th>ครูผู้ลา/ไปราชการ<br><span class="small">(สาเหตุ)</span></th><th>วิชา / ชั้น</th>
@@ -837,6 +845,7 @@
                 page.appendChild(foot);
             }
 
+            fitNames(box);
             pages.forEach((p, i) => { p.querySelector('.land-page-no').textContent = `หน้า ${i + 1}/${pages.length}`; });
             const html = pages.map(p => p.outerHTML).join('');
             document.body.removeChild(box);
