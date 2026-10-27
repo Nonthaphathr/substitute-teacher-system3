@@ -817,7 +817,18 @@
             foot.className = 'land-foot-sign';
             foot.innerHTML = `<div>ลงชื่อ........................................ผู้จัดทำรายงาน<br>(${esc(author)})<br>งานพัฒนากระบวนการเรียนรู้</div>`;
             page.appendChild(foot);
-            if(page.scrollHeight > page.clientHeight + 1) { page.removeChild(foot); page = newPage(); page.querySelector('tbody').remove(); page.querySelector('table').remove(); page.appendChild(foot); }
+            if(page.scrollHeight > page.clientHeight + 1) {
+                // ส่วนลงนามไม่พอดีหน้า: ดันแถวท้ายตาราง (สูงสุด 2 แถว รวมแถวสรุป) ไปหน้าใหม่พร้อมส่วนลงนาม ไม่ให้หน้าสุดท้ายมีแต่ชื่อเดี่ยว ๆ
+                page.removeChild(foot);
+                const tb = page.querySelector('tbody');
+                const moved = [];
+                const n = Math.min(2, tb.children.length - 1);
+                for(let i = 0; i < n; i++) moved.unshift(tb.removeChild(tb.lastElementChild));
+                page = newPage();
+                const nb = page.querySelector('tbody');
+                moved.forEach(tr => nb.appendChild(tr));
+                page.appendChild(foot);
+            }
 
             pages.forEach((p, i) => { p.querySelector('.land-page-no').textContent = `หน้า ${i + 1}/${pages.length}`; });
             const html = pages.map(p => p.outerHTML).join('');
