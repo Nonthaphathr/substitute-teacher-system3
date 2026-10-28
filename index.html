@@ -1938,8 +1938,7 @@
             docs.forEach(d => {
                 const bySub = {};
                 (d.records || []).forEach(r => {
-                    if(r.redirect) return;
-                    (bySub[r.sub] = bySub[r.sub] || []).push(r);
+                    (bySub[r.sub] = bySub[r.sub] || []).push(r);   // รวมครูวิชาเพิ่มเติมที่รับนักเรียน (redirect) ด้วย
                 });
                 Object.keys(bySub).forEach(sub => {
                     const rs = bySub[sub].sort((a, b) => a.period - b.period);
@@ -4320,7 +4319,7 @@
                     </div>
                     <ul style="margin-top:10px; padding-left:20px; font-size:0.9rem;">
                         ${d.records.map(r => r.redirect
-                            ? `<li>คาบ ${r.period}: 🔀 นักเรียนของ ${formatTeacherNameShort(r.absent)} (${r.reason}) ไปเรียนวิชาเพิ่มเติมกับ <strong>${formatTeacherNameShort(r.sub)}</strong></li>`
+                            ? `<li>คาบ ${r.period}: 🔀 นักเรียนของ ${formatTeacherNameShort(r.absent)} (${r.reason}) ไปเรียนวิชาเพิ่มเติมกับ <strong>${formatTeacherNameShort(r.sub)}</strong>${reportMark(d, r)}</li>`
                             : `<li>คาบ ${r.period}: <strong>${formatTeacherNameShort(r.sub)}</strong> แทน ${formatTeacherNameShort(r.absent)} (${r.reason})${reportMark(d, r)}</li>`).join('')}
                     </ul>
                 </div>`;
@@ -4564,8 +4563,8 @@
                 text += `\n`;
             }
 
-            if(sortedRecords.length > 0) {
-                text += `------------------------------\n📝 ครูผู้สอนแทน กรุณาคลิกลิงก์เพื่อบันทึกภาระงานที่มอบหมาย และเลือกนักเรียนที่ไม่เข้าเรียน:\n${reportUrl}\n\n`;
+            if(allRecords.length > 0) {
+                text += `------------------------------\n📝 ครูผู้สอนแทน (รวมครูวิชาเพิ่มเติมที่รับนักเรียนมาเรียนด้วย) กรุณาคลิกลิงก์เพื่อบันทึกภาระงานที่มอบหมาย และเลือกนักเรียนที่ไม่เข้าเรียน:\n${reportUrl}\n\n`;
             }
             text += `------------------------------\n🔗 คลิกลิงก์ระบบ:\n${currentUrl}`;
             return text;

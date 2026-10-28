@@ -298,12 +298,16 @@
         function shortName(full) { return String(full || '').replace(/^(นางสาว|นาง|นาย|ว่าที่ร้อยตรี)\s*/, ''); }
         // วิชาเพิ่มเติม: ใช้ค่า subjectType ที่บันทึกตอนจัดสอนแทน ถ้าไม่มี (ข้อมูลเก่า) เดาจากรหัสวิชา เช่น ท22201 (หลักที่ 4 = 2)
         function isElectiveRec(r) {
+            if(r.redirect) return true;   // ครูวิชาเพิ่มเติมที่รับนักเรียนมาเรียนด้วย = วิชาเพิ่มเติมเสมอ
             if(r.subjectType) return r.subjectType === 'เพิ่มเติม';
             const c = String(r.subject || '').trim();
             return /^[ก-ฮA-Za-z]\d{5}$/.test(c) && c.charAt(3) === '2';
         }
         function getOld(it) { return ((docsMap[it.docId] || {}).reports || {})[it.key] || null; }
-        function subjLineOf(r) { return [r.subject && r.subject !== '-' ? r.subject : '', r.subjectName || ''].filter(Boolean).join(' '); }
+        function subjLineOf(r) {
+            if(r.redirect && (r.redirectCode || r.redirectName)) return [r.redirectCode, r.redirectName].filter(Boolean).join(' ');
+            return [r.subject && r.subject !== '-' ? r.subject : '', r.subjectName || ''].filter(Boolean).join(' ');
+        }
 
         // ---------- TEMPLATE ภาระงาน (เก็บที่ app_settings/workload_templates; ถ้าอ่านไม่ได้ใช้ค่าในเครื่อง/ค่าเริ่มต้น) ----------
         async function loadTemplates() {
@@ -361,7 +365,7 @@
             }
             li.push('<b>พิมพ์ภาระงาน</b> ที่มอบหมายให้นักเรียนในแต่ละคาบ (หรือเลือก “ข้อความสำเร็จรูป” แล้วแก้ไขต่อได้) เช่น “ทำใบงานหน้า 12–13 และส่งก่อนเลิกคาบ”');
             li.push('<b>เช็คชื่อนักเรียน</b> — ระบบติ๊ก “มาเรียน” ให้ทุกคนไว้แล้ว ให้ <u>เอาติ๊กออกเฉพาะนักเรียนที่ไม่เข้าเรียนในคาบนั้น</u>');
-            li.push('<b>วิชาเพิ่มเติม</b> — ทำ 2 ขั้น: <b>① ติ๊กนักเรียนที่เรียนวิชานี้</b> (เด็กในวิชาเพิ่มเติมที่ถูกจัดสอนแทน) แล้ว <b>② เช็คชื่อมา/ขาด</b> เฉพาะนักเรียนกลุ่มนั้น');
+            li.push('<b>วิชาเพิ่มเติม</b> (รวมครูที่รับนักเรียนมาเรียนด้วย) — ทำ 2 ขั้น: <b>① ติ๊กนักเรียนที่เรียนวิชานี้</b> (เด็กในวิชาเพิ่มเติมที่ถูกจัดสอนแทน) แล้ว <b>② เช็คชื่อมา/ขาด</b> เฉพาะนักเรียนกลุ่มนั้น');
             li.push(RANGE || ADMIN
                 ? 'กด <b>“ส่งข้อมูล”</b> ได้ทีละหลายคาบ คาบที่ยังไม่กรอกภาระงานจะถูกข้ามไว้ก่อน และกลับมาลงภายหลังได้'
                 : 'กด <b>“ส่งข้อมูล”</b> ระบบจะบันทึกลงฐานข้อมูล และนำไปรวมในรายงานสรุปประจำเดือน');
@@ -386,7 +390,7 @@
                 Object.keys(docsMap).forEach(id => {
                     const d = docsMap[id];
                     (d.records || []).forEach(r => {
-                        if(r.redirect) return;
+                        // รวมทั้งครูสอนแทนปกติ และครูวิชาเพิ่มเติมที่รับนักเรียนมาเรียนด้วย (redirect)
                         items.push({ docId: id, docDate: d.docDate || '', daySchedule: d.daySchedule || '', r, key: reportKey(r) });
                     });
                 });
@@ -435,8 +439,8 @@
             $('pickList').innerHTML = info.map((x, i) => {
                 const all = x.pending === 0;
                 const subTxt = (RANGE || ADMIN)
-                    ? `สอนแทน ${x.mine.length} คาบ${x.pending ? ' • <b style="color:#b45309">ค้างลง ' + x.pending + ' คาบ</b>' : ''}`
-                    : `สอนแทนคาบ ${x.mine.map(it => it.r.period).join(', ')}`;
+                    ? `${x.mine.length} คาบ${x.pending ? ' • <b style="color:#b45309">ค้างลง ' + x.pending + ' คาบ</b>' : ''}`
+                    : `${x.mine.some(it => it.r.redirect) ? 'คาบ' : 'สอนแทนคาบ'} ${x.mine.map(it => it.r.period + (it.r.redirect ? ' (รับนักเรียนวิชาเพิ่มเติม)' : '')).join(', ')}`;
                 return `<button class="pick-btn" onclick="pickTeacher(${i})">
                     <div><div class="nm">${esc(x.name)}</div>
                     <div class="sub">${subTxt}</div></div>
@@ -476,7 +480,7 @@
         function initState(it, idx) {
             const old = getOld(it), roster = rosterOf(it);
             const detected = isElectiveRec(it.r);
-            const elective = old ? (old.isElective != null ? !!old.isElective : detected) : detected;
+            const elective = it.r.redirect ? true : (old ? (old.isElective != null ? !!old.isElective : detected) : detected);
             const members = new Set(), absent = new Set();
             let recalled = false;
             if(old) {
@@ -517,7 +521,7 @@
                 <div class="p-card ${st.open ? '' : 'sent'}" data-idx="${idx}" id="card_${idx}">
                     <div class="p-head">
                         ${dateChip}<span class="p-no">คาบ ${esc(r.period)}</span>
-                        <span class="p-meta">แทน <b>${esc(shortName(r.absent))}</b> (${esc(r.reason || '')})<br>
+                        <span class="p-meta">${r.redirect ? '<span class="chip-ok">🔀 รับนักเรียนวิชาเพิ่มเติม</span> ของ' : 'แทน'} <b>${esc(shortName(r.absent))}</b> (${esc(r.reason || '')})<br>
                         ${subjLine ? 'วิชา ' + esc(subjLine) + ' • ' : ''}ชั้น ${esc(r.grade || '-')}${r.group ? ' กลุ่ม ' + esc(r.group) : ''}</span>
                     </div>
                     ${st.open ? '' : `<div class="sent-sum" id="sum_${idx}"><span>✓ ส่งแล้ว${old && old.absentCount ? ' (นักเรียนขาด ' + old.absentCount + ' คน)' : ''}</span><button type="button" class="btn btn-ghost btn-sm" onclick="openCard(${idx})">✏️ แก้ไข</button></div>`}
@@ -752,6 +756,7 @@
                     grade: r.grade || '', subject: r.subject || '', subjectName: r.subjectName || '',
                     workload: work, attendance: absent.length ? 'absent' : 'all', absentStudents: absent, absentCount: absent.length,
                     isElective: !!(st.elective && hasRoster),
+                    isRedirect: !!r.redirect,
                     note: note,
                     entryMode: ADMIN ? 'admin' : (RANGE ? 'backlog' : 'teacher'),
                     submittedAt: firebase.firestore.FieldValue.serverTimestamp()

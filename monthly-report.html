@@ -766,23 +766,24 @@
                 const subjCell = `<b>${esc(r.subject && r.subject !== '-' ? r.subject : '-')}</b> ${esc(gradeTxt)}${r.subjectName ? '<br><span class="small">' + esc(r.subjectName) + '</span>' : ''}`;
                 const dateCell = `${shortThaiDate(r.docDate)}${r.daySchedule ? '<br><span class="small">' + esc(r.daySchedule) + '</span>' : ''}`;
                 const absentCell = `${nameNoWrap(r.absent)}<br><span class="small">(${esc(r.reason || '')})</span>`;
-                if(r.redirect) {
-                    const vis = [r.redirectCode, r.redirectName].filter(Boolean).join(' ');
-                    return `<tr class="redirect-row">
-                        <td>${i + 1}</td><td>${dateCell}</td><td>${esc(r.period)}</td><td class="text-left">${absentCell}</td><td>${subjCell}</td>
-                        <td class="text-left small">นักเรียนไปเรียน ${esc(vis || 'วิชาเพิ่มเติม')} กับ ${esc(r.sub)}</td>
-                        <td class="muted small">ไม่มีการสอนแทน</td><td class="muted small">—</td><td class="sign-cell"></td>
-                    </tr>`;
-                }
                 let work = '<span class="muted small">ยังไม่ได้รายงาน</span>';
                 let stu = '<span class="muted small">—</span>';
                 if(rep) {
                     work = `<span class="small">${esc(rep.workload || '-').replace(/\n/g, '<br>')}</span>`;
                     if(rep.note) work += `<br><span class="small muted">หมายเหตุ: ${esc(rep.note)}</span>`;
                     const list = rep.absentStudents || [];
+                    const elecTxt = rep.isElective ? `<b>เรียนวิชานี้ ${rep.electiveCount || 0} คน</b><br>` : '';
                     stu = list.length === 0
-                        ? '<span class="small">มาครบทุกคน</span>'
-                        : `<span class="small"><b>ขาด ${list.length} คน</b><br>${list.map(x => esc((x.no ? x.no + ' ' : '') + x.name)).join(', ')}</span>`;
+                        ? `<span class="small">${elecTxt}มาครบทุกคน</span>`
+                        : `<span class="small">${elecTxt}<b>ขาด ${list.length} คน</b><br>${list.map(x => esc((x.no ? x.no + ' ' : '') + x.name)).join(', ')}</span>`;
+                }
+                if(r.redirect) {
+                    const vis = [r.redirectCode, r.redirectName].filter(Boolean).join(' ');
+                    return `<tr class="redirect-row">
+                        <td>${i + 1}</td><td>${dateCell}</td><td>${esc(r.period)}</td><td class="text-left">${absentCell}</td><td>${subjCell}</td>
+                        <td class="text-left small">นักเรียนไปเรียน ${esc(vis || 'วิชาเพิ่มเติม')} กับ ${esc(r.sub)}</td>
+                        <td class="text-left">${rep ? work : '<span class="muted small">ยังไม่ได้รายงาน</span>'}</td><td class="text-left">${rep ? stu : '<span class="muted small">—</span>'}</td><td class="sign-cell"></td>
+                    </tr>`;
                 }
                 return `<tr>
                     <td>${i + 1}</td><td>${dateCell}</td><td>${esc(r.period)}</td><td class="text-left">${absentCell}</td><td>${subjCell}</td>
