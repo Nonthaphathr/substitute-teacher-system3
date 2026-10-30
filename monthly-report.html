@@ -772,7 +772,7 @@
                     work = `<span class="small">${esc(rep.workload || '-').replace(/\n/g, '<br>')}</span>`;
                     if(rep.note) work += `<br><span class="small muted">หมายเหตุ: ${esc(rep.note)}</span>`;
                     const list = rep.absentStudents || [];
-                    const elecTxt = rep.isElective ? `<b>เรียนวิชานี้ ${rep.electiveCount || 0} คน</b><br>` : '';
+                    const elecTxt = '';   // ตัดข้อความ "เรียนวิชานี้ ... คน" ออกตามที่กำหนด
                     stu = list.length === 0
                         ? `<span class="small">${elecTxt}มาครบทุกคน</span>`
                         : `<span class="small">${elecTxt}<b>ขาด ${list.length} คน</b><br>${list.map(x => esc((x.no ? x.no + ' ' : '') + x.name)).join(', ')}</span>`;
