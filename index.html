@@ -4345,7 +4345,7 @@
             const rep = d.reports && d.reports[reportKey(r)];
             if(!rep) return ' <span style="color:#b45309; font-size:0.8rem;">⏳ รอรายงานจากครู</span>';
             const n = rep.absentCount || 0;
-            const elec = rep.isElective ? ` วิชาเพิ่มเติม ${rep.electiveCount || 0} คน${n ? ' ขาด ' + n : ''}` : (n ? ' นักเรียนขาด ' + n + ' คน' : '');
+            const elec = n ? ' นักเรียนขาด ' + n + ' คน' : '';   // ไม่แสดงจำนวนนักเรียนที่เรียนวิชาเพิ่มเติมแล้ว
             return ` <span style="color:#059669; font-size:0.8rem;">✅ ส่งรายงานแล้ว${elec ? ' (' + elec.trim() + ')' : ''}</span>`;
         }
 
