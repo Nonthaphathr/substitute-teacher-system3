@@ -4557,7 +4557,7 @@
             if(redirectRecords.length > 0) {
                 text += `🔀 วิชาเพิ่มเติม: ให้นักเรียนไปเรียนร่วมกับครูผู้สอนวิชาเพิ่มเติมคาบเดียวกัน\n`;
                 redirectRecords.forEach(r => {
-                    const vis = [r.redirectCode, r.redirectName].filter(Boolean).join(' ');
+                    const vis = [r.subject && r.subject !== '-' ? r.subject : '', r.subjectName || ''].filter(Boolean).join(' ');   // วิชาของครูที่ไม่อยู่
                     text += `   • คาบ ${r.period} นักเรียน ${r.grade || '-'}${r.redirectGroup ? ' กลุ่ม ' + r.redirectGroup : ''} ของ ${formatTeacherNameShort(r.absent)} ไปเรียนกับ ${formatTeacherNameShort(r.sub)}${vis ? ' (' + vis + ')' : ''}\n`;
                 });
                 text += `\n`;
