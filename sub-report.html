@@ -305,7 +305,7 @@
         }
         function getOld(it) { return ((docsMap[it.docId] || {}).reports || {})[it.key] || null; }
         function subjLineOf(r) {
-            if(r.redirect && (r.redirectCode || r.redirectName)) return [r.redirectCode, r.redirectName].filter(Boolean).join(' ');
+            // วิชาเพิ่มเติม (redirect) แสดงวิชาของครูที่ไม่อยู่ ไม่ใช่วิชาหลักของครูที่รับนักเรียน
             return [r.subject && r.subject !== '-' ? r.subject : '', r.subjectName || ''].filter(Boolean).join(' ');
         }
 
